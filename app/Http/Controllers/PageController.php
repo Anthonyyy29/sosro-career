@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Admin\Lowongan;
+use Carbon\Carbon;
 
 class PageController extends Controller
 {
@@ -10,8 +12,22 @@ class PageController extends Controller
         return view('pages.beranda');
     }
 
-    public function lowongan() {
-        return view('pages.lowongan');
+    public function lowongan()
+    {
+        // AUTO TAKEDOWN (simple version) || Seharusnya pakai Cron yaitu khusus Laravel Scheduler + Command.
+        Lowongan::where('status_lowongan', 'aktif')
+            ->whereDate('tanggal_akhir', '<', now())
+            ->update([
+                'status_lowongan' => 'selesai'
+            ]);
+
+        // AMBIL LOWONGAN AKTIF SAJA
+        $lowongan = Lowongan::where('status_lowongan', 'aktif')
+            ->whereDate('tanggal_akhir', '>=', now())
+            ->orderBy('tanggal_akhir', 'ASC')
+            ->get();
+
+        return view('pages.lowongan', compact('lowongan'));
     }
 
     public function program() {

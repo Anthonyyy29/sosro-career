@@ -27,9 +27,9 @@
                     Dashboard
                 </a>
 
-                <a href="{{ route('admin.jobs') }}"
+                <a href="{{ route('admin.lowongan') }}"
                    class="block px-4 py-2 rounded hover:bg-gray-200
-                   {{ request()->routeIs('admin.jobs*') ? 'bg-gray-300 font-semibold' : '' }}">
+                   {{ request()->routeIs('admin.lowongan*') ? 'bg-gray-300 font-semibold' : '' }}">
                     Job Posting
                 </a>
 

@@ -86,288 +86,121 @@
             </div>
 
             {{-- GRID JOB LIST --}}
-            <div id="jobList" class="grid md:grid-cols-3 gap-6">
+            <div id="jobList" class="grid md:grid-cols-2 gap-6">
+                {{-- JOB CARD --}}
+                @foreach ($lowongan as $item)
 
-                {{-- ITEM 1 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Staff Administrasi"
-                     data-location="Jakarta Timur"
-                     data-category="HC">
+                    <div
+                        class="job-card border border-red-600 rounded-2xl p-6 md:p-8 bg-white shadow-sm hover:shadow-md transition flex flex-col gap-4"
+                        data-title="{{ $item->judul_lowongan }}"
+                        data-location="{{ $item->penempatan_cabang }}"
+                        data-category="{{ $item->kategori }}">
 
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Staff Administrasi</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Jakarta Timur</p>
+                        {{-- HEADER --}}
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
 
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Minimal D3 Administrasi</li>
-                            <li>Menguasai Microsoft Office</li>
-                            <li>Komunikatif & rapi dalam dokumentasi</li>
-                        </ul>
-                    </details>
+                            {{-- LEFT --}}
+                            <div>
+                                <h3 class="text-3xl font-extrabold text-black mb-2">
+                                    {{ $item->judul_lowongan }}
+                                </h3>
 
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Mengelola dokumen administrasi</li>
-                            <li>Membuat laporan bulanan</li>
-                            <li>Mendukung kebutuhan operasional divisi</li>
-                        </ul>
-                    </details>
+                                <div class="flex items-center gap-2 text-green-600 font-medium">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 8v4l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
 
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
+                                    <span>
+                                        Batas Lamar:
+                                        <u>{{ \Carbon\Carbon::parse($item->tanggal_akhir)->locale('id')->translatedFormat('d F Y') }}</u>
+                                    </span>
+                                </div>
+                            </div>
 
-                {{-- ITEM 2 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Quality Control"
-                     data-location="Cikarang"
-                     data-category="IT">
+                            {{-- RIGHT --}}
+                            <div class="flex flex-col gap-3 text-gray-600 mt-2 mb-5">
 
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Quality Control</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Cikarang</p>
+                                <div class="flex items-center gap-2">
+                                    {{-- icon lokasi --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                        <path fill-rule="evenodd" d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>{{ $item->penempatan_cabang }}</span>
+                                </div>
 
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Minimal D3 Kimia Pangan/Teknik Industri</li>
-                            <li>Mengerti standar QC</li>
-                        </ul>
-                    </details>
+                                <div class="flex items-center gap-2">
+                                    {{-- icon kategori --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                        <path d="M8.25 10.875a2.625 2.625 0 1 1 5.25 0 2.625 2.625 0 0 1-5.25 0Z" />
+                                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.125 4.5a4.125 4.125 0 1 0 2.338 7.524l2.007 2.006a.75.75 0 1 0 1.06-1.06l-2.006-2.007a4.125 4.125 0 0 0-3.399-6.463Z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>{{ $item->kategori }}</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pengecekan kualitas bahan baku</li>
-                            <li>Pelaporan hasil analisa</li>
-                        </ul>
-                    </details>
+                        {{-- CONTENT --}}
+                        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
 
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
+                            {{-- DETAILS --}}
+                            <div class="space-y-3">
 
-                {{-- ITEM 3 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Sales Supervisor"
-                     data-location="Bali"
-                     data-category="Sales">
+                                <details>
+                                    <summary class="cursor-pointer font-semibold text-black">
+                                        Kualifikasi
+                                    </summary>
 
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Sales Supervisor</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Bali</p>
+                                    @if(!empty($item->kualifikasi))
+                                        <ul class="list-disc ml-5 mt-2 text-gray-600 space-y-1">
+                                            @foreach (explode("\n", $item->kualifikasi) as $row)
+                                                @if(trim($row) !== '')
+                                                    <li>{{ $row }}</li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        <p class="mt-2 text-gray-400 italic">
+                                            Kualifikasi akan diinformasikan lebih lanjut.
+                                        </p>
+                                    @endif
+                                </details>
 
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pengalaman 2 tahun Sales</li>
-                            <li>Target oriented</li>
-                        </ul>
-                    </details>
+                                <details>
+                                    <summary class="cursor-pointer font-semibold text-black">
+                                        Jobdesk
+                                    </summary>
 
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Mengawasi tim sales</li>
-                            <li>Mencapai target bulanan</li>
-                        </ul>
-                    </details>
+                                    @if(!empty($item->jobdesk))
+                                        <ul class="list-disc ml-5 mt-2 text-gray-600 space-y-1">
+                                            @foreach (explode("\n", $item->jobdesk) as $row)
+                                                @if(trim($row) !== '')
+                                                    <li>{{ $row }}</li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        <p class="mt-2 text-gray-400 italic">
+                                            Deskripsi pekerjaan akan dijelaskan saat proses seleksi.
+                                        </p>
+                                    @endif
+                                </details>
+                            </div>
 
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
+                            {{-- BUTTON --}}
+                            <div class="shrink-0">
+                                <a href="{{ route('login') }}"
+                                class="inline-flex items-center justify-center bg-red-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-red-700 transition">
+                                    Lamar
+                                </a>
+                            </div>
 
-                {{-- ITEM 4 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Unit Manager"
-                     data-location="Pangkal Pinang"
-                     data-category="Sales">
+                        </div>
 
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Unit Manager</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Pangkal Pinang</p>
+                    </div>
 
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pemimpin yang baik</li>
-                            <li>Paham operasional distribusi</li>
-                        </ul>
-                    </details>
-
-                    <details>
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Mengelola cabang</li>
-                            <li>Monitoring kinerja tim</li>
-                        </ul>
-                    </details>
-
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
-
-                {{-- ITEM 5 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Quality Control"
-                     data-location="Cikarang"
-                     data-category="IT">
-
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Quality Control</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Cikarang</p>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Minimal D3 Kimia Pangan/Teknik Industri</li>
-                            <li>Mengerti standar QC</li>
-                        </ul>
-                    </details>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pengecekan kualitas bahan baku</li>
-                            <li>Pelaporan hasil analisa</li>
-                        </ul>
-                    </details>
-
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
-
-                {{-- ITEM 6 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Sales Supervisor"
-                     data-location="Bali"
-                     data-category="Sales">
-
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Sales Supervisor</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Bali</p>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pengalaman 2 tahun Sales</li>
-                            <li>Target oriented</li>
-                        </ul>
-                    </details>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Mengawasi tim sales</li>
-                            <li>Mencapai target bulanan</li>
-                        </ul>
-                    </details>
-
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
-
-                {{-- ITEM 7 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Unit Manager"
-                     data-location="Pangkal Pinang"
-                     data-category="Sales">
-
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Unit Manager</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Pangkal Pinang</p>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pemimpin yang baik</li>
-                            <li>Paham operasional distribusi</li>
-                        </ul>
-                    </details>
-
-                    <details>
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Mengelola cabang</li>
-                            <li>Monitoring kinerja tim</li>
-                        </ul>
-                    </details>
-
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
-
-                {{-- ITEM 8 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Quality Control"
-                     data-location="Cikarang"
-                     data-category="IT">
-
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Quality Control</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Cikarang</p>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Minimal D3 Kimia Pangan/Teknik Industri</li>
-                            <li>Mengerti standar QC</li>
-                        </ul>
-                    </details>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pengecekan kualitas bahan baku</li>
-                            <li>Pelaporan hasil analisa</li>
-                        </ul>
-                    </details>
-
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
-
-                {{-- ITEM 9 --}}
-                <div class="job-card border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg transition"
-                     data-title="Sales Supervisor"
-                     data-location="Bali"
-                     data-category="Sales">
-
-                    <h3 class="text-xl font-semibold text-red-700 mb-1">Sales Supervisor</h3>
-                    <p class="text-gray-600 mb-3">Penempatan: Bali</p>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Kualifikasi</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Pengalaman 2 tahun Sales</li>
-                            <li>Target oriented</li>
-                        </ul>
-                    </details>
-
-                    <details class="mb-3">
-                        <summary class="cursor-pointer font-semibold">Jobdesk</summary>
-                        <ul class="list-disc ml-5 text-gray-600">
-                            <li>Mengawasi tim sales</li>
-                            <li>Mencapai target bulanan</li>
-                        </ul>
-                    </details>
-
-                    <a href="{{ route('login') }}" 
-                        class="inline-block mt-4 bg-red-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-red-800 transition">
-                        Lamar
-                    </a>
-                </div>
+                @endforeach
 
             </div>
 
@@ -452,10 +285,4 @@
         // initialize
         setupPagination();
     </script>
-
-    {{-- Script Pagination --}}
-    {{-- <script>
-</script> --}}
-
-
 </x-app-layout>

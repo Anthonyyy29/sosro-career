@@ -2,17 +2,25 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\JobController;
+use App\Http\Controllers\Admin\LowonganController;
 use App\Http\Controllers\Admin\ApplicantController;
 
-Route::middleware(['auth:admin'])->group(function () {
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('admin.dashboard');
+Route::get('/profile', function () {
+    return view('admin.profile');
+})->name('profile');
 
-    Route::get('/jobs', [JobController::class, 'index'])
-        ->name('admin.jobs');
+Route::patch(
+    'lowongan/{lowongan}/toggle-status',
+    [LowonganController::class, 'toggleStatus']
+)->name('lowongan.toggle-status');
 
-    Route::get('/applicants', [ApplicantController::class, 'index'])
-        ->name('admin.applicants');
-});
+// CRUD Lowongan
+Route::resource('lowongan', LowonganController::class)
+    ->except(['show', 'create', 'edit']);
+
+
+Route::get('/applicants', [ApplicantController::class, 'index'])
+    ->name('applicants');
