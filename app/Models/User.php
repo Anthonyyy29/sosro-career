@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Application;
+use App\Models\Applicant;
+
 
 class User extends Authenticatable
 {
@@ -22,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'photo',
     ];
 
     /**
@@ -51,4 +55,16 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function applicant()
+    {
+        return $this->hasOne(Applicant::class);
+    }
+    
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
+    }
+    
+
 }

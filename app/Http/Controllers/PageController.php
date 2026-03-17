@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Admin\Lowongan;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class PageController extends Controller
@@ -14,20 +15,27 @@ class PageController extends Controller
 
     public function lowongan()
     {
-        // AUTO TAKEDOWN (simple version) || Seharusnya pakai Cron yaitu khusus Laravel Scheduler + Command.
+        // 1. AUTO TAKEDOWN
         Lowongan::where('status_lowongan', 'aktif')
             ->whereDate('tanggal_akhir', '<', now())
-            ->update([
-                'status_lowongan' => 'selesai'
-            ]);
+            ->update(['status_lowongan' => 'selesai']);
 
-        // AMBIL LOWONGAN AKTIF SAJA
+        // 2. AMBIL LOWONGAN AKTIF
         $lowongan = Lowongan::where('status_lowongan', 'aktif')
             ->whereDate('tanggal_akhir', '>=', now())
             ->orderBy('tanggal_akhir', 'ASC')
             ->get();
 
-        return view('pages.lowongan', compact('lowongan'));
+        // 3. AMBIL APPLICANT (Cara paling aman)
+        $applicant = null;
+        
+        if (Auth::check()) {
+            $user = Auth::user();
+            // Pastikan relasi 'applicant' sudah didefinisikan di Model User
+            $applicant = $user->applicant; 
+        }
+
+        return view('pages.lowongan', compact('lowongan', 'applicant'));
     }
 
     public function program() {

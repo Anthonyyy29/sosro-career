@@ -2,39 +2,145 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\ApplyController;
 
-// --- 1. HALAMAN PUBLIK (Akses Tanpa Login) ---
-Route::get('/', [PageController::class, 'beranda'])->name('beranda');
-Route::get('/lowongan', [PageController::class, 'lowongan'])->name('lowongan'); // Halaman daftar Jobcard
+// Breeze (User)
+use App\Http\Controllers\ProfileController as UserProfileController;
+
+// Applicant
+use App\Http\Controllers\Applicant\DashboardController;
+use App\Http\Controllers\Applicant\ApplicationController;
+use App\Http\Controllers\Applicant\ProfileController;
+
+// Admin
+use App\Http\Controllers\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\Admin\ApplicantController;
+use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\UserController;
+
+/*
+|--------------------------------------------------------------------------
+| 1. HALAMAN PUBLIK
+|--------------------------------------------------------------------------
+*/
+// Route::get('/', [PageController::class, 'beranda'])->name('beranda');
+Route::get('/', [PageController::class, 'lowongan'])->name('landing');
+Route::get('/lowongan', [PageController::class, 'lowongan'])->name('lowongan');
 Route::get('/program-kami', [PageController::class, 'program'])->name('program');
 Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
 Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
 
-// --- 2. AUTH USER (Breeze - Pelamar) ---
+
+/*
+|--------------------------------------------------------------------------
+| 2. AUTH USER (Breeze)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
+
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return redirect()->route('applicant.dashboard');
     })->name('dashboard');
 
-    Route::controller(ProfileController::class)->group(function () {
+    Route::controller(UserProfileController::class)->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
 });
 
-// --- 3. AUTH ADMIN (Hanya Form Login & Logout) ---
+
+/*
+|--------------------------------------------------------------------------
+| 3. AREA APPLICANT
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])
+    ->prefix('applicant')
+    ->name('applicant.')
+    ->group(function () {
+
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Profile Applicant (SEMUA DATA + DOKUMEN ADA DI SINI)
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::get('/profile/create', [ProfileController::class, 'create'])->name('profile.create');
+        Route::post('/profile', [ProfileController::class, 'store'])->name('profile.store');
+        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        Route::get('/profile/download', [ProfileController::class, 'downloadPdf'])->name('profile.download');
+
+            /*
+            |--------------------------------------------------------------------------
+            | RIWAYAT LAMARAN
+            |--------------------------------------------------------------------------
+            */
+        Route::get('/lamaran-saya', [ApplicationController::class, 'index'])
+        ->name('applications.index');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| 4. APPLY LOWONGAN (WAJIB PROFIL LENGKAP)
+|--------------------------------------------------------------------------
+*/
+Route::post('/apply/{lowongan}', [ApplyController::class, 'store'])
+    ->middleware(['auth', 'applicant.complete'])
+    ->name('jobs.apply');
+
+
+/*
+|--------------------------------------------------------------------------
+| 5. ADMIN AREA
+|--------------------------------------------------------------------------
+*/
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout')->middleware('auth:admin');
 
-// --- 4. ADMIN DASHBOARD (Import dari admin.php) ---
-// Kita bungkus semua yang ada di admin.php dengan middleware auth:admin di sini
 Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function () {
-    require __DIR__.'/admin.php';
+
+    Route::get('lowongan/{lowongan}/applicants', [App\Http\Controllers\Admin\ApplicantController::class, 'byLowongan'])
+        ->name('lowongan.applicants');
+
+    Route::get('/applicants', [ApplicantController::class, 'index'])
+        ->name('applicants.index');
+
+    Route::get('/applicants/{application}/detail', [ApplicantController::class, 'show'])
+        ->name('applicants.show');
+
+    Route::post('/applications/update-stage', [ApplicantController::class, 'updateStage'])
+        ->name('applications.update-stage');
+
+    Route::get('/laporan', [LaporanController::class, 'index'])
+        ->name('laporan.index');
+
+    Route::get('laporan/export', [LaporanController::class, 'export'])
+        ->name('laporan.export');
+        
+    Route::get('/users', [UserController::class, 'index'])
+        ->name('users.index');
+
+    Route::post('/users', [UserController::class, 'store'])
+        ->name('users.store');
+
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])
+        ->name('users.destroy');
+        
+    // Route untuk proses Bulk Update
+    Route::post('/applicants/bulk-update', [ApplicantController::class, 'bulkUpdate'])
+        ->name('applicants.bulkUpdate');
+
+
+    require __DIR__.'/admin.php';   
 });
 
-// Auth bawaan Breeze (Register, Login User, dll)
+
+/*
+|--------------------------------------------------------------------------
+| Breeze Auth Routes
+|--------------------------------------------------------------------------
+*/
 require __DIR__.'/auth.php';

@@ -21,7 +21,7 @@ class LowonganController extends Controller
         $lastNumber = (int) substr($last->kode_lowongan, 4);
         $newNumber  = $lastNumber + 1;
 
-        return 'LWG-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        return 'LWG-' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
     }
 
     public function toggleStatus(Lowongan $lowongan)
@@ -37,9 +37,44 @@ class LowonganController extends Controller
         return back()->with('success', 'Status lowongan berhasil diperbarui');
     }
 
-    public function index()
+    // public function index()
+    // {
+    //     $lowongan = Lowongan::withCount('applications')
+    //         ->orderBy('id', 'DESC')
+    //         ->get();
+
+    //     return view('admin.lowongan.index', compact('lowongan'));
+    // }
+
+    public function index(Request $request)
     {
-        $lowongan = Lowongan::orderBy('id', 'DESC')->get();
+        $query = Lowongan::withCount('applications');
+
+        // Filter Berdasarkan Judul
+        if ($request->filled('search')) {
+            $query->where('judul_lowongan', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter Berdasarkan Kategori
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        // Filter Berdasarkan Lokasi
+        if ($request->filled('lokasi')) {
+            $query->where('lokasi_kerja', 'like', '%' . $request->lokasi . '%');
+        }
+
+        // Sort Berdasarkan Tanggal
+        $sort = $request->get('sort_date', 'latest');
+        if ($sort == 'latest') {
+            $query->latest();
+        } else {
+            $query->oldest();
+        }
+
+        $lowongan = $query->get();
+
         return view('admin.lowongan.index', compact('lowongan'));
     }
 
@@ -106,6 +141,6 @@ class LowonganController extends Controller
     {
         $lowongan->delete();
 
-        return back()->with('success', 'Lowongan berhasil dihapus');
+        return back()->with('success', 'Lowongan '. $lowongan->judul_lowongan .' berhasil dihapus');
     }
 }

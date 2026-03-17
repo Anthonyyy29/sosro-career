@@ -3,8 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Sosro') }}</title>
+    <title>{{ config('app.name', 'Sosro Career') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo sosro.webp') }}">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>/* SOSRO Brand Loader */
         .loader {
@@ -61,54 +63,46 @@
     <nav class="fixed top-0 left-0 w-full bg-[#B51233] text-white shadow-lg z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
             <div class="flex items-center space-x-3">
-                <img src="{{ asset('assets/images/SGS Logo-Putih.png') }}" 
+                <img src="{{ asset('assets/images/SGS Logo-Putih.webp') }}" 
                     alt="Logo Sosro" 
-                    class="h-10 w-auto">
+                    class="h-11 w-auto">
             </div>
 
             {{-- DESKTOP MENU --}}
             <div class="hidden md:flex space-x-8">
 
                 {{-- BERANDA --}}
-                <a href="{{ route('beranda') }}"
-                class="relative group font-medium 
-                {{ request()->routeIs('beranda') ? 'text-white' : 'text-gray-100' }}">
+                {{-- <a href="{{ route('beranda') }}" class="relative group font-medium {{ request()->routeIs('beranda') ? 'text-white' : 'text-gray-100' }}">
                     
                     Beranda
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('beranda') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a>
+                </a> --}}
 
                 {{-- TENTANG --}}
-                <a href="{{ route('tentang') }}"
-                class="relative group font-medium 
-                {{ request()->routeIs('tentang') ? 'text-white' : 'text-gray-100' }}">
+                {{-- <a href="{{ route('tentang') }}" class="relative group font-medium {{ request()->routeIs('tentang') ? 'text-white' : 'text-gray-100' }}">
                     
                     Tentang
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('tentang') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a>
+                </a> --}}
 
                 {{-- PROGRAM --}}
-                <a href="{{ route('program') }}"
-                class="relative group font-medium 
-                {{ request()->routeIs('program') ? 'text-white' : 'text-gray-100' }}">
+                {{-- <a href="{{ route('program') }}" class="relative group font-medium {{ request()->routeIs('program') ? 'text-white' : 'text-gray-100' }}">
                     
                     Program
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('program') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a>
+                </a> --}}
 
                 {{-- LOWONGAN --}}
-                <a href="{{ route('lowongan') }}"
-                class="relative group font-medium 
-                {{ request()->routeIs('lowongan') ? 'text-white' : 'text-gray-100' }}">
+                <a href="{{ route('lowongan') }}" class="relative group font-medium {{ request()->routeIs('lowongan') ? 'text-white' : 'text-gray-100' }}">
                     
                     Lowongan
 
@@ -118,41 +112,65 @@
                 </a>
 
                 {{-- KONTAK --}}
-                <a href="{{ route('kontak') }}"
-                class="relative group font-medium 
-                {{ request()->routeIs('kontak') ? 'text-white' : 'text-gray-100' }}">
+                {{-- <a href="{{ route('kontak') }}" class="relative group font-medium {{ request()->routeIs('kontak') ? 'text-white' : 'text-gray-100' }}">
                     
                     Kontak
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('kontak') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a>
+                </a> --}}
 
             </div>
 
-
             {{-- AKSI DAN TRANSLATE --}}
             <div class="hidden md:flex items-center space-x-4">
-                <select class="bg-red-700 border border-white rounded px-2 py-1 text-sm">
+                {{-- fitur ganti bahasa --}}
+                {{-- <select class="bg-red-700 border border-red-400 rounded-lg px-2 py-1 text-sm text-white focus:ring-2 focus:ring-white outline-none">
                     <option>ID</option>
                     <option>EN</option>
-                </select>
+                </select> --}}
 
                 @auth
-                    {{-- Jika sudah login, tampilkan tombol logout --}}
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button 
-                            class="px-4 py-2 bg-white text-red-700 font-semibold rounded-lg hover:bg-gray-100 transition">
-                            Logout
-                        </button>
-                    </form>
+                    {{-- Jika sudah login: Tampilkan Button Dashboard & Avatar Mini --}}
+                    <div class="flex items-center space-x-3 bg-red-800/50 p-1.5 rounded-full pl-4 border border-red-400/30">
+                        <a href="{{ route('dashboard') }}" 
+                        class="text-sm font-bold tracking-wide uppercase hover:text-gray-200 transition">
+                            Dashboard
+                        </a>
+                        
+                        {{-- Dropdown Sederhana (Menggunakan Alpine.js bawaan Laravel) --}}
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center focus:outline-none">
+                                <div class="h-8 w-8 rounded-full bg-white text-red-700 flex items-center justify-center font-bold border-2 border-white shadow-sm">
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                </div>
+                            </button>
+
+                            <div x-show="open" @click.away="open = false" 
+                                class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 z-[60] text-gray-800 border border-gray-100">
+                                <div class="px-4 py-2 border-b border-gray-50 mb-1">
+                                    <p class="text-xs text-gray-400">Masuk sebagai:</p>
+                                    <p class="text-sm font-bold truncate">{{ Auth::user()->name }}</p>
+                                </div>
+                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-50 flex items-center">
+                                    <i class="fa-regular fa-user mr-2 w-4"></i> Profil Akun Saya
+                                </a>
+                                <hr class="my-1 border-gray-50">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold flex items-center">
+                                        <i class="fa-solid fa-arrow-right-from-bracket mr-2 w-4"></i> Keluar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 @else
                     {{-- Jika belum login --}}
                     <a href="{{ route('login') }}" 
-                    class="px-4 py-2 bg-white text-red-700 font-semibold rounded-lg hover:bg-gray-100 transition">
-                    Masuk
+                    class="px-6 py-2 bg-white text-red-700 font-bold rounded-full hover:bg-gray-100 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95">
+                        Masuk
                     </a>
                 @endauth
             </div>
@@ -170,11 +188,11 @@
 
         {{-- MOBILE MENU --}}
         <div id="mobile-menu" class="hidden md:hidden bg-[#B51233]">
-            <a href="{{ route('beranda') }}" class="block px-4 py-2 text-white hover:bg-red-800">Beranda</a>
-            <a href="{{ route('tentang') }}" class="block px-4 py-2 text-white hover:bg-red-800">Tentang</a>
-            <a href="{{ route('program') }}" class="block px-4 py-2 text-white hover:bg-red-800">Program</a>
+            {{-- <a href="{{ route('beranda') }}" class="block px-4 py-2 text-white hover:bg-red-800">Beranda</a> --}}
+            {{-- <a href="{{ route('tentang') }}" class="block px-4 py-2 text-white hover:bg-red-800">Tentang</a> --}}
+            {{-- <a href="{{ route('program') }}" class="block px-4 py-2 text-white hover:bg-red-800">Program</a> --}}
             <a href="{{ route('lowongan') }}" class="block px-4 py-2 text-white hover:bg-red-800">Lowongan</a>
-            <a href="{{ route('kontak') }}" class="block px-4 py-2 text-white hover:bg-red-800">Kontak</a>
+            {{-- <a href="{{ route('kontak') }}" class="block px-4 py-2 text-white hover:bg-red-800">Kontak</a> --}}
 
             {{-- Bahasa --}}
             <div class="px-4 py-2">
@@ -185,23 +203,40 @@
             </div>
 
             {{-- AUTH HANDLING --}}
-            @auth
-                {{-- Jika sudah login → tampilkan Logout --}}
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button class="block w-full text-left px-4 py-2 text-white hover:bg-red-800">
-                        Logout
-                    </button>
-                </form>
-            @else
-                {{-- Jika belum login → tampilkan tombol Masuk --}}
-                <a href="{{ route('login') }}" 
-                class="block w-full px-4 py-2 text-white bg-red-700 hover:bg-red-800">
-                    Masuk
-                </a>
-            @endauth
+            {{-- AUTH HANDLING MOBILE --}}
+            <div class="border-t border-red-400 mt-2 pt-2 pb-4">
+                @auth
+                    <div class="px-4 py-3 flex items-center space-x-3 mb-2">
+                        <div class="h-10 w-10 rounded-full bg-white text-red-700 flex items-center justify-center font-bold">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                        <div>
+                            <p class="text-white font-bold leading-none">{{ Auth::user()->name }}</p>
+                            <p class="text-red-200 text-xs">{{ Auth::user()->email }}</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('dashboard') }}" class="block px-4 py-3 text-white bg-red-800 font-bold">
+                        <i class="fa-solid fa-gauge-high mr-2"></i> Dashboard Utama
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="block px-4 py-3 text-white hover:bg-red-800">
+                        <i class="fa-regular fa-user mr-2"></i> Edit Profil Akun
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="block w-full text-left px-4 py-3 text-red-200 hover:bg-red-900 font-medium">
+                            <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Keluar Aplikasi
+                        </button>
+                    </form>
+                @else
+                    <div class="px-4 py-2">
+                        <a href="{{ route('login') }}" 
+                        class="block w-full text-center px-4 py-3 bg-white text-red-700 font-bold rounded-lg shadow-inner">
+                            Masuk ke Akun
+                        </a>
+                    </div>
+                @endauth
+            </div>
         </div>
-
     </nav>
     
     {{-- SCRIPT TOGGLE MOBILE MENU --}}

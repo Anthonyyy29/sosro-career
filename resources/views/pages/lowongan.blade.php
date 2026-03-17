@@ -59,29 +59,28 @@
                     type="text" 
                     placeholder="🔍 Cari posisi…"
                     class="w-full md:w-1/2 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700"
-                />
+                />  
 
                 {{-- FILTER LOKASI --}}
                 <select 
                     id="filterLocation"
-                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700"
-                >
+                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700">
                     <option value="">Semua Lokasi</option>
-                    <option value="Jakarta Timur">Jakarta Timur</option>
-                    <option value="Cikarang">Cikarang</option>
-                    <option value="Bali">Bali</option>
-                    <option value="Pangkal Pinang">Pangkal Pinang</option>
                 </select>
 
-                {{-- FILTER BIDANG PEKERJAAN --}}
+                {{-- FILTER KATEGORI PEKERJAAN --}}
                 <select 
                     id="filterCategory"
-                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700"
-                >
+                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700">
+                    <option value="">Semua Kategori</option>
+                </select>
+
+                {{-- FILTER BIDANG --}}
+                <select 
+                    id="filterBidang"
+                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3
+                        focus:outline-none focus:ring-2 focus:ring-red-700">
                     <option value="">Semua Bidang</option>
-                    <option value="IT">IT</option>
-                    <option value="HC">Human Capital</option>
-                    <option value="Sales Operation">Sales Operation</option>
                 </select>
             </div>
 
@@ -94,7 +93,8 @@
                         class="job-card border border-red-600 rounded-2xl p-6 md:p-8 bg-white shadow-sm hover:shadow-md transition flex flex-col gap-4"
                         data-title="{{ $item->judul_lowongan }}"
                         data-location="{{ $item->penempatan_cabang }}"
-                        data-category="{{ $item->kategori }}">
+                        data-category="{{ $item->kategori }}"
+                        data-bidang="{{ $item->bidang }}">
 
                         {{-- HEADER --}}
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -189,17 +189,31 @@
                             </div>
 
                             {{-- BUTTON --}}
-                            <div class="shrink-0">
-                                <a href="{{ route('login') }}"
-                                class="inline-flex items-center justify-center bg-red-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-red-700 transition">
-                                    Lamar
-                                </a>
-                            </div>
+                            @php
+                                $sudahMelamar = $applicant ? \App\Models\Application::where('applicant_id', $applicant->id)->where('lowongan_id', $item->id)->exists() : false;
+                            @endphp
 
+                            @if($sudahMelamar)
+                                <button disabled class="inline-flex items-center justify-center bg-green-600 text-white font-semibold px-8 py-3 rounded-full cursor-default">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                    Sudah Dilamar
+                                </button>
+                            @else
+                                {{-- Form Lamar seperti di atas --}}
+                                <div class="shrink-0">
+                                    <form method="POST" action="{{ route('jobs.apply', $item->id) }}" class="form-lamar">
+                                        @csrf
+                                        <button type="button" 
+                                                onclick="konfirmasiLamar(this)" 
+                                                data-posisi="{{ $item->judul_lowongan }}"
+                                                class="btn-submit-lamar inline-flex items-center justify-center bg-red-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-red-700 transition">
+                                            <span class="btn-text">Lamar</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
-
                     </div>
-
                 @endforeach
 
             </div>
@@ -209,80 +223,214 @@
         </div>
     </section>
 
-    {{-- SCRIPT SEARCH, FILTER LOKASI, FILTER BIDANG --}}
+    {{-- SCRIPT SEARCH, FILTER LOKASI, FILTER KATEGORI --}}
     <script>
-        const searchInput = document.getElementById("searchInput");
-        const filterLocation = document.getElementById("filterLocation");
-        const filterCategory = document.getElementById("filterCategory");
-        const jobCards = document.querySelectorAll(".job-card");
+    document.addEventListener("DOMContentLoaded", function () {
 
-        function filterJobs() {
-            const keyword = searchInput.value.toLowerCase();
-            const location = filterLocation.value;
-            const category = filterCategory.value;
+        const searchInput     = document.getElementById("searchInput");
+        const filterLocation  = document.getElementById("filterLocation");
+        const filterBidang  = document.getElementById("filterBidang");
+        const filterCategory  = document.getElementById("filterCategory");
+        const jobCards        = Array.from(document.querySelectorAll(".job-card"));
+        const pagination      = document.getElementById("pagination");
+
+        const itemsPerPage = 6;
+        let currentPage = 1;
+        let filteredCards = [...jobCards];
+
+        /* ===============================
+        🔹 AUTO FILL DROPDOWN FILTER
+        =============================== */
+        function populateFilters() {
+            const locations  = new Set();
+            const bidangSet = new Set();
+            const categories = new Set();
 
             jobCards.forEach(card => {
-                const title = card.dataset.title.toLowerCase();
-                const loc = card.dataset.location;
-                const cat = card.dataset.category;
+                if (card.dataset.location) {
+                    locations.add(card.dataset.location.trim());
+                }
+                if (card.dataset.bidang) {
+                    bidangSet.add(card.dataset.bidang.trim());
+                }
+                if (card.dataset.category) {
+                    categories.add(card.dataset.category.trim());
+                }
+            });
 
-                const matchKeyword = title.includes(keyword);
+            locations.forEach(loc => {
+                const option = document.createElement("option");
+                option.value = loc;
+                option.textContent = loc;
+                filterLocation.appendChild(option);
+            });
+
+            bidangSet.forEach(bidang => {
+                const option = document.createElement("option");
+                option.value = bidang;
+                option.textContent = bidang;
+                filterBidang.appendChild(option);
+            });
+
+            categories.forEach(cat => {
+                const option = document.createElement("option");
+                option.value = cat;
+                option.textContent = cat;
+                filterCategory.appendChild(option);
+            });
+        }
+
+        /* ===============================
+        🔹 FILTER LOGIC
+        =============================== */
+        function applyFilter() {
+            const keyword  = searchInput.value.toLowerCase();
+            const location = filterLocation.value;
+            const bidang = filterBidang.value;
+            const category = filterCategory.value;
+
+            filteredCards = jobCards.filter(card => {
+                const title = card.dataset.title.toLowerCase();
+                const loc   = card.dataset.location;
+                const cardBidang = card.dataset.bidang;
+                const cat   = card.dataset.category;
+
+                const matchKeyword  = title.includes(keyword);
                 const matchLocation = location === "" || loc === location;
+                const matchBidang = bidang === "" || cardBidang === bidang;
                 const matchCategory = category === "" || cat === category;
 
-                card.style.display = matchKeyword && matchLocation && matchCategory 
-                    ? "block" 
-                    : "none";
+                return matchKeyword && matchLocation && matchBidang && matchCategory;
             });
 
-            setupPagination();
+            currentPage = 1;
+            render();
         }
 
-        searchInput.addEventListener("input", filterJobs);
-        filterLocation.addEventListener("change", filterJobs);
-        filterCategory.addEventListener("change", filterJobs);
-        const jobList = document.getElementById("jobList");
-        const pagination = document.getElementById("pagination");
-        const itemsPerPage = 6;  // jumlah card per halaman
-        let currentPage = 1;
-        
-        function setupPagination() {
-            const visibleCards = [...jobCards].filter(card => card.style.display !== "none");
-            const totalPages = Math.ceil(visibleCards.length / itemsPerPage);
-        
-            visibleCards.forEach((card, index) => {
-                card.style.display =
-                    index >= (currentPage - 1) * itemsPerPage &&
-                    index < currentPage * itemsPerPage
-                        ? "block"
-                        : "none";
+        /* ===============================
+        🔹 RENDER CARD
+        =============================== */
+        function render() {
+            jobCards.forEach(card => card.style.display = "none");
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end   = start + itemsPerPage;
+
+            filteredCards.slice(start, end).forEach(card => {
+                card.style.display = "block";
             });
-        
-            renderPagination(totalPages);
+
+            renderPagination();
         }
-        
-        function renderPagination(totalPages) {
+
+        /* ===============================
+        🔹 PAGINATION
+        =============================== */
+        function renderPagination() {
             pagination.innerHTML = "";
-        
-            for (let page = 1; page <= totalPages; page++) {
+
+            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement("button");
-                btn.textContent = page;
+                btn.textContent = i;
                 btn.className =
-                    "px-4 py-2 border rounded " +
-                    (page === currentPage
+                    "px-4 py-2 border rounded transition " +
+                    (i === currentPage
                         ? "bg-red-700 text-white"
-                        : "bg-white text-red-700");
-        
+                        : "bg-white text-red-700 hover:bg-red-100");
+
                 btn.addEventListener("click", () => {
-                    currentPage = page;
-                    setupPagination();
+                    currentPage = i;
+                    render();
                 });
-        
+
                 pagination.appendChild(btn);
             }
         }
-        
-        // initialize
-        setupPagination();
+
+        /* ===============================
+        🔹 EVENT
+        =============================== */
+        searchInput.addEventListener("input", applyFilter);
+        filterLocation.addEventListener("change", applyFilter);
+        filterBidang.addEventListener("change", applyFilter);
+        filterCategory.addEventListener("change", applyFilter);
+
+        /* ===============================
+        🔹 INIT
+        =============================== */
+        populateFilters();
+        applyFilter();
+
+    });
+    </script>
+
+    {{-- Klik Lamar --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function konfirmasiLamar(btn) {
+            const posisi = btn.getAttribute('data-posisi');
+            const form = btn.closest('form');
+
+            Swal.fire({
+                title: 'Konfirmasi Lamaran',
+                html: `<div class="text-gray-500 text-sm">Anda akan mengirimkan lamaran untuk posisi:</div>
+                    <div class="font-bold text-gray-900 mt-1">${posisi}</div>`,
+                icon: 'info',
+                iconColor: '#dc2626',
+                showCancelButton: true,
+                confirmButtonText: 'Kirim Lamaran',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                buttonsStyling: false,
+                // Desain Clean & Flat
+                customClass: {
+                    popup: 'rounded-2xl border-none shadow-2xl',
+                    confirmButton: 'bg-red-600 text-white px-6 py-2.5 rounded-full font-bold mx-2 text-sm hover:bg-red-700 transition-colors',
+                    cancelButton: 'bg-gray-100 text-gray-600 px-6 py-2.5 rounded-full font-bold mx-2 text-sm hover:bg-gray-200 transition-colors'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // LOCK LEBAR TOMBOL (Agar tidak menciut saat teks berubah)
+                    btn.style.width = btn.offsetWidth + 'px';
+                    btn.disabled = true;
+                    
+                    // UI FEEDBACK MINIMALIS
+                    btn.innerHTML = `
+                        <div class="flex items-center justify-center">
+                            <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    `;
+                    
+                    form.submit();
+                }
+            });
+        }
+    </script>
+    {{-- Script untuk menangkap session flash message --}}
+    <script>
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                timer: 3000,
+                showConfirmButton: false
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#dc2626',
+            });
+        @endif
     </script>
 </x-app-layout>

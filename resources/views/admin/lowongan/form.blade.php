@@ -64,7 +64,7 @@
         <label>Status Lowongan</label>
         <select name="status_lowongan" class="input">
             <option value="aktif">Aktif</option>
-            <option value="tidak aktif">Tidak Aktif</option>
+            <option value="non-aktif">Non-Aktif</option>
             <option value="selesai">Selesai</option>
             <option value="dihapus">Dihapus</option>
         </select>

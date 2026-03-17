@@ -8,86 +8,133 @@
     editId: null,
     form: {},
     editAction: '' 
-    }" 
-    class="bg-white p-6 rounded-lg shadow-md">
+    }" git 
+    class="bg-white p-6 rounded-xl shadow-md">
 
     <!-- HEADER -->
     <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold text-gray-800">Manajemen Lowongan</h2>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Manajemen Lowongan</h1>
+            <p class="text-sm text-gray-500">Kelola dan pantau status publikasi lowongan kerja.</p>
+        </div>
 
-        <button @click="open = true"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition">
-            + Buat Lowongan
+        <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-blue-200 transition-all active:scale-95 gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span class="hidden sm:inline">Buat Lowongan</span>
         </button>
     </div>
 
     <!-- TABLE -->
-    <div class="overflow-x-auto w-full">
-        <table class="min-w-full text-left text-sm" id="table">
-            <thead class="bg-gray-100 border-b">
-                <tr>
-                    <th class="py-3 px-4 whitespace-nowrap">No</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Kode</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Judul</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Kategori</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Bidang</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Status</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Batas Lamar</th>
-                    <th class="py-3 px-4 whitespace-nowrap text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-    @foreach ($lowongan as $item)
-    {{-- Perubahan di baris bawah ini --}}
-    <tr class="border-b odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition-colors">
-        
-        <td class="py-3 px-4">{{ $loop->iteration }}</td>
-        <td class="py-3 px-4 font-mono">{{ $item->kode_lowongan }}</td>
-        <td class="py-3 px-4">{{ $item->judul_lowongan }}</td>
-        <td class="py-3 px-4">{{ $item->kategori }}</td>
-        <td class="py-3 px-4">{{ $item->bidang }}</td>
-        <td class="py-3 px-4 capitalize">{{ $item->status_lowongan }}</td>
-        <td class="py-3 px-4 ">{{ \Carbon\Carbon::parse($item->tanggal_akhir)->locale('id')->translatedFormat('d F Y') }}</td>
-        
-        <td class="py-3 px-4 text-center">
-            {{-- Tombol Edit --}}
-            <button
-                @click="
-                    editOpen = true;
-                    editId = {{ $item->id }};
-                    editAction = '{{ route('admin.lowongan.update', $item->id) }}';
-                    form = {{ $item->toJson() }};
-                "
-                class="text-blue-600 hover:underline mr-2">
-                Edit
-            </button>
+    <div class="overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm" id="table">
+                <thead>
+                    <tr class="bg-gray-50/50 border-b border-gray-100">
+                        <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">No</th>
+                        <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Informasi Lowongan</th>
+                        <th class="py-4 px-6 text-center font-bold text-gray-500 uppercase tracking-wider text-[11px]">Kandidat</th>
+                        <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Terbuat</th>
+                        <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Batas Waktu</th>
+                        <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Status</th>
+                        <th class="py-4 px-6 text-center font-bold text-gray-500 uppercase tracking-wider text-[11px]">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @foreach ($lowongan as $item)
+                    <tr onclick="window.location='{{ route('admin.lowongan.applicants', $item->id) }}'"
+                        class="group hover:bg-blue-50/40 cursor-pointer transition-all duration-100">
 
-            {{-- Tombol Hapus --}}
-            <form action="{{ route('admin.lowongan.destroy', $item->id) }}"
-                method="POST" class="inline"
-                onsubmit="return confirm('Hapus data ini?')">
-                @csrf @method('DELETE')
-                <button class="text-red-600 hover:underline">Hapus</button>
-            </form>
+                        <td class="px-6 py-4 text-gray-800 font-medium">{{ $loop->iteration }}</td>
+                        
+                        <td class="px-6 py-4">
+                            <div class="flex items-start gap-3">
+                                <div class="hidden sm:flex flex-col items-center justify-center w-10 h-10 rounded-lg bg-gray-50 text-gray-400 font-mono text-[10px] border border-gray-100">
+                                    {{ $item->kode_lowongan }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-800 group-hover:text-blue-700 transition-colors">{{ $item->judul_lowongan }}</span>
+                                    <span class="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-0.5">{{ $item->kategori }} • {{ $item->bidang }}</span>
+                                </div>
+                            </div>
+                        </td>
 
-            {{-- Tombol Status --}}
-            <form method="POST"
-                action="{{ route('admin.lowongan.toggle-status', $item->id) }}"
-                class="inline">
-                @csrf @method('PATCH')
-                <button
-                    class="px-2 py-1 text-xs font-semibold rounded hover:text-black
-                    {{ $item->status_lowongan === 'aktif' ? 'bg-green-600 text-white' : 'bg-gray-400 text-white' }}">
-                    {{ $item->status_lowongan === 'aktif' ? 'Aktif' : 'Non-Aktif' }}
-                </button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</tbody>
-        </table>
+                        <td class="px-6 py-4 text-center">
+                            <div class="inline-flex flex-col items-center">
+                                <span class="text-base font-bold text-gray-800">{{ $item->applications_count }}</span>
+                                <span class="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Pelamar</span>
+                            </div>
+                        </td>
+                        
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="text-gray-700 font-medium">{{ \Carbon\Carbon::parse($item->tanggal_mulai)->locale('id')->translatedFormat('d M Y') }}</span>
+                                @if($item->created_by == '1')
+                                    <span class="text-[9px] text-green-400 font-bold uppercase">HO</span>
+                                @else
+                                    <span class="text-[9px] text-green-400 font-bold uppercase">{{ ($item->created_by) }}</span>
+                                @endif
+                            </div>
+                        </td>
+                        
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="text-gray-700 font-medium">{{ \Carbon\Carbon::parse($item->tanggal_akhir)->locale('id')->translatedFormat('d M Y') }}</span>
+                                @if(\Carbon\Carbon::parse($item->tanggal_akhir)->isPast())
+                                    <span class="text-[10px] text-red-500 font-bold uppercase">Sudah Berakhir</span>
+                                @else
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase">{{ \Carbon\Carbon::parse($item->tanggal_akhir)->diffForHumans() }}</span>
+                                @endif
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4">
+                            <form method="POST" action="{{ route('admin.lowongan.toggle-status', $item->id) }}" onclick="event.stopPropagation()">
+                                @csrf @method('PATCH')
+                                <button type="submit" title="Ubah Status" 
+                                    class="group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ease-in-out
+                                    {{ $item->status_lowongan === 'aktif' 
+                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:shadow-sm' 
+                                        : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100' }}">
+                                    
+                                    <span class="relative flex h-2 w-2">
+                                        @if($item->status_lowongan === 'aktif')
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        @endif
+                                        <span class="relative inline-flex rounded-full h-2 w-2 {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                    </span>
+                                    
+                                    <span class="text-[10px] tracking-wider font-bold uppercase">
+                                        {{ $item->status_lowongan }}
+                                    </span>
+                                </button>
+                            </form>
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex justify-center items-center gap-2" onclick="event.stopPropagation()">
+                                <button @click.stop="
+                                    editOpen = true;
+                                    editId = {{ $item->id }};
+                                    editAction = '{{ route('admin.lowongan.update', $item->id) }}';
+                                    form = {{ $item->toJson() }};
+                                " title="Edit" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition shadow-sm border border-transparent hover:border-blue-100">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                </button>
+
+                                <form action="{{ route('admin.lowongan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus lowongan ini?')">
+                                    @csrf @method('DELETE')
+                                    <button title="Hapus" type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-xl transition shadow-sm border border-transparent hover:border-red-100">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
-
 
     <!-- ================= MODAL CREATE ================= -->
     <div x-show="open" x-transition.opacity x-cloak
@@ -110,35 +157,76 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input class="input" name="judul_lowongan" placeholder="Judul Lowongan" required>
+
                     <!-- KATEGORI -->
-                    <select name="kategori" class="input">
-                        <option value="">Pilih Kategori</option>
+                    <select name="kategori" class="input" required>
+                        <option value="" disabled selected>Pilih Kategori</option>
                         <option value="Profesional">Profesional</option>
-                        <option value="MT">Management Trainee</option>
+                        <option value="Management Trainee">Management Trainee</option>
                         <option value="Magang">Magang</option>
                     </select>
 
                     <!-- BIDANG -->
-                    <select name="bidang" class="input">
-                        <option value="">Pilih Bidang</option>
-                        <option value="IT">Teknologi Informasi (IT)</option>
-                        <option value="HC">Human Capital</option>
-                        <option value="Finance">Finance</option>
+                    <select name="bidang" class="input" required>
+                        <option value="" disabled selected>Pilih Bidang</option>
+                        <option value="Administrasi">Administrasi</option>
+                        <option value="Finance & Accounting">Finance & Accounting</option>
+                        <option value="General Affairs">General Affairs</option>
+                        <option value="Human Resources & People Development">Human Resources & People Development</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Internal Audit">Internal Audit</option>
                         <option value="Marketing">Marketing</option>
-                        <option value="Sales">Sales & Distribution</option>
-                        <option value="Pabrik">Pabrik</option>
+                        <option value="Produksi / Teknik">Produksi / Teknik</option>
+                        <option value="Purchasing">Purchasing</option>
+                        <option value="Quality Control">Quality Control</option>
+                        <option value="Research & Development">Research & Development</option>
+                        <option value="Sales & Distribution">Sales & Distribution</option>
+                        <option value="Supply Chain & Logistic">Supply Chain & Logistic</option>
                     </select>
 
-                    <select name="tipe_lowongan" class="input">
-                        <option value="">Pilih Tipe Lowongan</option>
+                    <select name="tipe_lowongan" class="input" required>
+                        <option value="" disabled selected>Pilih Tipe Lowongan</option>
                         <option value="Full-time">Full-time</option>
                         <option value="Part-time">Part-time</option>
                         <option value="Freelance">Freelance</option>
                         <option value="Kontrak">Kontrak</option>
                     </select>
 
-                    <input class="input" name="penempatan_cabang" placeholder="Penempatan">
-                    <input class="input" name="lokasi_kerja" placeholder="Lokasi Kerja">
+                    <select name="penempatan_cabang" class="input" required>
+                        <option value="" disabled selected>Pilih Penempatan</option>
+                        <option value="Kantor Pusat" class="font-bold">Kantor Pusat</option>
+                        <optgroup label="KPW">
+                            <option value="KPW Bali Nusra">KPW Bali Nusra</option>
+                            <option value="KPW Jakarta Banten">KPW Jakarta Banten</option>
+                            <option value="KPW Jawa Barat">KPW Jawa Barat</option>
+                            <option value="KPW Jawa Tengah">KPW Jawa Tengah</option>
+                            <option value="KPW Jawa Timur">KPW Jawa Timur</option>
+                            <option value="KPW Kalimantan Sulawesi">KPW Kalimantan Sulawesi</option>
+                            <option value="KPW Sumbar Kepri">KPW Sumbar Kepri</option>
+                            <option value="KPW Sumbagsel Babel">KPW Sumbagsel Babel</option>
+                            <option value="KPW Sumut NAD">KPW Sumut NAD</option>
+                        </optgroup>
+                        <optgroup label="Pabrik">
+                            <option value="Pabrik Cakung">Pabrik Cakung</option>
+                            <option value="Pabrik Cibitung">Pabrik Cibitung</option>
+                            <option value="Pabrik Deli Serdang">Pabrik Deli Serdang</option>
+                            <option value="Pabrik Gianyar">Pabrik Gianyar</option>
+                            <option value="Pabrik Mojokerto">Pabrik Mojokerto</option>
+                            <option value="Pabrik Palembang">Pabrik Palembang</option>
+                            <option value="Pabrik Pandaan">Pabrik Pandaan</option>
+                            <option value="Pabrik Purbalingga">Pabrik Purbalingga</option>
+                            <option value="Pabrik Sentul">Pabrik Sentul</option>
+                            <option value="Pabrik Slawi">Pabrik Slawi</option>
+                            <option value="Pabrik Ungaran">Pabrik Ungaran</option>
+                        </optgroup>
+                        <optgroup label="Lainnya">
+                            <option value="Kebun">Kebun</option>
+                            <option value="Poci Kreasi Mandiri">Poci Kreasi Mandiri</option>
+                        </optgroup>
+                    </select>
+
+                    <input class="input" name="lokasi_kerja" placeholder="Lokasi Kerja" required>
+
                     <!-- Tanggal Mulai (AUTO) -->
                     <input type="text" class="input bg-gray-100 cursor-not-allowed" value="{{ now()->format('d M Y') }}" disabled>
 
@@ -157,7 +245,7 @@
                         Batal
                     </button>
                     <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
                         Simpan
                     </button>
                 </div>
@@ -187,33 +275,72 @@
 
                     <input class="input" name="judul_lowongan" x-model="form.judul_lowongan" required>
 
-                    <select name="kategori" class="input" x-model="form.kategori">
-                        <option value="">Pilih Kategori</option>
+                    <select name="kategori" class="input" x-model="form.kategori" required>
+                        <option value="" disabled selected>Pilih Kategori</option>
                         <option value="Profesional">Profesional</option>
-                        <option value="MT">Management Trainee</option>
+                        <option value="Management Trainee">Management Trainee</option>
                         <option value="Magang">Magang</option>
                     </select>
 
-                    <select name="bidang" class="input" x-model="form.bidang">
-                        <option value="">Pilih Bidang</option>
-                        <option value="IT">Teknologi Informasi (IT)</option>
-                        <option value="HC">Human Capital</option>
-                        <option value="Finance">Finance</option>
+                    <select name="bidang" class="input" x-model="form.bidang" required>
+                        <option value="" disabled selected>Pilih Bidang</option>
+                        <option value="Administrasi">Administrasi</option>
+                        <option value="Finance & Accounting">Finance & Accounting</option>
+                        <option value="General Affairs">General Affairs</option>
+                        <option value="Human Resources & People Development">Human Resources & People Development</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Internal Audit">Internal Audit</option>
                         <option value="Marketing">Marketing</option>
-                        <option value="Sales">Sales & Distribution</option>
-                        <option value="Pabrik">Pabrik</option>
+                        <option value="Produksi / Teknik">Produksi / Teknik</option>
+                        <option value="Purchasing">Purchasing</option>
+                        <option value="Quality Control">Quality Control</option>
+                        <option value="Research & Development">Research & Development</option>
+                        <option value="Sales & Distribution">Sales & Distribution</option>
+                        <option value="Supply Chain & Logistic">Supply Chain & Logistic</option>
                     </select>
 
-                    <select name="tipe_lowongan" class="input" x-model="form.tipe_lowongan">
-                        <option value="">Pilih Tipe Lowongan</option>
+                    <select name="tipe_lowongan" class="input" x-model="form.tipe_lowongan" required>
+                        <option value="" disabled selected>Pilih Tipe Lowongan</option>
                         <option value="Full-time">Full-time</option>
                         <option value="Part-time">Part-time</option>
                         <option value="Freelance">Freelance</option>
                         <option value="Kontrak">Kontrak</option>
                     </select>
 
-                    <input class="input" name="penempatan_cabang" x-model="form.penempatan_cabang">
-                    <input class="input" name="lokasi_kerja" x-model="form.lokasi_kerja">
+                    <select name="penempatan_cabang" class="input" x-model="form.penempatan_cabang" required>
+                        <option value="" disabled selected>Pilih Penempatan</option>
+                        <option value="Kantor Pusat" class="font-bold">Kantor Pusat</option>
+                        <optgroup label="KPW">
+                            <option value="KPW Bali Nusra">KPW Bali Nusra</option>
+                            <option value="KPW Jakarta Banten">KPW Jakarta Banten</option>
+                            <option value="KPW Jawa Barat">KPW Jawa Barat</option>
+                            <option value="KPW Jawa Tengah">KPW Jawa Tengah</option>
+                            <option value="KPW Jawa Timur">KPW Jawa Timur</option>
+                            <option value="KPW Kalimantan Sulawesi">KPW Kalimantan Sulawesi</option>
+                            <option value="KPW Sumbar Kepri">KPW Sumbar Kepri</option>
+                            <option value="KPW Sumbagsel Babel">KPW Sumbagsel Babel</option>
+                            <option value="KPW Sumut NAD">KPW Sumut NAD</option>
+                        </optgroup>
+                        <optgroup label="Pabrik">
+                            <option value="Pabrik Cakung">Pabrik Cakung</option>
+                            <option value="Pabrik Cibitung">Pabrik Cibitung</option>
+                            <option value="Pabrik Deli Serdang">Pabrik Deli Serdang</option>
+                            <option value="Pabrik Gianyar">Pabrik Gianyar</option>
+                            <option value="Pabrik Mojokerto">Pabrik Mojokerto</option>
+                            <option value="Pabrik Palembang">Pabrik Palembang</option>
+                            <option value="Pabrik Pandaan">Pabrik Pandaan</option>
+                            <option value="Pabrik Purbalingga">Pabrik Purbalingga</option>
+                            <option value="Pabrik Sentul">Pabrik Sentul</option>
+                            <option value="Pabrik Slawi">Pabrik Slawi</option>
+                            <option value="Pabrik Ungaran">Pabrik Ungaran</option>
+                        </optgroup>
+                        <optgroup label="Lainnya">
+                            <option value="Kebun">Kebun</option>
+                            <option value="Poci Kreasi Mandiri">Poci Kreasi Mandiri</option>
+                        </optgroup>
+                    </select>
+                    
+                    <input class="input" name="lokasi_kerja" x-model="form.lokasi_kerja" required>
 
                     <input type="text" class="input bg-gray-100" :value="form.tanggal_mulai" disabled>
 
@@ -229,7 +356,7 @@
                         Batal
                     </button>
                     <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
                         Update
                     </button>
                 </div>

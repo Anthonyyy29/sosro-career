@@ -3,6 +3,7 @@
 namespace App\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Application;
 
 class Lowongan extends Model
 {
@@ -24,4 +25,8 @@ class Lowongan extends Model
         'created_by',
     ];
 
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'lowongan_id');
+    }
 }
