@@ -26,6 +26,10 @@ class LowonganController extends Controller
 
     public function toggleStatus(Lowongan $lowongan)
     {
+        if (Auth::user()->role !== 'superadmin') {
+            return back()->with('error', 'Hanya Superadmin yang dapat mengubah status lowongan.');
+        }
+
         if ($lowongan->status_lowongan === 'aktif') {
             $lowongan->status_lowongan = 'tidak aktif';
         } elseif ($lowongan->status_lowongan === 'tidak aktif') {
@@ -37,19 +41,15 @@ class LowonganController extends Controller
         return back()->with('success', 'Status lowongan berhasil diperbarui');
     }
 
-    // public function index()
-    // {
-    //     $lowongan = Lowongan::withCount('applications')
-    //         ->orderBy('id', 'DESC')
-    //         ->get();
-
-    //     return view('admin.lowongan.index', compact('lowongan'));
-    // }
-
     public function index(Request $request)
     {
-        $query = Lowongan::withCount('applications');
+        $query = Lowongan::withCount('applications')->with('admin');
 
+        // Filter milik sendiri jika bukan superadmin
+        if (Auth::user()->role !== 'superadmin') {
+            $query->where('created_by', Auth::id());
+        }
+        
         // Filter Berdasarkan Judul
         if ($request->filled('search')) {
             $query->where('judul_lowongan', 'like', '%' . $request->search . '%');

@@ -22,6 +22,9 @@
                 100% { transform: rotate(360deg); }
             }
         </style>
+
+        <x-turnstile.scripts />
+
     </head>
     <body class="font-sans text-gray-900 antialiased bg-gray-50/50">
         
@@ -30,17 +33,17 @@
                 <div class="flex justify-between h-18 md:h-20 p-2"> 
                     <div class="flex items-center">
                         {{-- <a href="{{ route('beranda') }}" class="text-xl md:text-2xl font-black text-red-600 tracking-tighter transition hover:opacity-80"> --}}
-                        <a href="#" class="text-xl md:text-2xl font-black text-red-600 tracking-tighter transition hover:opacity-80">
+                        <a href="{{ route('beranda') }}" class="text-xl md:text-2xl font-black text-red-600 tracking-tighter transition hover:opacity-80">
                             SOSRO<span class="text-gray-800 font-light">CAREER</span>
                         </a>
                     </div>
 
                     <div class="hidden md:flex md:items-center md:space-x-8">
-                        {{-- <a href="{{ route('beranda') }}" class="{{ request()->routeIs('beranda') ? 'nav-link-active' : 'nav-link' }} hover:text-red-600">Beranda</a> --}}
-                        {{-- <a href="{{ route('tentang') }}" class="nav-link hover:text-red-600">Tentang</a> --}}
-                        {{-- <a href="{{ route('program') }}" class="nav-link hover:text-red-600">Program</a> --}}
+                        <a href="{{ route('beranda') }}" class="{{ request()->routeIs('beranda') ? 'nav-link-active' : 'nav-link' }} hover:text-red-600">Beranda</a>
+                        <a href="{{ route('tentang') }}" class="nav-link hover:text-red-600">Tentang</a>
+                        <a href="{{ route('program') }}" class="nav-link hover:text-red-600">Program</a>
                         <a href="{{ route('lowongan') }}" class="{{ request()->routeIs('lowongan') ? 'nav-link-active' : 'nav-link' }} hover:text-red-600">Lowongan</a>
-                        {{-- <a href="{{ route('kontak') }}" class="nav-link hover:text-red-600">Kontak</a> --}}
+                        <a href="{{ route('kontak') }}" class="nav-link hover:text-red-600">Kontak</a>
                     </div>
 
                     <div class="hidden md:flex md:items-center">
@@ -61,6 +64,7 @@
                                      x-transition:enter="transition ease-out duration-150"
                                      x-transition:enter-start="opacity-0 scale-95 translate-y-2"
                                      x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                     style="display: none;"
                                      class="absolute right-0 mt-3 w-56 bg-white border border-gray-100 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-2 z-50 overflow-hidden">
                                     
                                     <div class="px-4 py-3 bg-gray-50/50 mb-2 border-b border-gray-100">
@@ -73,6 +77,12 @@
                                         Akun Saya
                                     </a>
 
+
+                                    {{-- Trial by Rizky --}}
+                                    <a href="{{ route('applicant.dashboard') }}" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all">
+                                        <svg class="w-4 h-4 mr-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        Dashboard
+                                    </a>
 
                                     {{-- Trial by Rizky --}}
                                     <a href="{{ route('applicant.applications.index') }}" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all">
@@ -114,6 +124,7 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-4"
+                 style="display: none;"
                  class="md:hidden bg-white border-t border-gray-100 overflow-hidden shadow-2xl rounded-b-[2rem]">
                 
                 <div class="px-5 pt-6 pb-8 space-y-4"> @auth
@@ -129,11 +140,11 @@
                     @endauth
                     
                     <div class="grid grid-cols-1 gap-2 text-red-600">
-                        {{-- <a href="{{ route('beranda') }}" class="mobile-nav-link {{ request()->routeIs('beranda') ? 'bg-red-50 text-red-600' : '' }} hover:font-semibold">Beranda</a> --}}
-                        {{-- <a href="{{ route('tentang') }}" class="mobile-nav-link hover:font-semibold">Tentang</a> --}}
-                        {{-- <a href="{{ route('program') }}" class="mobile-nav-link hover:font-semibold">Program</a> --}}
+                        <a href="{{ route('beranda') }}" class="mobile-nav-link {{ request()->routeIs('beranda') ? 'bg-red-50 text-red-600' : '' }} hover:font-semibold">Beranda</a>
+                        <a href="{{ route('tentang') }}" class="mobile-nav-link hover:font-semibold">Tentang</a>
+                        <a href="{{ route('program') }}" class="mobile-nav-link hover:font-semibold">Program</a>
                         <a href="{{ route('lowongan') }}" class="mobile-nav-link {{ request()->routeIs('lowongan') ? 'bg-red-50 text-red-600' : '' }} hover:font-semibold">Lowongan</a>
-                        {{-- <a href="{{ route('kontak') }}" class="mobile-nav-link hover:font-semibold">Kontak</a> --}}
+                        <a href="{{ route('kontak') }}" class="mobile-nav-link hover:font-semibold">Kontak</a>
                         {{-- hanya satu yang paling bawah ini sepertinya memang tidak terpakai --}}
                         {{-- <a href="{{ route('applicant.applications.index') }}" class="hover:text-red-600"> Lamaran Saya </a> --}}
                     </div>

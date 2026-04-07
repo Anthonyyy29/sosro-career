@@ -65,15 +65,16 @@
                             </div>
                         </td>
                         
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="text-gray-700 font-medium">{{ \Carbon\Carbon::parse($item->tanggal_mulai)->locale('id')->translatedFormat('d M Y') }}</span>
-                                @if($item->created_by == '1')
-                                    <span class="text-[9px] text-green-400 font-bold uppercase">HO</span>
-                                @else
-                                    <span class="text-[9px] text-green-400 font-bold uppercase">{{ ($item->created_by) }}</span>
-                                @endif
-                            </div>
+                        {{-- Siapa Pembuat lowongan --}}
+                        <td class="px-6 py-4"> 
+                            <div class="flex flex-col"> 
+                                <span class="text-gray-700 font-medium">{{ \Carbon\Carbon::parse($item->tanggal_mulai)->locale('id')->translatedFormat('d M Y') }}</span> 
+                                @if($item->created_by == '1') 
+                                    <span class="text-[9px] text-green-400 font-bold uppercase">HO</span> 
+                                @else 
+                                    <span class="text-[9px] text-green-400 font-bold uppercase">{{ $item->admin->name }}</span> 
+                                @endif 
+                            </div> 
                         </td>
                         
                         <td class="px-6 py-4">
@@ -88,26 +89,40 @@
                         </td>
 
                         <td class="px-6 py-4">
-                            <form method="POST" action="{{ route('admin.lowongan.toggle-status', $item->id) }}" onclick="event.stopPropagation()">
-                                @csrf @method('PATCH')
-                                <button type="submit" title="Ubah Status" 
-                                    class="group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ease-in-out
-                                    {{ $item->status_lowongan === 'aktif' 
-                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:shadow-sm' 
-                                        : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100' }}">
-                                    
+                            @if(Auth::user()->role === 'superadmin')
+                                {{-- Jika Superadmin: Tampilkan Form Toggle (Bisa Klik) --}}
+                                <form method="POST" action="{{ route('admin.lowongan.toggle-status', $item->id) }}" onclick="event.stopPropagation()">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" title="Ubah Status" 
+                                        class="group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ease-in-out
+                                        {{ $item->status_lowongan === 'aktif' 
+                                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:shadow-sm' 
+                                            : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100' }}">
+                                        
+                                        <span class="relative flex h-2 w-2">
+                                            @if($item->status_lowongan === 'aktif')
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            @endif
+                                            <span class="relative inline-flex rounded-full h-2 w-2 {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                        </span>
+                                        
+                                        <span class="text-[10px] tracking-wider font-bold uppercase">
+                                            {{ $item->status_lowongan }}
+                                        </span>
+                                    </button>
+                                </form>
+                            @else
+                                {{-- Jika Admin Biasa: Tampilkan Badge Saja (Tidak Bisa Klik) --}}
+                                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border opacity-70 cursor-not-allowed
+                                    {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
                                     <span class="relative flex h-2 w-2">
-                                        @if($item->status_lowongan === 'aktif')
-                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        @endif
                                         <span class="relative inline-flex rounded-full h-2 w-2 {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
                                     </span>
-                                    
                                     <span class="text-[10px] tracking-wider font-bold uppercase">
                                         {{ $item->status_lowongan }}
                                     </span>
-                                </button>
-                            </form>
+                                </div>
+                            @endif
                         </td>
 
                         <td class="px-6 py-4 text-center">
@@ -117,8 +132,11 @@
                                     editId = {{ $item->id }};
                                     editAction = '{{ route('admin.lowongan.update', $item->id) }}';
                                     form = {{ $item->toJson() }};
+                                    window.dispatchEvent(new CustomEvent('fill-editors', { detail: form }));
                                 " title="Edit" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition shadow-sm border border-transparent hover:border-blue-100">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
                                 </button>
 
                                 <form action="{{ route('admin.lowongan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus lowongan ini?')">
@@ -346,8 +364,14 @@
 
                     <input type="date" class="input" name="tanggal_akhir" x-model="form.tanggal_akhir">
                     
-                    <textarea class="input" rows="5" name="jobdesk" x-model="form.jobdesk"></textarea>
-                    <textarea class="input" rows="5" name="kualifikasi" x-model="form.kualifikasi"></textarea>
+                    <div class="mb-4" wire:ignore> <label class="block mb-2 font-semibold">Jobdesk</label>
+                        <textarea id="editor-jobdesk-edit" name="jobdesk" x-on:update-jobdesk.window="form.jobdesk = $event.detail"></textarea>
+                    </div>
+
+                    <div class="mb-4" wire:ignore>
+                        <label class="block mb-2 font-semibold">Kualifikasi</label>
+                        <textarea id="editor-kualifikasi-edit" name="kualifikasi" x-on:update-kualifikasi.window="form.kualifikasi = $event.detail"></textarea>
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-3">
@@ -375,4 +399,95 @@
     }
 </style>
 
+    {{-- textarea --}}
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+    <script>
+        let editors = {};
+
+        function initEditor(selector, fieldName) {
+            ClassicEditor
+                .create(document.querySelector(selector), {
+                    toolbar: ['bold', 'italic', 'underline', 'bulletedList', 'numberedList', 'undo', 'redo']
+                })
+                .then(editor => {
+                    editors[fieldName] = editor;
+                    
+                    // Jika menggunakan Alpine.js (Modal Edit), sinkronkan data saat editor berubah
+                    editor.model.document.on('change:data', () => {
+                        const data = editor.getData();
+                        // Update manual jika Anda menggunakan x-model Alpine
+                        if (window.Alpine) {
+                            // Mencari scope Alpine terdekat untuk mengupdate variabel form
+                            const modal = document.querySelector('[x-data]');
+                            if (modal && modal.__x) {
+                                modal.__x.$data.form[fieldName] = data;
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        // Inisialisasi untuk Modal Create
+        document.addEventListener('DOMContentLoaded', () => {
+            initEditor('textarea[name="jobdesk"]', 'jobdesk');
+            initEditor('textarea[name="kualifikasi"]', 'kualifikasi');
+        });
+
+        // Khusus untuk Modal Edit: Karena Alpine.js mengisi data secara dinamis, 
+        // kita perlu memantau saat modal edit terbuka untuk mengisi konten editor.
+        document.addEventListener('alpine:init', () => {
+            Alpine.effect(() => {
+                const editOpen = Alpine.store('editOpen'); // Sesuaikan jika Anda pakai store atau variable lokal
+                // Jika Anda menggunakan variable 'editOpen' di x-data, 
+                // pastikan konten editor di-update saat data form masuk.
+            });
+        });
+    </script>
+
+    {{-- edit --}}
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+    <script>
+        let editEditorJob, editEditorKual;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const config = {
+                // Kita tambahkan Underline di sini
+                toolbar: ['bold', 'italic', 'underline', 'bulletedList', 'numberedList', 'undo', 'redo']
+            };
+
+            // Init Editor Jobdesk
+            ClassicEditor.create(document.querySelector('#editor-jobdesk-edit'), config)
+                .then(editor => {
+                    editEditorJob = editor;
+                    editor.model.document.on('change:data', () => {
+                        // Kirim data ke Alpine form.jobdesk
+                        window.dispatchEvent(new CustomEvent('update-jobdesk', { detail: editor.getData() }));
+                    });
+                });
+
+            // Init Editor Kualifikasi
+            ClassicEditor.create(document.querySelector('#editor-kualifikasi-edit'), config)
+                .then(editor => {
+                    editEditorKual = editor;
+                    editor.model.document.on('change:data', () => {
+                        // Kirim data ke Alpine form.kualifikasi
+                        window.dispatchEvent(new CustomEvent('update-kualifikasi', { detail: editor.getData() }));
+                    });
+                });
+        });
+
+        // Fungsi inilah yang menangkap data dari button Edit Anda
+        window.addEventListener('fill-editors', (e) => {
+            // Beri sedikit delay (100ms) agar modal terbuka dulu baru data diisi
+            setTimeout(() => {
+                if(editEditorJob) editEditorJob.setData(e.detail.jobdesk || '');
+                if(editEditorKual) editEditorKual.setData(e.detail.kualifikasi || '');
+            }, 100);
+        });
+    </script>
 @endsection

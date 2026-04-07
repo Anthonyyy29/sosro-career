@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class LoginRequest extends FormRequest
 {
@@ -29,6 +30,16 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'cf-turnstile-response' => ['required', new Turnstile()],
+        ];
+    }
+
+    // Tambahan untuk turnstile
+    public function messages(): array
+    {
+        return [
+            'cf-turnstile-response.required' => 'Silakan centang verifikasi keamanan.',
+            'cf-turnstile-response.turnstile' => 'Verifikasi keamanan gagal atau sesi habis. Silakan coba lagi.',
         ];
     }
 

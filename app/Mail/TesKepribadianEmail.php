@@ -3,38 +3,36 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class RejectedEmail extends Mailable
+class TesKepribadianEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $application;
-    public $reason;
+    public $data; // Kita simpan data input di sini
 
-    public function __construct($application, $reason = null)
+    public function __construct($application, $data)
     {
         $this->application = $application;
-        $this->reason = $reason;
+        $this->data = $data;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Konfirmasi Seleksi PT Sinar Sosro Gunung Slamat',
+            subject: 'Undangan Tes Kepribadian - PT Sinar Sosro Gunung Slamat',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.rejected',
-            with: [
-                'reason' => $this->reason,
-            ],
+            view: 'emails.tes_kepribadian',
         );
     }
 }

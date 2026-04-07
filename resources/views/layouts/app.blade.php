@@ -3,11 +3,24 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{-- SEO (start) --}}
     <title>{{ config('app.name', 'Sosro Career') }}</title>
+    <meta name="description" content="Temukan lowongan kerja terbaru di PT Sinar Sosro Gunung Slamat.">
+    <meta name="keywords" content="sosro, teh botol sosro, sosro career, karir sosro, lowongan kerja sosro, rekrutmen pt sinar sosro gunung slamat, 
+                loker pabrik teh, gunung slamat career, sosro lowongan, sosro rekrutmen, karir pabrik teh, loker teh sosro, sosro job, sosro karir, 
+                gunung slamat lowongan, pabrik teh sosro rekrutmen, sosro hiring, sosro recruitment, gunung slamat career, fmcg karir, fmcg sosro, 
+                lowongan fmcg indonesia, sosro fmcg job, karir fmcg teh, loker fmcg pabrik, sosro fmcg recruitment">
+    <meta property="og:title" content="Karir PT Sinar Sosro Gunung Slamat">
+    <meta property="og:description" content="Bergabunglah bersama PT Sinar Sosro Gunung Slamat. Cek lowongan aktif di karir.sosro.com">
+    <meta property="og:url" content="https://karir.sosro.com">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ asset('assets/images/logo sosro.webp') }}">
+    {{-- SEO (end) --}}
+    <link rel="icon" href="{{ asset('assets/images/logo sosro.webp') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo sosro.webp') }}">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>/* SOSRO Brand Loader */
         .loader {
         display: flex;
@@ -34,15 +47,35 @@
         }
 
         @keyframes sosro-loading {
-        20% {
-            background-color: #7a0c22; /* darker red highlight */
-            transform: scaleY(1.5);
+            20% {
+                background-color: #7a0c22; /* darker red highlight */
+                transform: scaleY(1.5);
+            }
+            40% {
+                transform: scaleY(1);
+            }
         }
-        40% {
-            transform: scaleY(1);
+
+        .job-card ul {
+            list-style-type: disc !important;
+            margin-left: 1.25rem !important;
         }
+        .job-card ol {
+            list-style-type: decimal !important;
+            margin-left: 1.25rem !important;
+        }
+        .job-card strong {
+            font-weight: 700 !important;
+        }
+        .job-card em {
+            font-style: italic !important;
+        }
+        .job-card u {
+            text-decoration: underline !important;
         }
     </style>
+
+    <x-turnstile.scripts />
 </head>
 <body class="font-sans antialiased bg-gray-50">
 
@@ -60,11 +93,12 @@
 
 
     {{-- NAVBAR --}}
-    <nav class="fixed top-0 left-0 w-full bg-[#B51233] text-white shadow-lg z-50">
+    {{-- <nav class="fixed top-0 left-0 w-full bg-[#B51233] text-white shadow-lg z-50"> --}}
+    <nav id="main-navbar" class="fixed top-0 left-0 w-full text-white z-50 transition-all duration-500 ease-in-out">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
             <div class="flex items-center space-x-3">
                 <img src="{{ asset('assets/images/SGS Logo-Putih.webp') }}" 
-                    alt="Logo Sosro" 
+                    alt="Logo Sinar Sosro Gunung Slamat" 
                     class="h-11 w-auto">
             </div>
 
@@ -72,34 +106,34 @@
             <div class="hidden md:flex space-x-8">
 
                 {{-- BERANDA --}}
-                {{-- <a href="{{ route('beranda') }}" class="relative group font-medium {{ request()->routeIs('beranda') ? 'text-white' : 'text-gray-100' }}">
+                <a href="{{ route('beranda') }}" class="relative group font-medium {{ request()->routeIs('beranda') ? 'text-white' : 'text-gray-100' }}">
                     
                     Beranda
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('beranda') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a> --}}
+                </a>
 
                 {{-- TENTANG --}}
-                {{-- <a href="{{ route('tentang') }}" class="relative group font-medium {{ request()->routeIs('tentang') ? 'text-white' : 'text-gray-100' }}">
+                <a href="{{ route('tentang') }}" class="relative group font-medium {{ request()->routeIs('tentang') ? 'text-white' : 'text-gray-100' }}">
                     
                     Tentang
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('tentang') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a> --}}
+                </a>
 
                 {{-- PROGRAM --}}
-                {{-- <a href="{{ route('program') }}" class="relative group font-medium {{ request()->routeIs('program') ? 'text-white' : 'text-gray-100' }}">
+                <a href="{{ route('program') }}" class="relative group font-medium {{ request()->routeIs('program') ? 'text-white' : 'text-gray-100' }}">
                     
                     Program
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('program') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a> --}}
+                </a>
 
                 {{-- LOWONGAN --}}
                 <a href="{{ route('lowongan') }}" class="relative group font-medium {{ request()->routeIs('lowongan') ? 'text-white' : 'text-gray-100' }}">
@@ -112,24 +146,24 @@
                 </a>
 
                 {{-- KONTAK --}}
-                {{-- <a href="{{ route('kontak') }}" class="relative group font-medium {{ request()->routeIs('kontak') ? 'text-white' : 'text-gray-100' }}">
+                <a href="{{ route('kontak') }}" class="relative group font-medium {{ request()->routeIs('kontak') ? 'text-white' : 'text-gray-100' }}">
                     
                     Kontak
 
                     <span class="absolute left-0 -bottom-1 h-[1px] bg-white transition-all duration-300
                         {{ request()->routeIs('kontak') ? 'w-full' : 'w-0 group-hover:w-full' }}">
                     </span>
-                </a> --}}
+                </a>
 
             </div>
 
             {{-- AKSI DAN TRANSLATE --}}
             <div class="hidden md:flex items-center space-x-4">
                 {{-- fitur ganti bahasa --}}
-                {{-- <select class="bg-red-700 border border-red-400 rounded-lg px-2 py-1 text-sm text-white focus:ring-2 focus:ring-white outline-none">
+                <select class="bg-red-700 border border-red-400 rounded-lg px-2 py-1 text-sm text-white focus:ring-2 focus:ring-white outline-none">
                     <option>ID</option>
                     <option>EN</option>
-                </select> --}}
+                </select>
 
                 @auth
                     {{-- Jika sudah login: Tampilkan Button Dashboard & Avatar Mini --}}
@@ -188,11 +222,11 @@
 
         {{-- MOBILE MENU --}}
         <div id="mobile-menu" class="hidden md:hidden bg-[#B51233]">
-            {{-- <a href="{{ route('beranda') }}" class="block px-4 py-2 text-white hover:bg-red-800">Beranda</a> --}}
-            {{-- <a href="{{ route('tentang') }}" class="block px-4 py-2 text-white hover:bg-red-800">Tentang</a> --}}
-            {{-- <a href="{{ route('program') }}" class="block px-4 py-2 text-white hover:bg-red-800">Program</a> --}}
+            <a href="{{ route('beranda') }}" class="block px-4 py-2 text-white hover:bg-red-800">Beranda</a>
+            <a href="{{ route('tentang') }}" class="block px-4 py-2 text-white hover:bg-red-800">Tentang</a>
+            <a href="{{ route('program') }}" class="block px-4 py-2 text-white hover:bg-red-800">Program</a>
             <a href="{{ route('lowongan') }}" class="block px-4 py-2 text-white hover:bg-red-800">Lowongan</a>
-            {{-- <a href="{{ route('kontak') }}" class="block px-4 py-2 text-white hover:bg-red-800">Kontak</a> --}}
+            <a href="{{ route('kontak') }}" class="block px-4 py-2 text-white hover:bg-red-800">Kontak</a>
 
             {{-- Bahasa --}}
             <div class="px-4 py-2">
@@ -254,7 +288,7 @@
     </script>
 
     {{-- CONTENT --}}
-    <main class="pt-16 min-h-screen">
+    <main class="min-h-screen">
         {{ $slot }}
     </main>
 
@@ -361,5 +395,29 @@
     });
     </script>
 
+    {{-- Turnstile Js --}}
+    <script>
+        document.addEventListener('turnstile-error', function() {
+            // Jika ada error, otomatis reset widget
+            turnstile.reset();
+        });
+    </script>
+    <script>
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('main-navbar');
+            if (window.scrollY > 50) {
+                // State saat di-scroll (Solid)
+                nav.classList.add('bg-[#B51233]', 'shadow-lg', 'py-0');
+                nav.classList.remove('py-2', 'bg-transparent');
+            } else {
+                // State awal (Transparent)
+                nav.classList.remove('bg-[#B51233]', 'shadow-lg', 'py-0');
+                nav.classList.add('py-2', 'bg-transparent');
+            }
+        });
+    </script>
+
+    {{-- carousel beranda --}}
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </body>
 </html>

@@ -43,12 +43,21 @@
         <div class="max-w-6xl mx-auto px-6">
 
             {{-- JUDUL --}}
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-red-700 mb-4">Lowongan Karier Terbaru</h1>
-                <p class="text-gray-700 text-lg">
-                    Temukan posisi yang sesuai dengan keahlian dan minat kamu.
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-white mb-4">Lowongan Karier Terbaru</h1>
+                <p class="text-white text-lg">
+                    Temukan posisi yang sesuai dengan keahlian dan minat kamu di Sosro Career.
                 </p>
             </div>
+
+            {{-- Badge Jumlah Lowongan --}}
+            <div class="inline-flex items-center px-4 py-1.5 rounded-full bg-red-50 border-red-100 mb-4">
+                <p class="text-red-700 font-semibold text-sm">Posisi terbuka: 
+                    <span id="jobCount" class="bg-red-600 text-white px-2 py-0.5 rounded-full mx-1">
+                    {{ $lowongan->count() }}
+                    </span>
+                </p>
+            </div>            
 
             {{-- SEARCH + FILTER --}}
             <div class="flex flex-col md:flex-row gap-4 justify-center mb-10">
@@ -127,7 +136,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                                         <path fill-rule="evenodd" d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
                                     </svg>
-                                    <span>{{ $item->penempatan_cabang }}</span>
+                                    <span>{{ $item->lokasi_kerja }}</span>
                                 </div>
 
                                 <div class="flex items-center gap-2">
@@ -146,45 +155,18 @@
 
                             {{-- DETAILS --}}
                             <div class="space-y-3">
-
                                 <details>
-                                    <summary class="cursor-pointer font-semibold text-black">
-                                        Kualifikasi
-                                    </summary>
-
-                                    @if(!empty($item->kualifikasi))
-                                        <ul class="list-disc ml-5 mt-2 text-gray-600 space-y-1">
-                                            @foreach (explode("\n", $item->kualifikasi) as $row)
-                                                @if(trim($row) !== '')
-                                                    <li>{{ $row }}</li>
-                                                @endif
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <p class="mt-2 text-gray-400 italic">
-                                            Kualifikasi akan diinformasikan lebih lanjut.
-                                        </p>
-                                    @endif
+                                    <summary class="cursor-pointer font-semibold text-black">Kualifikasi</summary>
+                                    <div class="mt-2 text-gray-600 prose prose-sm max-w-none">
+                                        {!! $item->kualifikasi ?: '<p class="italic text-gray-400">Kualifikasi akan diinformasikan lebih lanjut.</p>' !!}
+                                    </div>
                                 </details>
 
                                 <details>
-                                    <summary class="cursor-pointer font-semibold text-black">
-                                        Jobdesk
-                                    </summary>
-
-                                    @if(!empty($item->jobdesk))
-                                        <ul class="list-disc ml-5 mt-2 text-gray-600 space-y-1">
-                                            @foreach (explode("\n", $item->jobdesk) as $row)
-                                                @if(trim($row) !== '')
-                                                    <li>{{ $row }}</li>
-                                                @endif
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <p class="mt-2 text-gray-400 italic">
-                                            Deskripsi pekerjaan akan dijelaskan saat proses seleksi.
-                                        </p>
-                                    @endif
+                                    <summary class="cursor-pointer font-semibold text-black">Jobdesk</summary>
+                                    <div class="mt-2 text-gray-600 prose prose-sm max-w-none">
+                                        {!! $item->jobdesk ?: '<p class="italic text-gray-400">Deskripsi pekerjaan akan dijelaskan saat proses seleksi.</p>' !!}
+                                    </div>
                                 </details>
                             </div>
 
@@ -214,6 +196,39 @@
                             @endif
                         </div>
                     </div>
+
+                    {{-- Untuk SEO --}}
+                    {{-- <script type="application/ld+json">
+                        {
+                        "@context": "https://schema.org/",
+                        "@type": "JobPosting",
+                        "title": "{{ $item->judul_lowongan }}",
+                        "description": "{!! strip_tags($item->jobdesk . $item->kualifikasi) !!}",
+                        "identifier": {
+                            "@type": "PropertyValue",
+                            "name": "Sinar Sosro",
+                            "value": "{{ $item->id }}"
+                        },
+                        "datePosted": "{{ $item->created_at->format('Y-m-d') }}",
+                        "validThrough": "{{ $item->tanggal_akhir }}",
+                        "hiringOrganization": {
+                            "@type": "Organization",
+                            "name": "PT Sinar Sosro Gunung Slamat",
+                            "sameAs": "https://karir.sosro.com",
+                            "logo": "https://karir.sosro.com/assets/logo-sosro.png"
+                        },
+                        "jobLocation": {
+                            "@type": "Place",
+                            "address": {
+                            "@type": "PostalAddress",
+                            "addressLocality": "{{ $item->penempatan_cabang }}",
+                            "addressRegion": "Jawa Tengah", // spesifikin provinsi
+                            "addressCountry": "ID"
+                            }
+                        },
+                        "employmentType": "{{ $item->kategori }}"
+                        }
+                    </script> --}}
                 @endforeach
 
             </div>
@@ -302,6 +317,8 @@
 
                 return matchKeyword && matchLocation && matchBidang && matchCategory;
             });
+
+            document.getElementById("jobCount").textContent = filteredCards.length;
 
             currentPage = 1;
             render();

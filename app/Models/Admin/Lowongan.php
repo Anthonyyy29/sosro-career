@@ -4,6 +4,7 @@ namespace App\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Application;
+use App\Models\Admin;
 
 class Lowongan extends Model
 {
@@ -28,5 +29,10 @@ class Lowongan extends Model
     public function applications()
     {
         return $this->hasMany(Application::class, 'lowongan_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class, 'created_by');
     }
 }

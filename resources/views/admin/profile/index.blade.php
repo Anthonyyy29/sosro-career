@@ -9,14 +9,14 @@
     </div>
 
     {{-- MAIN PROFILE CARD --}}
-    <div class="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden p-2">
+    <div class="bg-white shadow-sm border border-gracy-100 rounded-2xl overflow-hidden p-2">
         <div class="flex flex-col lg:flex-row gap-10 p-6 lg:p-10">
             
             {{-- SISI KIRI: AVATAR --}}
             <div class="flex flex-col items-center lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-50 pb-8 lg:pb-0 lg:pr-10">
                 <div class="relative group mb-6">
                     <img id="avatar-preview" 
-                         src="{{ auth()->user()->photo ? asset('storage/photos/' . auth()->user()->photo) . '?' . time() : asset('assets/images/images.png') }}"
+                         src="{{ auth()->user()->photo ? asset('storage/photos/' . auth()->user()->photo) . '?' . time() : asset('assets/images/default profile.webp') }}"
                          class="w-40 h-40 rounded-xl border-4 border-gray-50 shadow-md object-cover bg-white transition-transform duration-300 group-hover:scale-[1.02]" 
                          alt="Admin Avatar">
                     

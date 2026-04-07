@@ -16,6 +16,42 @@
     {{-- Alpine.js untuk lonceng notifikasi --}}
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <style>/* SOSRO Brand Loader */
+        .loader {
+        display: flex;
+        align-items: center;
+        }
+
+        .bar {
+        display: inline-block;
+        width: 4px;
+        height: 22px;
+        background-color: #B51233; /* MERAH BRAND */
+        border-radius: 10px;
+        animation: sosro-loading 1s linear infinite;
+        }
+
+        .bar:nth-child(2) {
+        height: 32px;
+        margin: 0 6px;
+        animation-delay: .25s;
+        }
+
+        .bar:nth-child(3) {
+        animation-delay: .5s;
+        }
+
+        @keyframes sosro-loading {
+            20% {
+                background-color: #7a0c22; /* darker red highlight */
+                transform: scaleY(1.5);
+            }
+            40% {
+                transform: scaleY(1);
+            }
+        }
+    </style>
+
     <style>
         /* Sidebar - Menggunakan Warna Background Putih Bersih */
         .sidebar {
@@ -228,11 +264,50 @@
         border-color: #3b82f6 !important;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
     }
+
+    /* Perbaikan visual Bullet & Numbering di dalam CKEditor */
+    .ck-content ul {
+        list-style-type: disc !important;
+        padding-left: 1.5rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .ck-content ol {
+        list-style-type: decimal !important;
+        padding-left: 1.5rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .ck-content blockquote {
+        border-left: 3px solid #ccc;
+        padding-left: 1rem;
+        font-style: italic;
+    }
+
+    /* Pastikan area ketik memiliki kontras yang baik */
+    .ck-editor__editable {
+        background-color: white !important;
+        color: black !important;
+        min-height: 200px;
+    }
     </style>
 
 </head>
 
 <body class="bg-gray-100">
+    {{-- Loader --}}
+    <!-- PAGE LOADER -->
+    <div id="page-loader"
+        class="fixed inset-0 z-[9999] flex items-center justify-center 
+                bg-white/70 backdrop-blur-md opacity-100 transition-opacity duration-[700ms]">
+
+        <div class="loader">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+    </div>
+    {{-- Loader end --}}
 
     <div id="menuButton" class="no-print">☰</div>
 
@@ -328,7 +403,7 @@
                     <div class="relative">
                         <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 focus:outline-none group">
                             <span class="text-gray-700 font-bold text-sm group-hover:text-red-600 transition-colors">{{ auth()->user()->name ?? 'Admin User' }}</span>
-                            <img src="{{ auth()->user()->photo ? asset('storage/photos/' . auth()->user()->photo) . '?' . time() : asset('assets/images/images.png') }}" class="w-9 h-9 rounded-full border-2 border-transparent group-hover:border-red-500 transition-all shadow-sm" alt="Profile">
+                            <img src="{{ auth()->user()->photo ? asset('storage/photos/' . auth()->user()->photo) . '?' . time() : asset('assets/images/default profile.webp') }}" class="w-9 h-9 rounded-full border-2 border-transparent group-hover:border-red-500 transition-all shadow-sm" alt="Profile">
                             <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
 
@@ -344,7 +419,7 @@
                             class="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
                             
                             <div class="px-4 py-2 border-bottom border-gray-50 mb-1">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Menu Akun</p>
+                                <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Menu Akun</p>
                             </div>
 
                             <a href="{{ route('admin.profile') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors">
@@ -549,5 +624,54 @@
     });
 </script>
 
+{{-- Script loader --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loader = document.getElementById("page-loader");
+
+            // 1. FADE OUT: Saat halaman Selesai dimuat (Data sudah siap)
+            window.addEventListener("load", () => {
+                setTimeout(() => {
+                    loader.style.opacity = "0";
+                    setTimeout(() => {
+                        loader.style.display = "none";
+                    }, 700); // Sesuai durasi transition-opacity Anda
+                }, 100); 
+            });
+
+            // 2. FADE IN: Saat Admin klik menu (Request data dimulai)
+            document.querySelectorAll("a[href]").forEach(link => {
+                link.addEventListener("click", e => {
+                    const url = link.getAttribute("href");
+
+                    // Validasi agar tidak muncul di link yang salah
+                    if (
+                        !url || 
+                        url.startsWith("#") || 
+                        url.startsWith("javascript") ||
+                        link.target === "_blank" || 
+                        link.hasAttribute('download') ||
+                        link.closest("form")
+                    ) return;
+
+                    loader.style.display = "flex";
+                    setTimeout(() => {
+                        loader.style.opacity = "1";
+                    }, 10);
+                });
+            });
+
+            // 3. HANDLE BACK BUTTON
+            // Mencegah loader tetap muncul saat user tekan tombol 'Back' di browser
+            window.addEventListener("pageshow", (event) => {
+                if (event.persisted) {
+                    loader.style.opacity = "0";
+                    setTimeout(() => {
+                        loader.style.display = "none";
+                    }, 700);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

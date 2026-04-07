@@ -14,29 +14,37 @@ class UserController extends Controller
     public function index()
     {
         /** @var \App\Models\Admin $admin */
-    $admin = Auth::user();
+        $admin = Auth::user();
 
-    if (!$admin || $admin->role !== 'superadmin') {
-        abort(403, 'Maaf, halaman ini hanya untuk Super Admin.');
-    }
-        // Ambil data dari tabel admins
+        if (!$admin || $admin->role !== 'superadmin') {
+            abort(403, 'Maaf, halaman ini hanya untuk Super Admin.');
+        }
+
+        // 1. Ambil data dari tabel admins (Tetap sama)
         $admins = Admin::select('id', 'name', 'email', 'role', 'created_at')
             ->get()
             ->map(function ($item) {
-                $item->source_table = 'admins'; // Penanda asal tabel
+                $item->source_table = 'admins';
+                $item->has_profile = false; // Admin tidak punya profil pelamar
                 return $item;
             });
 
-        // Ambil data dari tabel users (Pelamar)
-        $users = User::select('id', 'name', 'email', 'created_at')
+        // 2. Ambil data dari tabel users (Pelamar) + Eager Load Profile
+        $users = User::with(['applicant.profile']) // TAMBAHAN: Eager loading relasi
+            ->select('id', 'name', 'email', 'created_at')
             ->get()
             ->map(function ($item) {
-                $item->role = 'pelamar'; // Kita beri label manual
+                $item->role = 'pelamar';
                 $item->source_table = 'users';
+                
+                // Cek apakah sudah isi biodata
+                $item->has_profile = $item->applicant && $item->applicant->profile;
+                // Simpan applicant_id untuk link download PDF nanti
+                $item->applicant_id = $item->applicant ? $item->applicant->id : null;
+                
                 return $item;
             });
 
-        // Gabungkan keduanya
         $allUsers = $admins->concat($users)->sortByDesc('created_at');
 
         return view('admin.users.index', compact('allUsers'));

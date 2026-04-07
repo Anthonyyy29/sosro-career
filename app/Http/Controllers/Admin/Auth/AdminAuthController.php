@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class AdminAuthController extends Controller
 {
@@ -17,11 +18,21 @@ class AdminAuthController extends Controller
     // Proses login
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        // 1. Validasi SEMUA data dulu (termasuk Turnstile)
+        $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-        ]);
+            'cf-turnstile-response' => ['required', new Turnstile()],
+        ], [
+            'cf-turnstile-response.required' => 'Verifikasi keamanan wajib dicentang.',
+            'cf-turnstile-response.turnstile' => 'Sesi verifikasi kadaluwarsa, silakan ulangi.',
+    ]);
 
+        // 2. AMBIL HANYA email dan password saja untuk login
+        // Jangan kirim cf-turnstile-response ke fungsi attempt()
+        $credentials = $request->only('email', 'password');
+
+        // 3. Proses login dengan credentials yang sudah bersih
         if (Auth::guard('admin')->attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
 

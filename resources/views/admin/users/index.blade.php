@@ -27,6 +27,7 @@
                         <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Email</th>
                         <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Role</th>
                         <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Status Akun</th>
+                        <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Biodata</th>
                         <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Aksi</th>
                     </tr>
                 </thead>
@@ -54,6 +55,29 @@
                         <td class="py-4">
                             <span class="text-[11px] text-gray-400">Terdaftar: {{ $user->created_at->format('d M Y') }}</span>
                         </td>
+                        <td class="px-6 py-4 text-center">
+                            @if($user->role == 'pelamar')
+                                @if($user->has_profile)
+                                    <div class="flex items-center gap-2 justify-center">
+                                        {{-- <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Lengkap</span> --}}
+                                        {{-- <span class="text-green-400 text-[10px] italic font-medium tracking-tight">Lengkap</span> --}}
+
+                                        {{-- Tombol Lihat PDF --}}
+                                        <a href="{{ route('admin.users.downloadProfile', $user->applicant_id) }}" 
+                                        target="_blank" 
+                                        class="text-blue-500 hover:text-blue-700 hover:underline transition-colors text-[11px] italic font-medium tracking-tight" title="Lihat Biodata"> Lihat Biodata
+                                            {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                            </svg> --}}
+                                        </a>
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 text-[10px] italic italic font-medium tracking-tight">Belum Isi Biodata</span>
+                                @endif
+                            @else
+                                <span class="text-gray-300">-</span>
+                            @endif
+                        </td>
                         <td class="py-4 text-center">
                         {{-- Jika ID user di baris ini SAMA dengan ID admin yang login, sembunyikan tombol hapusnya --}}
                             @if($user->id == auth()->id() && $user->source_table == 'admins')
@@ -64,7 +88,7 @@
                                     onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
+                                    <button type="submit" class="text-red-500 hover:text-red-700 transition-colors" title="Hapus">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>

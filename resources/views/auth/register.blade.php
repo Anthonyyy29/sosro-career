@@ -66,6 +66,12 @@
                         <x-input-error :messages="$errors->get('password_confirmation')" class="text-xs" />
                     </div>
 
+                    <div class="mt-4 flex flex-col items-center justify-center">
+                        <x-turnstile />
+
+                        <x-input-error :messages="$errors->get('cf-turnstile-response')" class="text-xs" />
+                    </div>
+
                     <div class="flex flex-col space-y-4 pt-4">
                         <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold shadow-xl shadow-red-200 active:scale-[0.98] transition-all duration-150 flex justify-center items-center tracking-wide">
                             <span>Daftarkan Akun</span>

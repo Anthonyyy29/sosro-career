@@ -42,7 +42,13 @@
                     </a>
                 </div>
 
-                <div>
+                <div class="mt-4 flex flex-col items-center justify-center">
+                    <x-turnstile />
+
+                    <x-input-error :messages="$errors->get('cf-turnstile-response')" class="text-xs" />
+                </div>
+
+                <div class="flex flex-col space-y-4 pt-4">
                     <button type="submit" class="w-full bg-[#ffbf34] hover:bg-[#eab02d] py-4 rounded-2xl font-bold transition-all shadow-xl shadow-gray-200 active:scale-95 flex items-center justify-center space-x-2">
                         <span>Login Admin</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

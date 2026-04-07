@@ -14,7 +14,16 @@
             this.statusModalOpen = true;
         }
     }">
-
+    @if ($errors->any())
+    <div class="fixed top-5 right-5 z-[100] bg-red-600 text-white p-4 rounded-lg shadow-xl">
+        <strong>Terjadi Kesalahan:</strong>
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -184,7 +193,7 @@
         </div>
 
         {{-- Fitur Update Masal --}}
-        <form id="bulkForm" method="POST" action="{{ route('admin.applicants.bulkUpdate') }}">
+        <form id="bulkForm" method="POST" action="{{ route('admin.applicants.bulkPrepare') }}">
             @csrf
             <div id="hiddenIdsContainer"></div>
 
@@ -194,8 +203,7 @@
                     <option value="administration">Lolos Administrasi</option>
                     <option value="psikotes">Psikotes</option>
                     <option value="interview">Interview</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="rejected" class="bg-red-200">Rejected</option>
                     </select>
 
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
@@ -370,15 +378,18 @@
                         {{-- Form input Psikotes --}}
                         <div x-show="nextStatus === 'psikotes'" x-transition class="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
                             <p class="text-[11px] font-bold text-blue-600 uppercase">Informasi Psikotes</p>
-                            <div class="flex gap-4">
-                                <div class="w-1/2">
-                                    <label class="text-xs text-gray-500">Tanggal Pelaksanaan</label>
-                                    <input type="date" name="psikotes_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                                </div>
-                                <div class="w-1/2">
-                                    <label class="text-xs text-gray-500">Tanggal Selesai</label>
-                                    <input type="date" name="psikotes_end_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                                </div>
+
+                            <div>
+                                <label class="text-xs text-gray-500">Jenis Tes</label>
+                                <select name="psikotes_type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
+                                    <option value="psikotes">Psikotes (Standar)</option>
+                                    <option value="tes_kepribadian">Tes Kepribadian (Level Atas)</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="text-xs text-gray-500">Tanggal Pelaksanaan</label>
+                                <input type="date" name="psikotes_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
                             </div>
                             <div>
                                 <label class="text-xs text-gray-500">Link Psikotes</label>
@@ -392,15 +403,14 @@
                         </div>
 
                         {{-- Form input Interview --}}
-                        <div x-show="nextStatus === 'interview'" x-transition class="p-4 bg-cyan-50 rounded-xl border border-cyan-100 space-y-3">
+                        <div x-show="nextStatus === 'interview'" x-transition class="p-4 bg-cyan-50 rounded-xl border border-cyan-100 space-y-3" x-data="{ invType: 'initial' }">
                             <p class="text-[11px] font-bold text-cyan-600 uppercase">Informasi Interview</p>
-                            
-                            {{-- Tambahkan Pilihan Jenis Interview --}}
                             <div>
                                 <label class="text-xs text-gray-500">Jenis Interview</label>
-                                <select name="interview_type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                                    <option value="initial">Interview Awal</option>
-                                    <option value="lanjutan">Interview Lanjutan</option>
+                                <select name="interview_type" x-model="invType" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
+                                    <option value="initial">Interview Awal (Online)</option>
+                                    <option value="lanjutan">Interview Lanjutan (Online)</option>
+                                    <option value="offline">Interview Offline (Tatap Muka)</option>
                                 </select>
                             </div>
 
@@ -408,9 +418,15 @@
                                 <label class="text-xs text-gray-500">Tanggal & Waktu Interview</label>
                                 <input type="datetime-local" name="interview_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
                             </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Link Interview</label>
+
+                            <div x-show="invType !== 'offline'">
+                                <label class="text-xs text-gray-500">Link Interview (Zoom/Gmeet)</label>
                                 <input type="url" name="interview_link" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="https://...">
+                            </div>
+
+                            <div x-show="invType === 'offline'">
+                                <label class="text-xs text-gray-500">Lokasi Interview (Alamat Lengkap)</label>
+                                <textarea name="interview_location" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Gedung Graha Rekso..."></textarea>
                             </div>
                         </div>
 
@@ -483,14 +499,24 @@
                         </div>
 
                         {{-- Form input Alasan Penolakan --}}
-                        <div x-show="nextStatus === 'rejected'" x-transition class="p-4 bg-red-50 rounded-xl border border-red-100 space-y-2">
+                        <div x-show="nextStatus === 'rejected'" x-transition class="p-4 bg-red-50 rounded-xl border border-red-100 space-y-3">
                             <div class="flex items-center gap-2 text-red-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <p class="text-[11px] font-bold uppercase">Konfirmasi Penolakan</p>
                             </div>
-                            <label class="text-xs text-red-600 font-bold uppercase">Alasan Penolakan (Internal)</label>
-                            <textarea name="rejection_reason" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" rows="3" placeholder="Berikan alasan singkat.."></textarea>
-                            <p class="text-[10px] text-red-500 italic mt-2">* Sistem akan otomatis mengirimkan email penolakan standar kepada pelamar.</p>
+                            
+                            <div>
+                                <label class="text-xs text-red-600 font-bold uppercase">Alasan Penolakan</label>
+                                <select name="rejection_reason" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:ring-red-500">
+                                    <option value="" disabled selected>-- Pilih Alasan --</option>
+                                    <option value="Pengalaman kerja tidak sesuai">Pengalaman kerja tidak sesuai</option>
+                                    <option value="Latar belakang industri tidak sesuai">Latar belakang industri tidak sesuai</option>
+                                    <option value="Latar belakang pendidikan tidak sesuai">Latar belakang pendidikan tidak sesuai</option>
+                                    <option value="Belum sesuai dengan kriteria yang kami butuhkan saat ini">Kriteria belum sesuai</option>
+                                </select>
+                            </div>
+                            
+                            <p class="text-[10px] text-red-500 italic mt-1">* Alasan ini akan tampil di dashboard pelamar sebagai feedback standar.</p>
                         </div>
                     </div>
 

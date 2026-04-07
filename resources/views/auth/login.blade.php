@@ -65,6 +65,12 @@
                     @endif
                 </div>
 
+                <div class="mt-4 flex flex-col items-center justify-center">
+                    <x-turnstile />
+
+                    <x-input-error :messages="$errors->get('cf-turnstile-response')" class="text-xs" />
+                </div>
+                
                 <div class="pt-2">
                     <button type="submit"
                         class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-red-200 active:scale-95">
@@ -83,12 +89,12 @@
                     </p>
                 @endif
 
-                <div class="h-px w-24 bg-gray-100"></div>
+                {{-- <div class="h-px w-24 bg-gray-100"></div> --}}
 
-                <a href="{{ route('admin.login') }}"
+                {{-- <a href="{{ route('admin.login') }}"
                     class="text-[12px] text-gray-400 hover:text-blue-600 font-semibold tracking-wider uppercase">
                     Portal Admin
-                </a>
+                </a> --}}
             </div>
         </div>
     </div>

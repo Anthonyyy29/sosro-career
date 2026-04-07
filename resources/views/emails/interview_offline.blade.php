@@ -9,6 +9,7 @@
         .content { padding: 40px 35px; font-size: 15px; }
         .info-table { width: 100%; margin: 20px 0; border-collapse: collapse; }
         .info-table td { padding: 5px 0; vertical-align: top; }
+        .info-box { background-color: #f8f9fa; border-left: 5px solid #d32f2f; padding: 20px; margin: 25px 0; }
         .label { width: 130px; font-weight: bold; }
         .separator { width: 20px; text-align: center; }
         .footer { background-color: #f4f4f4; padding: 25px 35px; font-size: 12px; color: #666; border-top: 1px solid #eeeeee; }
@@ -18,7 +19,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2 style="margin:0; letter-spacing: 1px;">UNDANGAN INTERVIEW LANJUTAN</h2>
+            <h2 style="margin:0; letter-spacing: 1px;">UNDANGAN INTERVIEW OFFLINE</h2>
             <p style="margin:5px 0 0;">PT Sinar Sosro Gunung Slamat</p>
         </div>
 
@@ -38,20 +39,19 @@
                     <td class="separator">:</td>
                     <td>{{ \Carbon\Carbon::parse($data['interview_date'])->format('H:i') }} WIB</td>
                 </tr>
-            </table>
-
-            <p>Adapun proses interview dilaksanakan secara virtual melalui Zoom/Gmeet. Pada saat proses interview, baik pria/wanita mengenakan pakaian rapi, dan sopan.</p>
-
-            <table class="info-table">
                 <tr>
-                    <td class="label">Link Interview</td>
+                    <td class="label">Lokasi</td>
                     <td class="separator">:</td>
-                    <td><a href="{{ $data['interview_link'] }}" target="_blank">{{ $data['interview_link'] }}</a></td>
+                    <td>{{ $data['interview_location'] }}</td>
                 </tr>
             </table>
 
-            <p>Demikian informasi ini kami sampaikan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
+            <p style="background-color: yellow;"><strong>Mohon hadir 15 menit sebelum jadwal yang ditentukan.</strong></p>
             
+            <p>Pada saat proses interview, baik pria/wanita mengenakan pakaian rapi, dan sopan.</p>
+
+            <p>Demikian informasi ini kami sampaikan.<br>Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
+                        
             <p style="margin-top: 30px; line-height: 1.4;">
                 Regards,<br>
                 <strong>HC - OD & Recruitment</strong>

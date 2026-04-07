@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Exports\LaporanPelamarExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
@@ -20,6 +21,14 @@ class LaporanController extends Controller
         $status = $request->get('status');    
 
         $query = Application::with(['lowongan', 'applicant.user']);
+
+        // SCOPE DATA LAPORAN (PENTING)
+        // Jika bukan superadmin, hanya tampilkan laporan dari lowongan miliknya sendiri
+        if (Auth::user()->role !== 'superadmin') {
+            $query->whereHas('lowongan', function($q) {
+                $q->where('created_by', Auth::id());
+            });
+        }
 
         // Filter Tanggal
         if ($startDate && $endDate) {
@@ -39,19 +48,25 @@ class LaporanController extends Controller
             $query->where('status', $status);
         }
 
-        $listStatus = Application::select('status')
-        ->distinct()
-        ->pluck('status');
+        // Mengambil daftar status unik untuk dropdown (sesuai scope)
+        $statusQuery = Application::query();
+        if (Auth::user()->role !== 'superadmin') {
+            $statusQuery->whereHas('lowongan', function($q) {
+                $q->where('created_by', Auth::id());
+            });
+        }
+        $listStatus = $statusQuery->select('status')->distinct()->pluck('status');
 
-        // Mengambil lowongan yang pernah dilamar saja
-        $listLowongan = Lowongan::whereHas('applications')->get();
+        // Mengambil daftar lowongan untuk dropdown filter (sesuai scope)
+        $lowonganQuery = Lowongan::whereHas('applications');
+        if (Auth::user()->role !== 'superadmin') {
+            $lowonganQuery->where('created_by', Auth::id());
+        }
+        $listLowongan = $lowonganQuery->get();
 
         $applications = $query->latest()->get();
-
-        // Data untuk dropdown filter posisi
-        $listLowongan = Lowongan::whereHas('applications')->get();
         
-        // Hitung Rekap
+        // Hitung Rekap berdasarkan data yang sudah terfilter scope
         $rekap = [
             'total' => $applications->count(),
             'diterima' => $applications->where('status', 'accepted')->count(),
@@ -71,7 +86,14 @@ class LaporanController extends Controller
 
         $query = Application::with(['lowongan', 'applicant.user']);
 
-        // Pastikan filter di Export sama persis dengan di Index
+        // --- SCOPE DATA EXPORT (PENTING AGAR TIDAK BISA DITEMBAK) ---
+        if (Auth::user()->role !== 'superadmin') {
+            $query->whereHas('lowongan', function($q) {
+                $q->where('created_by', Auth::id());
+            });
+        }
+
+        // Filter Tanggal
         if ($startDate && $endDate) {
             $query->whereBetween('created_at', [
                 Carbon::parse($startDate)->startOfDay(),

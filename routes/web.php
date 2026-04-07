@@ -23,8 +23,8 @@ use App\Http\Controllers\Admin\UserController;
 | 1. HALAMAN PUBLIK
 |--------------------------------------------------------------------------
 */
-// Route::get('/', [PageController::class, 'beranda'])->name('beranda');
-Route::get('/', [PageController::class, 'lowongan'])->name('landing');
+Route::get('/', [PageController::class, 'beranda'])->name('beranda');
+// Route::get('/', [PageController::class, 'lowongan'])->name('landing');
 Route::get('/lowongan', [PageController::class, 'lowongan'])->name('lowongan');
 Route::get('/program-kami', [PageController::class, 'program'])->name('program');
 Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
@@ -128,11 +128,16 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
 
     Route::delete('/users/{id}', [UserController::class, 'destroy'])
         ->name('users.destroy');
+
+    Route::get('/users/download-profile/{applicantId}', [ApplicantController::class, 'downloadProfilePdf'])
+    ->name('users.downloadProfile');
+    // ->middleware(['auth', 'can:superadmin-only']);
         
     // Route untuk proses Bulk Update
-    Route::post('/applicants/bulk-update', [ApplicantController::class, 'bulkUpdate'])
-        ->name('applicants.bulkUpdate');
-
+    Route::post('/applicants/bulk-update', [ApplicantController::class, 'bulkUpdate'])->name('applicants.bulkUpdate');
+    Route::post('/applicants/bulk-prepare', [ApplicantController::class, 'bulkPrepare'])->name('applicants.bulkPrepare');
+    Route::post('/applicants/bulk-process', [ApplicantController::class, 'bulkProcess'])->name('applicants.bulkProcess');
+    Route::post('/applicants/bulk-process-interview', [ApplicantController::class, 'bulkProcessInterview'])->name('applicants.bulkProcessInterview');
 
     require __DIR__.'/admin.php';   
 });
