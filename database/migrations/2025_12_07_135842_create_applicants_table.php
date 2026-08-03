@@ -18,8 +18,8 @@ return new class extends Migration
 
             // Relasi ke tabel lowongan
             // $table->foreign('job_id')->references('id')->on('jobs')->onDelete('cascade');
-            $table->dropForeign('applicants_job_id_foreign');
-            $table->dropColumn('job_id');
+            // $table->dropForeign('applicants_job_id_foreign');
+            // $table->dropColumn('job_id');
         });
     }
 

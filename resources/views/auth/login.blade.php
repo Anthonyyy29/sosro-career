@@ -11,7 +11,8 @@
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+            {{-- <form method="POST" action="{{ route('login') }}" class="space-y-5"> --}}
+            <form method="POST" action="{{ route('login') }}" class="space-y-5" onsubmit="return disableButton(this)">
                 @csrf
 
                 <div>
@@ -72,10 +73,14 @@
                 </div>
                 
                 <div class="pt-2">
-                    <button type="submit"
+                    <button type="submit" id="submit-btn"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-red-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100">
+                        <span id="btn-text">Masuk</span>
+                    </button>
+                    {{-- <button type="submit"
                         class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-red-200 active:scale-95">
                         Masuk
-                    </button>
+                    </button> --}}
                 </div>
             </form>
 
@@ -114,6 +119,21 @@
                 eyeOpen.classList.add("hidden");
                 eyeClose.classList.remove("hidden");
             }
+        }
+
+        // SCRIPT UNTUK MENONAKTIFKAN TOMBOL SUBMIT SETELAH DIKLIK UNTUK MENCEGAH DOUBLE SUBMISSION
+        function disableButton(form) {
+            const btn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+
+            // 1. Cegah klik berulang
+            btn.disabled = true;
+
+            // 2. Beri indikasi visual bahwa proses sedang berjalan
+            btnText.innerText = 'Memproses...';
+            
+            // 3. Kembalikan true agar form tetap terkirim ke server
+            return true;
         }
     </script>
 </x-app-layout>

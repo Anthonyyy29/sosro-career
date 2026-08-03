@@ -220,9 +220,9 @@
                             <option value="KPW Jawa Tengah">KPW Jawa Tengah</option>
                             <option value="KPW Jawa Timur">KPW Jawa Timur</option>
                             <option value="KPW Kalimantan Sulawesi">KPW Kalimantan Sulawesi</option>
-                            <option value="KPW Sumbar Kepri">KPW Sumbar Kepri</option>
                             <option value="KPW Sumbagsel Babel">KPW Sumbagsel Babel</option>
-                            <option value="KPW Sumut NAD">KPW Sumut NAD</option>
+
+                            <option value="KPW Sumut NAD - Sumbar Kepri">KPW Sumut NAD - Sumbar Kepri</option>
                         </optgroup>
                         <optgroup label="Pabrik">
                             <option value="Pabrik Cakung">Pabrik Cakung</option>
@@ -335,9 +335,9 @@
                             <option value="KPW Jawa Tengah">KPW Jawa Tengah</option>
                             <option value="KPW Jawa Timur">KPW Jawa Timur</option>
                             <option value="KPW Kalimantan Sulawesi">KPW Kalimantan Sulawesi</option>
-                            <option value="KPW Sumbar Kepri">KPW Sumbar Kepri</option>
                             <option value="KPW Sumbagsel Babel">KPW Sumbagsel Babel</option>
-                            <option value="KPW Sumut NAD">KPW Sumut NAD</option>
+                            
+                            <option value="KPW Sumut NAD - Sumbar Kepri">KPW Sumut NAD - Sumbar Kepri</option>
                         </optgroup>
                         <optgroup label="Pabrik">
                             <option value="Pabrik Cakung">Pabrik Cakung</option>

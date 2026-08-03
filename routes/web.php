@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ApplyController;
+use App\Http\Controllers\ContactController;
 
 // Breeze (User)
 use App\Http\Controllers\ProfileController as UserProfileController;
@@ -23,13 +24,21 @@ use App\Http\Controllers\Admin\UserController;
 | 1. HALAMAN PUBLIK
 |--------------------------------------------------------------------------
 */
-Route::get('/', [PageController::class, 'beranda'])->name('beranda');
+Route::get('/', [PageController::class, 'lowongan'])->name('lowongan');
 // Route::get('/', [PageController::class, 'lowongan'])->name('landing');
-Route::get('/lowongan', [PageController::class, 'lowongan'])->name('lowongan');
-Route::get('/program-kami', [PageController::class, 'program'])->name('program');
-Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
-Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
+// Route::get('/lowongan', [PageController::class, 'lowongan'])->name('lowongan');
+// Route::get('/program-kami', [PageController::class, 'program'])->name('program');
+// Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
+// Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
 
+// // // // // // // // // // // // // // // // // // // // // //
+// DISABLE PUBLIC ROUTES UNTUK SEMENTARA UNTUK SOFT LAUNCHING  //
+// // // // // // // // // // // // // // // // // // // // // //
+
+// BARU: Route untuk publik :: Limit 3 kali kirim per 1 menit
+Route::post('/contact-us', [ContactController::class, 'store'])
+    ->middleware('throttle:3,1')
+    ->name('contact.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -111,6 +120,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
     Route::get('/applicants/{application}/detail', [ApplicantController::class, 'show'])
         ->name('applicants.show');
 
+    // Route untuk proses Bulk Update
+    Route::post('/applicants/bulk-update', [ApplicantController::class, 'bulkUpdate'])->name('applicants.bulkUpdate');
+    Route::post('/applicants/bulk-prepare', [ApplicantController::class, 'bulkPrepare'])->name('applicants.bulkPrepare');
+    Route::post('/applicants/bulk-process', [ApplicantController::class, 'bulkProcess'])->name('applicants.bulkProcess');
+    Route::post('/applicants/bulk-process-interview', [ApplicantController::class, 'bulkProcessInterview'])->name('applicants.bulkProcessInterview');
+
     Route::post('/applications/update-stage', [ApplicantController::class, 'updateStage'])
         ->name('applications.update-stage');
 
@@ -130,14 +145,19 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
         ->name('users.destroy');
 
     Route::get('/users/download-profile/{applicantId}', [ApplicantController::class, 'downloadProfilePdf'])
-    ->name('users.downloadProfile');
-    // ->middleware(['auth', 'can:superadmin-only']);
+        ->name('users.downloadProfile');
+
+    Route::get('/messages', [ContactController::class, 'index'])
+        ->name('kontak.index');
+
+    Route::post('/messages/{contact}/assign', [ContactController::class, 'assign'])
+        ->name('kontak.assign');
         
-    // Route untuk proses Bulk Update
-    Route::post('/applicants/bulk-update', [ApplicantController::class, 'bulkUpdate'])->name('applicants.bulkUpdate');
-    Route::post('/applicants/bulk-prepare', [ApplicantController::class, 'bulkPrepare'])->name('applicants.bulkPrepare');
-    Route::post('/applicants/bulk-process', [ApplicantController::class, 'bulkProcess'])->name('applicants.bulkProcess');
-    Route::post('/applicants/bulk-process-interview', [ApplicantController::class, 'bulkProcessInterview'])->name('applicants.bulkProcessInterview');
+    Route::delete('/kontak/{contact}', [ContactController::class, 'destroy'])
+        ->name('kontak.destroy');
+
+    Route::post('/kontak/{contact}/mark-replied', [ContactController::class, 'markAsReplied'])
+    ->name('kontak.mark-replied');
 
     require __DIR__.'/admin.php';   
 });

@@ -131,11 +131,11 @@
                     
                     <h4 class="text-lg font-bold mb-2 relative">Butuh Bantuan?</h4>
                     <p class="text-gray-400 text-sm mb-4 relative">Jika mengalami kendala teknis saat pendaftaran, hubungi kami.</p>
-                    {{-- <a href="{{ route('kontak') }}" class="inline-flex items-center text-red-400 font-bold text-sm hover:text-red-300 transition-colors"> --}}
-                    <a href="#" class="inline-flex items-center text-red-400 font-bold text-sm hover:text-red-300 transition-colors">
+                    {{-- <a href="{{ route('kontak') }}" class="inline-flex items-center text-red-400 font-bold text-sm hover:text-red-300 transition-colors">
                         Hubungi Kontak Kami
                         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
+                    </a> --}}
+                    {{-- Soft Launching: sementara halaman beranda diarahkan ke halaman lowongan --}}
                 </div>
             </div>
 

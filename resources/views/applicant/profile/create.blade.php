@@ -1,12 +1,30 @@
 <x-guest-layout>
     @if ($errors->any())
-        <div class="bg-red-500 text-white p-5 rounded-2xl mb-6">
-            <p class="font-bold">Ada kesalahan input:</p>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>- {{ $error }}</li>
-                @endforeach
-            </ul>
+        <div x-data="{ open: true }" 
+            x-show="open" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform translate-y-2"
+            class="relative bg-red-500 text-white p-5 rounded-2xl mb-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-bold mb-1">Ada kesalahan input:</p>
+                    <ul class="text-sm opacity-90">
+                        @foreach ($errors->all() as $error)
+                        <li>• {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <button @click="open = false" 
+                        class="absolute top-4 right-4 hover:bg-white/20 rounded-full p-1 transition cursor-pointer">
+                    <svg xmlns="http:                                                                                             
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </div>
     @endif
     <div x-data="{ 
@@ -27,7 +45,7 @@
         syncDomisili() {
             if(this.isSameAddress) { this.domisili = this.alamat; }
         }
-    }" class="min-h-screen bg-[#FDFDFD] py-12 px-4 flex flex-col items-center justify-center font-sans">
+    }" class="min-h-screen bg-[#FDFDFD] py-12 px-4 flex flex-col items-center justify-center font-figtree">
         
         <div class="max-w-4xl w-full">
             
@@ -63,7 +81,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">NIK (Sesuai KTP) <span class="text-red-500">*</span></label>
-                                    <input name="nik" :required="step === 1" type="text" inputmode="numeric" maxlength="16" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                    <input name="nik" :required="step === 1" type="text" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="16" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Nama Lengkap</label>
@@ -75,7 +93,11 @@
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">No. Telepon / WA <span class="text-red-500">*</span></label>
-                                    <input name="phone" :required="step === 1" type="tel" pattern="[0-9]{10,15}" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
+                                    <input name="phone" value="{{ old('phone') }}" :required="step === 1" type="text" pattern="[0-9+\s\-]{10,20}" inputmode="numeric"
+                                        class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 {{ $errors->has('phone') ? 'border-red-500' : 'border-transparent' }} focus:border-red-500 outline-none">
+                                    @error('phone')
+                                        <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Jenis Kelamin <span class="text-red-500">*</span></label>
@@ -94,7 +116,7 @@
                                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Tempat Lahir <span class="text-red-500">*</span></label>
-                                        <input name="tempat_lahir" type="text" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
+                                        <input name="tempat_lahir" type="text" :required="step === 1" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
                                     </div>
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Tanggal Lahir <span class="text-red-500">*</span></label>
@@ -103,7 +125,7 @@
                                 </div>
                                 <div class="space-y-1 md:col-span-2">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Alamat Lengkap (Sesuai KTP) <span class="text-red-500">*</span></label>
-                                    <textarea x-model="alamat" name="alamat" rows="2" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none"></textarea>
+                                    <textarea x-model="alamat" name="alamat" :required="step === 1" rows="2" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none"></textarea>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="inline-flex items-center mb-2">

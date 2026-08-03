@@ -5,8 +5,7 @@
         x-data="{ open: true }"
         x-show="open"
         x-cloak
-        class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50"
-    >
+        class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
         <div class="bg-white max-w-lg mx-auto p-6 rounded-xl shadow-xl border-l-8 border-red-700 relative">
             
             <button 
@@ -38,17 +37,25 @@
         </div>
     </div>
 
+    {{-- HERO SECTION LOWONGAN --}}
+    <section class="relative w-full h-screen overflow-hidden z-0 bg-black">
+        <img src="{{ asset('assets/images/lowongan-hero.webp') }}" alt="Intip Keseruan Insan Sinar Sosro Gunung Slamat" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-red-900 via-red/80 to-transparent"></div>
+        <div class="absolute inset-0 flex items-center justify-center px-6 md:px-20 max-w-7xl mx-auto">
+            <div class="w-full text-center md:text-left">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl text-white font-bold uppercase leading-[1.1] md:max-w-[700px] drop-shadow-lg">
+                    Bersama Kami, Menjadi Bagian Sinar Sosro Gunung Slamat
+                </h1>
+                <p class="text-lg md:text-3xl text-white mt-6 md:mt-8 leading-relaxed max-w-2xl">
+                    Bergabunglah dengan tim kami, baik sebagai talenta muda maupun profesional berpengalaman. Pilih kategori yang sesuai untuk mengembangkan potensi karirmu.
+                </p>
+            </div>
+        </div>
+    </section>
+
     {{-- SECTION LOWONGAN --}}
     <section class="py-20 bg-white">
         <div class="max-w-6xl mx-auto px-6">
-
-            {{-- JUDUL --}}
-            <div class="text-center mb-10">
-                <h1 class="text-4xl font-bold text-white mb-4">Lowongan Karier Terbaru</h1>
-                <p class="text-white text-lg">
-                    Temukan posisi yang sesuai dengan keahlian dan minat kamu di Sosro Career.
-                </p>
-            </div>
 
             {{-- Badge Jumlah Lowongan --}}
             <div class="inline-flex items-center px-4 py-1.5 rounded-full bg-red-50 border-red-100 mb-4">
@@ -57,49 +64,101 @@
                     {{ $lowongan->count() }}
                     </span>
                 </p>
-            </div>            
-
-            {{-- SEARCH + FILTER --}}
-            <div class="flex flex-col md:flex-row gap-4 justify-center mb-10">
-
-                {{-- INPUT SEARCH --}}
-                <input 
-                    id="searchInput"
-                    type="text" 
-                    placeholder="🔍 Cari posisi…"
-                    class="w-full md:w-1/2 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700"
-                />  
-
-                {{-- FILTER LOKASI --}}
-                <select 
-                    id="filterLocation"
-                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700">
-                    <option value="">Semua Lokasi</option>
-                </select>
-
-                {{-- FILTER KATEGORI PEKERJAAN --}}
-                <select 
-                    id="filterCategory"
-                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-700">
-                    <option value="">Semua Kategori</option>
-                </select>
-
-                {{-- FILTER BIDANG --}}
-                <select 
-                    id="filterBidang"
-                    class="w-full md:w-1/4 border border-gray-300 rounded-lg px-4 py-3
-                        focus:outline-none focus:ring-2 focus:ring-red-700">
-                    <option value="">Semua Bidang</option>
-                </select>
             </div>
 
-            {{-- GRID JOB LIST --}}
+            {{-- SEARCH + FILTER CONTAINER --}}
+            <div class="flex flex-col lg:flex-row gap-4 justify-center items-center mb-10 font-sans">
+
+                {{-- WRAPPER SEARCH (Input + Button Jadi Satu) --}}
+                <div class="relative flex items-center w-full lg:w-2/5 bg-white rounded-full shadow-md overflow-hidden">
+                    <div class="pl-5 text-red-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input 
+                        id="searchInput"
+                        type="text" 
+                        placeholder="Cari lowongan..."
+                        class="w-full px-4 py-3.5 border-none focus:ring-0 focus:outline-none text-red-800 placeholder-red-300 bg-transparent font-semibold"
+                    />
+                    <button class="bg-[#B11116] text-white px-8 py-2.5 rounded-full font-bold mr-1.5 hover:bg-red-800 transition shadow-md">
+                        Cari
+                    </button>
+                </div>
+
+                {{-- FILTER LOKASI --}}
+                <div class="relative w-full lg:w-1/5 font-semibold group" x-data="{ open: false }">
+                    <select 
+                        id="filterLocation"
+                        {{-- Saat diklik (buka menu), status open jadi true. Saat pilihan dipilih (change), status open jadi false --}}
+                        @click="open = !open"
+                        @blur="open = false"
+                        @change="open = false"
+                        class="appearance-none w-full bg-white border-none rounded-full px-6 py-4 shadow-md text-red-400 focus:outline-none focus:ring-2 focus:ring-red-700/20 cursor-pointer pr-12">
+                        <option value="">Semua Lokasi</option>
+                    </select>
+                    <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-red-700">
+                        <svg 
+                            {{-- Class ini yang membuat panah berputar seperti di FAQ --}}
+                            :class="{ 'rotate-180': open }" 
+                            class="w-5 h-5 transition-transform duration-300" 
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- FILTER PROFESIONAL --}}
+                <div class="relative w-full lg:w-1/5 font-semibold" x-data="{ open: false }">
+                    <select 
+                        id="filterCategory"
+                        @click="open = !open"
+                        @blur="open = false"
+                        @change="open = false"
+                        class="appearance-none w-full bg-white border-none rounded-full px-6 py-4 shadow-md text-red-400 focus:outline-none focus:ring-2 focus:ring-red-700/20 cursor-pointer pr-12">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                    <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-red-700">
+                        <svg 
+                            :class="{ 'rotate-180': open }" 
+                            class="w-5 h-5 transition-transform duration-300" 
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- FILTER BIDANG --}}
+                <div class="relative w-full lg:w-1/5 font-semibold" x-data="{ open: false }">
+                    <select 
+                        id="filterBidang"
+                        @click="open = !open"
+                        @blur="open = false"
+                        @change="open = false"
+                        class="appearance-none w-full bg-white border-none rounded-full px-6 py-4 shadow-md text-red-400 focus:outline-none focus:ring-2 focus:ring-red-700/20 cursor-pointer pr-12">
+                        <option value="">Semua Bidang</option>
+                    </select>
+                    <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-red-700">
+                        <svg 
+                            {{-- Class ini yang membuat panah berputar seperti di FAQ --}}
+                            :class="{ 'rotate-180': open }" 
+                            class="w-5 h-5 transition-transform duration-300" 
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- GRID CARD JOB POSTING / POSTINGAN LOWONGAN --}}
             <div id="jobList" class="grid md:grid-cols-2 gap-6">
                 {{-- JOB CARD --}}
                 @foreach ($lowongan as $item)
 
                     <div
-                        class="job-card border border-red-600 rounded-2xl p-6 md:p-8 bg-white shadow-sm hover:shadow-md transition flex flex-col gap-4"
+                        class="job-card border border-grey-200 rounded-2xl p-6 md:p-8 bg-white shadow-xl inset-shadow-sm inset-shadow-indigo-500 hover:shadow-md transition flex flex-col gap-4"
                         data-title="{{ $item->judul_lowongan }}"
                         data-location="{{ $item->penempatan_cabang }}"
                         data-category="{{ $item->kategori }}"
@@ -110,7 +169,7 @@
 
                             {{-- LEFT --}}
                             <div>
-                                <h3 class="text-3xl font-extrabold text-black mb-2">
+                                <h3 class="text-4xl font-bold text-black mb-2">
                                     {{ $item->judul_lowongan }}
                                 </h3>
 
@@ -163,8 +222,8 @@
                                 </details>
 
                                 <details>
-                                    <summary class="cursor-pointer font-semibold text-black">Jobdesk</summary>
-                                    <div class="mt-2 text-gray-600 prose prose-sm max-w-none">
+                                    <summary class="cursor-pointer font-semibold text-black">Deskripsi Pekerjaan</summary>
+                                    <div class="mt-2 text-gray-600 max-w-none">
                                         {!! $item->jobdesk ?: '<p class="italic text-gray-400">Deskripsi pekerjaan akan dijelaskan saat proses seleksi.</p>' !!}
                                     </div>
                                 </details>
@@ -176,7 +235,7 @@
                             @endphp
 
                             @if($sudahMelamar)
-                                <button disabled class="inline-flex items-center justify-center bg-green-600 text-white font-semibold px-8 py-3 rounded-full cursor-default">
+                                <button disabled class="inline-flex items-center justify-center bg-green-600 text-white text-lg font-semibold px-8 py-2 rounded-full cursor-default">
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                                     Sudah Dilamar
                                 </button>
@@ -188,47 +247,14 @@
                                         <button type="button" 
                                                 onclick="konfirmasiLamar(this)" 
                                                 data-posisi="{{ $item->judul_lowongan }}"
-                                                class="btn-submit-lamar inline-flex items-center justify-center bg-red-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-red-700 transition">
-                                            <span class="btn-text">Lamar</span>
+                                                class="btn-submit-lamar inline-flex items-center justify-center bg-[#B11116] hover:bg-red-800 text-white font-semibold px-8 py-2 rounded-full transition">
+                                            <span class="btn-text text-lg">Lamar</span>
                                         </button>
                                     </form>
                                 </div>
                             @endif
                         </div>
                     </div>
-
-                    {{-- Untuk SEO --}}
-                    {{-- <script type="application/ld+json">
-                        {
-                        "@context": "https://schema.org/",
-                        "@type": "JobPosting",
-                        "title": "{{ $item->judul_lowongan }}",
-                        "description": "{!! strip_tags($item->jobdesk . $item->kualifikasi) !!}",
-                        "identifier": {
-                            "@type": "PropertyValue",
-                            "name": "Sinar Sosro",
-                            "value": "{{ $item->id }}"
-                        },
-                        "datePosted": "{{ $item->created_at->format('Y-m-d') }}",
-                        "validThrough": "{{ $item->tanggal_akhir }}",
-                        "hiringOrganization": {
-                            "@type": "Organization",
-                            "name": "PT Sinar Sosro Gunung Slamat",
-                            "sameAs": "https://karir.sosro.com",
-                            "logo": "https://karir.sosro.com/assets/logo-sosro.png"
-                        },
-                        "jobLocation": {
-                            "@type": "Place",
-                            "address": {
-                            "@type": "PostalAddress",
-                            "addressLocality": "{{ $item->penempatan_cabang }}",
-                            "addressRegion": "Jawa Tengah", // spesifikin provinsi
-                            "addressCountry": "ID"
-                            }
-                        },
-                        "employmentType": "{{ $item->kategori }}"
-                        }
-                    </script> --}}
                 @endforeach
 
             </div>
@@ -240,148 +266,148 @@
 
     {{-- SCRIPT SEARCH, FILTER LOKASI, FILTER KATEGORI --}}
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
 
-        const searchInput     = document.getElementById("searchInput");
-        const filterLocation  = document.getElementById("filterLocation");
-        const filterBidang  = document.getElementById("filterBidang");
-        const filterCategory  = document.getElementById("filterCategory");
-        const jobCards        = Array.from(document.querySelectorAll(".job-card"));
-        const pagination      = document.getElementById("pagination");
+            const searchInput     = document.getElementById("searchInput");
+            const filterLocation  = document.getElementById("filterLocation");
+            const filterBidang  = document.getElementById("filterBidang");
+            const filterCategory  = document.getElementById("filterCategory");
+            const jobCards        = Array.from(document.querySelectorAll(".job-card"));
+            const pagination      = document.getElementById("pagination");
 
-        const itemsPerPage = 6;
-        let currentPage = 1;
-        let filteredCards = [...jobCards];
+            const itemsPerPage = 6;
+            let currentPage = 1;
+            let filteredCards = [...jobCards];
 
-        /* ===============================
-        🔹 AUTO FILL DROPDOWN FILTER
-        =============================== */
-        function populateFilters() {
-            const locations  = new Set();
-            const bidangSet = new Set();
-            const categories = new Set();
+            /* ===============================
+            🔹 AUTO FILL DROPDOWN FILTER
+            =============================== */
+            function populateFilters() {
+                const locations  = new Set();
+                const bidangSet = new Set();
+                const categories = new Set();
 
-            jobCards.forEach(card => {
-                if (card.dataset.location) {
-                    locations.add(card.dataset.location.trim());
-                }
-                if (card.dataset.bidang) {
-                    bidangSet.add(card.dataset.bidang.trim());
-                }
-                if (card.dataset.category) {
-                    categories.add(card.dataset.category.trim());
-                }
-            });
-
-            locations.forEach(loc => {
-                const option = document.createElement("option");
-                option.value = loc;
-                option.textContent = loc;
-                filterLocation.appendChild(option);
-            });
-
-            bidangSet.forEach(bidang => {
-                const option = document.createElement("option");
-                option.value = bidang;
-                option.textContent = bidang;
-                filterBidang.appendChild(option);
-            });
-
-            categories.forEach(cat => {
-                const option = document.createElement("option");
-                option.value = cat;
-                option.textContent = cat;
-                filterCategory.appendChild(option);
-            });
-        }
-
-        /* ===============================
-        🔹 FILTER LOGIC
-        =============================== */
-        function applyFilter() {
-            const keyword  = searchInput.value.toLowerCase();
-            const location = filterLocation.value;
-            const bidang = filterBidang.value;
-            const category = filterCategory.value;
-
-            filteredCards = jobCards.filter(card => {
-                const title = card.dataset.title.toLowerCase();
-                const loc   = card.dataset.location;
-                const cardBidang = card.dataset.bidang;
-                const cat   = card.dataset.category;
-
-                const matchKeyword  = title.includes(keyword);
-                const matchLocation = location === "" || loc === location;
-                const matchBidang = bidang === "" || cardBidang === bidang;
-                const matchCategory = category === "" || cat === category;
-
-                return matchKeyword && matchLocation && matchBidang && matchCategory;
-            });
-
-            document.getElementById("jobCount").textContent = filteredCards.length;
-
-            currentPage = 1;
-            render();
-        }
-
-        /* ===============================
-        🔹 RENDER CARD
-        =============================== */
-        function render() {
-            jobCards.forEach(card => card.style.display = "none");
-
-            const start = (currentPage - 1) * itemsPerPage;
-            const end   = start + itemsPerPage;
-
-            filteredCards.slice(start, end).forEach(card => {
-                card.style.display = "block";
-            });
-
-            renderPagination();
-        }
-
-        /* ===============================
-        🔹 PAGINATION
-        =============================== */
-        function renderPagination() {
-            pagination.innerHTML = "";
-
-            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
-            if (totalPages <= 1) return;
-
-            for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement("button");
-                btn.textContent = i;
-                btn.className =
-                    "px-4 py-2 border rounded transition " +
-                    (i === currentPage
-                        ? "bg-red-700 text-white"
-                        : "bg-white text-red-700 hover:bg-red-100");
-
-                btn.addEventListener("click", () => {
-                    currentPage = i;
-                    render();
+                jobCards.forEach(card => {
+                    if (card.dataset.location) {
+                        locations.add(card.dataset.location.trim());
+                    }
+                    if (card.dataset.bidang) {
+                        bidangSet.add(card.dataset.bidang.trim());
+                    }
+                    if (card.dataset.category) {
+                        categories.add(card.dataset.category.trim());
+                    }
                 });
 
-                pagination.appendChild(btn);
+                locations.forEach(loc => {
+                    const option = document.createElement("option");
+                    option.value = loc;
+                    option.textContent = loc;
+                    filterLocation.appendChild(option);
+                });
+
+                bidangSet.forEach(bidang => {
+                    const option = document.createElement("option");
+                    option.value = bidang;
+                    option.textContent = bidang;
+                    filterBidang.appendChild(option);
+                });
+
+                categories.forEach(cat => {
+                    const option = document.createElement("option");
+                    option.value = cat;
+                    option.textContent = cat;
+                    filterCategory.appendChild(option);
+                });
             }
-        }
 
-        /* ===============================
-        🔹 EVENT
-        =============================== */
-        searchInput.addEventListener("input", applyFilter);
-        filterLocation.addEventListener("change", applyFilter);
-        filterBidang.addEventListener("change", applyFilter);
-        filterCategory.addEventListener("change", applyFilter);
+            /* ===============================
+            🔹 FILTER LOGIC
+            =============================== */
+            function applyFilter() {
+                const keyword  = searchInput.value.toLowerCase();
+                const location = filterLocation.value;
+                const bidang = filterBidang.value;
+                const category = filterCategory.value;
 
-        /* ===============================
-        🔹 INIT
-        =============================== */
-        populateFilters();
-        applyFilter();
+                filteredCards = jobCards.filter(card => {
+                    const title = card.dataset.title.toLowerCase();
+                    const loc   = card.dataset.location;
+                    const cardBidang = card.dataset.bidang;
+                    const cat   = card.dataset.category;
 
-    });
+                    const matchKeyword  = title.includes(keyword);
+                    const matchLocation = location === "" || loc === location;
+                    const matchBidang = bidang === "" || cardBidang === bidang;
+                    const matchCategory = category === "" || cat === category;
+
+                    return matchKeyword && matchLocation && matchBidang && matchCategory;
+                });
+
+                document.getElementById("jobCount").textContent = filteredCards.length;
+
+                currentPage = 1;
+                render();
+            }
+
+            /* ===============================
+            🔹 RENDER CARD
+            =============================== */
+            function render() {
+                jobCards.forEach(card => card.style.display = "none");
+
+                const start = (currentPage - 1) * itemsPerPage;
+                const end   = start + itemsPerPage;
+
+                filteredCards.slice(start, end).forEach(card => {
+                    card.style.display = "block";
+                });
+
+                renderPagination();
+            }
+
+            /* ===============================
+            🔹 PAGINATION
+            =============================== */
+            function renderPagination() {
+                pagination.innerHTML = "";
+
+                const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+                if (totalPages <= 1) return;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement("button");
+                    btn.textContent = i;
+                    btn.className =
+                        "px-4 py-2 border rounded transition " +
+                        (i === currentPage
+                            ? "bg-red-700 text-white"
+                            : "bg-white text-red-700 hover:bg-red-100");
+
+                    btn.addEventListener("click", () => {
+                        currentPage = i;
+                        render();
+                    });
+
+                    pagination.appendChild(btn);
+                }
+            }
+
+            /* ===============================
+            🔹 EVENT
+            =============================== */
+            searchInput.addEventListener("input", applyFilter);
+            filterLocation.addEventListener("change", applyFilter);
+            filterBidang.addEventListener("change", applyFilter);
+            filterCategory.addEventListener("change", applyFilter);
+
+            /* ===============================
+            🔹 INIT
+            =============================== */
+            populateFilters();
+            applyFilter();
+
+        });
     </script>
 
     {{-- Klik Lamar --}}
@@ -429,6 +455,7 @@
             });
         }
     </script>
+    
     {{-- Script untuk menangkap session flash message --}}
     <script>
         @if(session('success'))

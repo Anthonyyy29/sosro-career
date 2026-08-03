@@ -26,24 +26,28 @@
         <x-turnstile.scripts />
 
     </head>
-    <body class="font-sans text-gray-900 antialiased bg-gray-50/50">
+    <body class="font-figtree text-gray-900 antialiased bg-gray-50/50">
         
         <nav x-data="{ open: false, userOpen: false }" class="bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-[100]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-18 md:h-20 p-2"> 
                     <div class="flex items-center">
-                        {{-- <a href="{{ route('beranda') }}" class="text-xl md:text-2xl font-black text-red-600 tracking-tighter transition hover:opacity-80"> --}}
-                        <a href="{{ route('beranda') }}" class="text-xl md:text-2xl font-black text-red-600 tracking-tighter transition hover:opacity-80">
+                        <a href="{{ route('lowongan') }}" class="text-xl md:text-2xl font-black text-red-600 tracking-tighter transition hover:opacity-80">
                             SOSRO<span class="text-gray-800 font-light">CAREER</span>
-                        </a>
+                        </a> 
                     </div>
 
                     <div class="hidden md:flex md:items-center md:space-x-8">
+                        {{-- 
                         <a href="{{ route('beranda') }}" class="{{ request()->routeIs('beranda') ? 'nav-link-active' : 'nav-link' }} hover:text-red-600">Beranda</a>
                         <a href="{{ route('tentang') }}" class="nav-link hover:text-red-600">Tentang</a>
                         <a href="{{ route('program') }}" class="nav-link hover:text-red-600">Program</a>
                         <a href="{{ route('lowongan') }}" class="{{ request()->routeIs('lowongan') ? 'nav-link-active' : 'nav-link' }} hover:text-red-600">Lowongan</a>
-                        <a href="{{ route('kontak') }}" class="nav-link hover:text-red-600">Kontak</a>
+                        <a href="{{ route('kontak') }}" class="nav-link hover:text-red-600">Kontak</a> 
+
+                        catatan Soft Launching: sementara halaman beranda diarahkan ke halaman lowongan
+                        --}}
+                        <a href="{{ route('lowongan') }}" class="{{ request()->routeIs('lowongan') ? 'nav-link-active' : 'nav-link' }} hover:text-red-600">Lowongan</a>
                     </div>
 
                     <div class="hidden md:flex md:items-center">
@@ -140,13 +144,16 @@
                     @endauth
                     
                     <div class="grid grid-cols-1 gap-2 text-red-600">
+                        {{-- 
                         <a href="{{ route('beranda') }}" class="mobile-nav-link {{ request()->routeIs('beranda') ? 'bg-red-50 text-red-600' : '' }} hover:font-semibold">Beranda</a>
                         <a href="{{ route('tentang') }}" class="mobile-nav-link hover:font-semibold">Tentang</a>
                         <a href="{{ route('program') }}" class="mobile-nav-link hover:font-semibold">Program</a>
                         <a href="{{ route('lowongan') }}" class="mobile-nav-link {{ request()->routeIs('lowongan') ? 'bg-red-50 text-red-600' : '' }} hover:font-semibold">Lowongan</a>
-                        <a href="{{ route('kontak') }}" class="mobile-nav-link hover:font-semibold">Kontak</a>
-                        {{-- hanya satu yang paling bawah ini sepertinya memang tidak terpakai --}}
-                        {{-- <a href="{{ route('applicant.applications.index') }}" class="hover:text-red-600"> Lamaran Saya </a> --}}
+                        <a href="{{ route('kontak') }}" class="mobile-nav-link hover:font-semibold">Kontak</a> 
+                        <a href="{{ route('lowongan') }}" class="mobile-nav-link {{ request()->routeIs('lowongan') ? 'bg-red-50 text-red-600' : '' }} hover:font-semibold">Lowongan</a>
+
+                        catatan Soft Launching: sementara halaman beranda diarahkan ke halaman lowongan
+                        --}}
                     </div>
                     
                     <div class="pt-4 border-t border-gray-100">

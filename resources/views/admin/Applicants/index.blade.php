@@ -512,7 +512,7 @@
                                     <option value="Pengalaman kerja tidak sesuai">Pengalaman kerja tidak sesuai</option>
                                     <option value="Latar belakang industri tidak sesuai">Latar belakang industri tidak sesuai</option>
                                     <option value="Latar belakang pendidikan tidak sesuai">Latar belakang pendidikan tidak sesuai</option>
-                                    <option value="Belum sesuai dengan kriteria yang kami butuhkan saat ini">Kriteria belum sesuai</option>
+                                    <option value="Belum sesuai dengan kriteria lowongan yang ada saat ini">Kriteria belum sesuai</option>
                                 </select>
                             </div>
                             

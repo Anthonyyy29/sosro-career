@@ -1,3 +1,10 @@
+{{-- 
+    File: resources/views/layouts/admin.blade.php
+    Description: Layout untuk halaman admin panel.
+    status: dead file
+--}}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

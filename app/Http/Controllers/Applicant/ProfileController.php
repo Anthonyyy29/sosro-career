@@ -30,7 +30,7 @@ class ProfileController extends Controller
             'jk'               => 'required|in:L,P',
             'tempat_lahir'     => 'required|string',
             'tanggal_lahir'    => 'required|date',
-            'phone'            => 'required|numeric',
+            'phone'            => 'required|string|regex:/^[0-9+\-\s]+$/|min:10|max:20',
             'alamat'           => 'required|string',
             'ex_employee'      => 'required|in:Ya,Tidak',
             'ex_company_name'  => 'nullable|required_if:ex_employee,Ya|string|max:255',

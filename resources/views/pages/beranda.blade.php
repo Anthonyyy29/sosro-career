@@ -17,12 +17,12 @@
             </div>
             <div class="w-full md:w-1/3 flex items-center justify-center md:justify-end">
                 <a href="{{ route('lowongan') }}" 
-                class="px-10 py-4 bg-white text-[#B51233] font-bold text-xl rounded-full 
+                class="px-10 py-4 bg-white text-[#B11116] font-bold text-xl rounded-full 
                         shadow-[0_4px_14px_0_rgba(255,255,255,0.39)] 
                         hover:shadow-[0_6px_20px_rgba(255,255,255,0.23)] 
-                        hover:bg-[#B51233] hover:text-white 
+                        hover:bg-[#B11116] hover:text-white 
                         transition-all duration-500 ease-out
-                        ring-4 ring-white/20 hover:ring-[#B51233]/30">
+                        ring-4 ring-white/20 hover:ring-[#B11116]/30">
                     Lihat Lowongan Sekarang
                 </a>
             </div>
@@ -30,7 +30,7 @@
     </section>
 
     {{-- SECTION PROFIL SINGKAT --}}
-    <section class="py-28 bg-gradient-to-b from-white via-[#B51233] to-white text-left relative overflow-hidden">
+    <section class="py-28 bg-gradient-to-b from-white via-[#B11116] to-white text-left relative overflow-hidden">
 
         {{-- Dekorasi daun --}}
         <svg class="absolute top-4 left-1/3 w-10 opacity-20 rotate-45" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
@@ -47,7 +47,7 @@
             <div class="relative">
                 
                 {{-- Card Teks --}}
-                <h2 class="text-3xl md:text-4xl font-bold text-[#B51233] uppercase border-b-2 border-red-700 pb-1 inline-block mb-4 drop-shadow-sm">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#B11116] uppercase border-b-2 border-red-700 pb-1 inline-block mb-4 drop-shadow-sm">
                     Profil Singkat
                 </h2>
 
@@ -110,14 +110,14 @@
 
             {{-- Bagian Kanan: Teks dan Tombol --}}
             <div class="w-full md:w-[40%] text-center md:text-left">
-                <h2 class="text-3xl md:text-4xl font-bold text-[#B51233] uppercase drop-shadow-sm">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#B11116] uppercase drop-shadow-sm">
                     Ikuti <br> Perjalanan <br> Karier Kami
                 </h2>
 
                 <div class="mt-10 flex flex-col gap-4 items-center md:items-start">
                     {{-- Tombol Instagram --}}
                     <a href="https://www.instagram.com/sosrocareer" target="_blank" 
-                    class="flex items-center gap-3 bg-white border border-red-200 hover:border-[#B51233] hover:shadow-md transition rounded-full px-6 py-3 w-full max-w-xs">
+                    class="flex items-center gap-3 bg-white border border-red-200 hover:border-[#B11116] hover:shadow-md transition rounded-full px-6 py-3 w-full max-w-xs">
                     {{-- class="group flex items-center gap-4 bg-white border-2 border-gray-100 px-6 py-3 rounded-full w-80 hover:shadow-lg transition duration-300 transform hover:-translate-y-1"> --}}
                     <i class="fa-brands fa-square-instagram text-4xl" style="background: -webkit-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
                         <span class="font-semibold text-lg text-gray-800 tracking-wide">@sosrocareer</span>
@@ -125,7 +125,7 @@
 
                     {{-- Tombol LinkedIn --}}
                     <a href="https://www.linkedin.com/company/pt-sinar-sosro" target="_blank" 
-                        class="flex items-center gap-3 bg-white border border-red-200 hover:border-[#B51233] hover:shadow-md transition rounded-full px-6 py-3 w-full max-w-xs">
+                        class="flex items-center gap-3 bg-white border border-red-200 hover:border-[#B11116] hover:shadow-md transition rounded-full px-6 py-3 w-full max-w-xs">
                         {{-- class="group flex items-center gap-4 bg-white border-2 border-gray-100 px-6 py-3 rounded-full w-80 hover:shadow-lg transition duration-300 transform hover:-translate-y-1"> --}}
                         <i class="fa-brands fa-linkedin text-4xl" style="color: #0077B5;"></i>
                         <span class="font-semibold text-base text-gray-800 leading-tight">
@@ -139,7 +139,7 @@
     </section>
 
     {{-- SECTION AJAKAN BERGABUNG --}}
-    <section class="py-20 bg-[#B51233] px-6">
+    <section class="py-20 bg-[#B11116] px-6">
         <div class="max-w-5xl mx-auto text-center">
             <h2 class="text-3xl md:text-4xl font-bold uppercase text-white mb-4 drop-shadow-lg">
                 TEMUKAN KESEMPATAN BERTUMBUH & BERKEMBANG BERSAMA KAMI
@@ -150,7 +150,7 @@
             </p>
 
             <a href="{{ route('program') }}" 
-                class="inline-block bg-white text-[#B51233] px-10 py-4 rounded-full font-bold text-lg mt-8 
+                class="inline-block bg-white text-[#B11116] px-10 py-4 rounded-full font-bold text-lg mt-8 
                         shadow-lg shadow-black/20 hover:shadow-white/20 
                         transform transition-all duration-300 
                         hover:-translate-y-1 hover:scale-105 active:scale-95">
@@ -160,15 +160,15 @@
     </section>
 
     {{-- SECTION NILAI PERUSAHAAN (BANNER CAROUSEL) --}}
-    <section class="py-24 bg-white overflow-hidden">
+    <section class="py-20 bg-white overflow-hidden">
         <div class="flex flex-col lg:flex-row items-center relative">
             
             {{-- BAGIAN KIRI: TEKS (Sebagai Penghalang/Masking) --}}
             <div class="w-full lg:w-[40%] px-6 lg:pl-16 lg:pr-12 text-center lg:text-left mb-12 lg:mb-0 z-20 bg-white self-stretch flex flex-col justify-center">
-                <h2 class="text-3xl md:text-4xl font-bold text-[#B51233] uppercase mb-5">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#B11116] uppercase mb-5">
                     Nilai Perusahaan
                 </h2>
-                <p class="text-lg md:text-xl text-[#B51233] font-medium md:max-w-md mx-auto lg:mx-0">
+                <p class="text-lg md:text-xl text-[#B11116] font-medium md:max-w-md mx-auto lg:mx-0">
                     Pedoman dalam membentuk sikap, perilaku, dan cara kerja insan perusahaan serta dasar setiap pengambilan keputusan dan interaksi kerja.
                 </p>
             </div>
@@ -176,7 +176,7 @@
             {{-- BAGIAN KANAN: SLIDER (Menembus ke Kanan) --}}
             <div class="w-full lg:w-[60%] relative z-10">
                 {{-- Kontainer Merah --}}
-                <div class="bg-[#B51233] rounded-l-[50px] lg:rounded-r-none p-10 pt-16 lg:pl-16 relative">
+                <div class="bg-[#B11116] rounded-l-[50px] lg:rounded-r-none p-10 pt-16 lg:pl-16 relative">
                     
                     {{-- Swiper Container TANPA overflow-hidden --}}
                     <div class="swiper-container-nilai !overflow-visible"> 
@@ -263,12 +263,99 @@
         }
     </style>
 
+    {{-- SECTION VIDEO OFFICE TOUR --}}
+    <section class="relative overflow-hidden bg-white">
+        {{-- Pattern Merah Background --}}
+        <div class="absolute inset-0 -z-10 overflow-hidden">
+            {{-- Gradient base merah soft --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-red-50 via-white to-red-50 opacity-80"></div>
+            
+            {{-- Pattern dots merah --}}
+            <div class="absolute inset-0" style="background-image: radial-gradient(#fecaca 1px, transparent 1px); background-size: 20px 20px; opacity: 0.4;"></div>
+            
+            {{-- Blob merah blur buat aksen --}}
+            <div class="absolute top-0 left-1/4 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+            <div class="absolute bottom-0 right-1/4 w-72 h-72 bg-red-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        </div>
+
+        <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            {{-- Badge + Header --}}
+            <div class="text-center mb-10 lg:mb-14">
+                {{-- <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight"> --}}
+                <h2 class="text-3xl lg:text-5xl font-bold text-[#B11116] mb-4 uppercase">
+                    Jelajahi Kantor Kami
+                </h2>
+                <p class="text-base lg:text-lg text-gray-600 max-w-2xl mx-auto">
+                    Lihat langsung suasana kerja, fasilitas, dan setiap sudut ruang yang bikin tim kami betah & produktif.
+                </p>
+            </div>
+
+            {{-- Container Video --}}
+            <div class="relative">
+                {{-- Frame aksen merah di belakang video --}}
+                <div class="absolute -inset-4 bg-gradient-to-r from-red-600 to-red-400 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+                
+                {{-- Video Card --}}
+                <div class="relative group">
+                    <div class="aspect-video rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-gray-900/10 bg-gray-900">
+                        <video
+                            class="w-full h-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                            controls
+                            playsinline
+                            preload="metadata"
+                        >
+                            <source src="{{ asset('assets/videos/Video Testing.mp4') }}" type="video/mp4">
+                            Browser Anda tidak mendukung pemutaran video.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Info tambahan di bawah --}}
+            <div class="mt-10 grid grid-cols-3 lg:grid-cols-3 gap-6 text-center">
+                <div>
+                    <div class="text-2xl lg:text-3xl font-bold text-[#B11116]">15</div>
+                    <div class="text-sm text-gray-600 mt-1">Divisi</div>
+                </div>
+                <div>
+                    <div class="text-2xl lg:text-3xl font-bold text-[#B11116]">11</div>
+                    <div class="text-sm text-gray-600 mt-1">Pabrik</div>
+                </div>
+                <div>
+                    <div class="text-2xl lg:text-3xl font-bold text-[#B11116]">8</div>
+                    <div class="text-sm text-gray-600 mt-1">Kantor Penjualan</div>
+                </div>
+                {{-- <div>
+                    <div class="text-2xl lg:text-3xl font-bold text-red-600">100+</div>
+                    <div class="text-sm text-gray-600 mt-1">Kapasitas Tim</div>
+                </div> --}}
+            </div>
+
+        </div>
+
+        <style>
+            @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+        </style>
+    </section>
+
     {{-- SECTION KEGIATAN PERUSAHAAN --}}
-    <section class="py-15 bg-white">
+    <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-6">
             
             {{-- Judul Section --}}
-            <h2 class="text-3xl md:text-4xl font-bold text-[#B51233] uppercase mb-10 text-center lg:text-left drop-shadow-sm">
+            <h2 class="text-3xl md:text-4xl font-bold text-[#B11116] uppercase mb-10 text-center lg:text-left drop-shadow-sm">
                 Kegiatan Perusahaan
             </h2>
 
@@ -279,9 +366,9 @@
                         ['img' => 'kegiatan sosial sosro.png', 'title' => 'Program <br> Guru Magang'],
                         ['img' => 'training sosro.webp', 'title' => 'Kunjungan <br> Industri'],
                         ['img' => 'kegiatan sosial sosro.webp', 'title' => 'Pelatihan <br> Internal'],
-                        ['img' => 'training sosro.webp', 'title' => 'Corporate <br> Social Responsibility'],
-                        ['img' => 'kegiatan sosial sosro.webp', 'title' => 'Employee <br> Gathering'],
-                        ['img' => 'training sosro.webp', 'title' => 'Project <br> Strategis'],
+                        // ['img' => 'training sosro.webp', 'title' => 'Corporate <br> Social Responsibility'],
+                        // ['img' => 'kegiatan sosial sosro.webp', 'title' => 'Employee <br> Gathering'],
+                        // ['img' => 'training sosro.webp', 'title' => 'Project <br> Strategis'],
                         // ['img' => 'kegiatan-6.webp', 'title' => 'Project <br> Strategis'],
                     ];
                 @endphp
@@ -306,7 +393,7 @@
             {{-- Tombol Lihat Selengkapnya --}}
             <div class="mt-12 text-center">
                 <a href="{{ route('tentang') }}#kegiatan-perusahaan" 
-                class="inline-block bg-[#B51233] text-white px-10 py-3 rounded-full font-bold text-lg hover:bg-red-800 transition shadow-sm transform hover:-translate-y-1 active:scale-95">
+                class="inline-block bg-[#B11116] text-white px-10 py-3 rounded-full font-bold text-lg hover:bg-red-800 transition shadow-sm transform hover:-translate-y-1 active:scale-95">
                     Lihat Selengkapnya
                 </a>
             </div>
@@ -318,7 +405,7 @@
     <section class="py-16 bg-white overflow-hidden">
         <div class="max-w-7xl mx-auto px-6">
             
-            <h2 class="text-3xl md:text-4xl font-bold text-[#B51233] uppercase mb-5 text-center drop-shadow-sm">
+            <h2 class="text-3xl md:text-4xl font-bold text-[#B11116] uppercase mb-5 text-center drop-shadow-sm">
                 Apa Kata Karyawan Kami?
             </h2>
 
@@ -328,7 +415,7 @@
                     <div class="swiper-wrapper">
 
                         @php
-                            // Data Karyawan (Pastikan path file sesuai dengan folder public/assets/images Anda)
+                            // Data Karyawan dan Testimoni
                             $testimoni = [
                                 [
                                     'img' => 'karyawan-1.webp',
@@ -359,22 +446,22 @@
 
                         @foreach($testimoni as $item)
                         <div class="swiper-slide pt-10 pb-1">
-                            <div class="bg-[#B51233] rounded-[40px] relative flex flex-col md:flex-row items-center min-h-[480px] md:min-h-[400px]">
+                            <div class="bg-[#B11116] rounded-[40px] relative flex flex-col md:flex-row items-center min-h-[480px] md:min-h-[400px] overflow-hidden">
                                 
                                 <div class="w-full md:w-1/3 flex justify-center md:justify-start items-end relative z-10 h-[280px] md:h-[450px]">
                                     <img src="{{ asset('assets/images/' . $item['img']) }}" 
                                         alt="{{ $item['name'] }}" 
-                                        class="w-auto h-full max-w-full object-contain object-bottom md:absolute md:-bottom-2 md:left-6 lg:left-10">
+                                        class="w-auto h-full max-w-full object-contain object-bottom md:absolute md:left-6 lg:left-10">
                                 </div>
 
-                                <div class="w-full md:w-2/3 p-6 md:pr-10 md:pl-4 relative z-0">
-                                    <div class="bg-white rounded-[30px] p-6 md:p-10 shadow-xl min-h-[320px] flex flex-col justify-center">
-                                        <p class="text-[#B51233] text-base md:text-xl lg:text-2xl font-medium leading-relaxed italic">
+                                <div class="w-full p-6 relative z-0">
+                                    <div class="bg-white rounded-[30px] p-6 md:p-10 md:pl-20 shadow-xl min-h-[320px] flex flex-col justify-center md:-ml-16 transition-transform hover:-translate-y-2">
+                                        <p class="text-[#B11116] text-base md:text-xl lg:text-2xl font-medium leading-relaxed italic">
                                             {{ $item['quote'] }}
                                         </p>
                                         <div class="mt-6">
-                                            <h4 class="text-[#B51233] text-lg md:text-xl font-bold">{{ $item['name'] }}</h4>
-                                            <p class="text-red-400 text-sm md:text-base italic">{{ $item['role'] }}</p>
+                                            <h4 class="text-[#B11116] text-lg md:text-xl font-bold">{{ $item['name'] }}</h4>
+                                            <p class="text-red-700 text-sm md:text-base italic">{{ $item['role'] }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -387,10 +474,10 @@
                     <div class="swiper-pagination-testimoni mt-8 flex justify-center"></div>
                 </div>
 
-                <button class="nav-prev hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 bg-white text-[#B51233] w-11 h-11 rounded-full shadow-lg items-center justify-center hover:bg-red-50 transition border border-gray-100">
+                <button class="nav-prev hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 bg-white text-[#B11116] w-11 h-11 rounded-full shadow-lg items-center justify-center hover:bg-red-50 transition border border-gray-100">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <button class="nav-next hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 bg-white text-[#B51233] w-11 h-11 rounded-full shadow-lg items-center justify-center hover:bg-red-50 transition border border-gray-100">
+                <button class="nav-next hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 bg-white text-[#B11116] w-11 h-11 rounded-full shadow-lg items-center justify-center hover:bg-red-50 transition border border-gray-100">
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
 
@@ -401,7 +488,7 @@
     <style>
         /* Styling Pagination Agar Sesuai Tema */
         .swiper-pagination-testimoni .swiper-pagination-bullet {
-            background: #B51233;
+            background: #B11116;
             opacity: 0.2;
             width: 10px;
             height: 10px;
