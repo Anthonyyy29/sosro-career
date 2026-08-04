@@ -79,22 +79,41 @@
                             @endif
                         </td>
                         <td class="py-4 text-center">
-                        {{-- Jika ID user di baris ini SAMA dengan ID admin yang login, sembunyikan tombol hapusnya --}}
-                            @if($user->id == auth()->id() && $user->source_table == 'admins')
-                                <span class="text-xs text-gray-400 italic">Akun Anda</span>
-                            @else
-                                <form action="{{ route('admin.users.destroy', $user->id) }}?source={{ $user->source_table }}" 
-                                    method="POST" 
-                                    onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 transition-colors" title="Hapus">
+                            <div class="flex items-center justify-center gap-3">
+                                @if($user->source_table == 'admins')
+                                    <button type="button"
+                                        onclick='openEditModal({{ Illuminate\Support\Js::from([
+                                            "id" => $user->id,
+                                            "name" => $user->name,
+                                            "email" => $user->email,
+                                            "role" => $user->role,
+                                            "cabang" => $user->cabang,
+                                        ]) }})'
+                                        class="text-blue-500 hover:text-blue-700 transition-colors" title="Edit">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 19.5h-15" />
                                         </svg>
                                     </button>
-                                </form>
-                            @endif
+                                @endif
+
+                                {{-- Jika ID user di baris ini SAMA dengan ID admin yang login, sembunyikan tombol hapusnya --}}
+                                @if($user->id == auth()->id() && $user->source_table == 'admins')
+                                    <span class="text-xs text-gray-400 italic">Akun Anda</span>
+                                @else
+                                    <form action="{{ route('admin.users.destroy', $user->id) }}?source={{ $user->source_table }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 transition-colors" title="Hapus">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -138,10 +157,18 @@
                     
                     <div>
                         <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Tipe Pengguna (Role)</label>
-                        <select name="role" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
+                        <select name="role" id="createRoleSelect" required onchange="toggleCabangField('create')" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
                             <option value="pelamar">Pelamar</option>
                             <option value="admin">Admin Cabang</option>
                             <option value="superadmin">Super Admin</option>
+                        </select>
+                    </div>
+
+                    <div id="createCabangField" class="hidden">
+                        <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Cabang</label>
+                        <select name="cabang" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
+                            <option value="" disabled selected>Pilih Cabang</option>
+                            @include('admin.partials.cabang-options')
                         </select>
                     </div>
 
@@ -155,12 +182,90 @@
     </div>
 </div>
 
+{{-- Modal Edit Admin --}}
+<div id="modalEditUser" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-black opacity-40"></div>
+
+        <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 tracking-tight">Edit Akun</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+
+            <form id="editUserForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="space-y-5">
+                    <div>
+                        <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                        <input type="text" name="name" id="editName" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Alamat Email</label>
+                        <input type="email" name="email" id="editEmail" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Password Baru</label>
+                        <input type="password" name="password" id="editPassword" minlength="8"
+                            class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all"
+                            placeholder="Kosongkan jika tidak ingin ganti password">
+                    </div>
+
+                    <div>
+                        <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Tipe Pengguna (Role)</label>
+                        <select name="role" id="editRoleSelect" required onchange="toggleCabangField('edit')" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
+                            <option value="admin">Admin Cabang</option>
+                            <option value="superadmin">Super Admin</option>
+                        </select>
+                    </div>
+
+                    <div id="editCabangField" class="hidden">
+                        <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Cabang</label>
+                        <select name="cabang" id="editCabangSelect" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
+                            <option value="" disabled>Pilih Cabang</option>
+                            @include('admin.partials.cabang-options')
+                        </select>
+                    </div>
+
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="closeEditModal()" class="flex-1 px-6 py-3 font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-all">Batal</button>
+                        <button type="submit" class="flex-1 px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 transition-all">Simpan Perubahan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function openModal() {
         document.getElementById('modalUser').classList.remove('hidden');
     }
     function closeModal() {
         document.getElementById('modalUser').classList.add('hidden');
+    }
+
+    function toggleCabangField(prefix) {
+        const role = document.getElementById(prefix + 'RoleSelect').value;
+        const field = document.getElementById(prefix + 'CabangField');
+        field.classList.toggle('hidden', role !== 'admin');
+    }
+
+    function openEditModal(user) {
+        document.getElementById('editUserForm').action = '{{ url('admin/users') }}/' + user.id;
+        document.getElementById('editName').value = user.name;
+        document.getElementById('editEmail').value = user.email;
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editRoleSelect').value = user.role;
+        document.getElementById('editCabangSelect').value = user.cabang || '';
+        toggleCabangField('edit');
+        document.getElementById('modalEditUser').classList.remove('hidden');
+    }
+    function closeEditModal() {
+        document.getElementById('modalEditUser').classList.add('hidden');
     }
 </script>
 @endsection

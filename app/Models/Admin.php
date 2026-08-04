@@ -18,6 +18,7 @@ class Admin extends Authenticatable
         'password',
         'photo',
         'role',
+        'cabang',
     ];
 
     protected $hidden = [

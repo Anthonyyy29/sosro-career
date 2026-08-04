@@ -21,7 +21,7 @@ class UserController extends Controller
         }
 
         // 1. Ambil data dari tabel admins (Tetap sama)
-        $admins = Admin::select('id', 'name', 'email', 'role', 'created_at')
+        $admins = Admin::select('id', 'name', 'email', 'role', 'cabang', 'created_at')
             ->get()
             ->map(function ($item) {
                 $item->source_table = 'admins';
@@ -57,6 +57,7 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email|unique:admins,email',
             'password' => 'required|min:8',
             'role'     => 'required|in:superadmin,admin,pelamar',
+            'cabang'   => 'required_if:role,admin|nullable|string',
         ]);
 
         $data = [
@@ -72,11 +73,44 @@ class UserController extends Controller
         } else {
             // Masuk ke tabel admins (admin cabang atau superadmin)
             $data['role'] = $request->role;
+
+            if ($request->role === 'admin') {
+                $data['cabang'] = $request->cabang;
+            }
+
             Admin::create($data);
             $message = "Akun " . ucfirst($request->role) . " berhasil dibuat.";
         }
 
         return back()->with('success', $message);
+    }
+
+    public function update($id, Request $request)
+    {
+        $admin = Admin::findOrFail($id);
+
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:admins,email,' . $admin->id,
+            'password' => 'nullable|min:8',
+            'role'     => 'required|in:superadmin,admin',
+            'cabang'   => 'required_if:role,admin|nullable|string',
+        ]);
+
+        $data = [
+            'name'   => $request->name,
+            'email'  => $request->email,
+            'role'   => $request->role,
+            'cabang' => $request->role === 'admin' ? $request->cabang : null,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $admin->update($data);
+
+        return back()->with('success', 'Akun ' . $admin->name . ' berhasil diperbarui.');
     }
 
     public function destroy($id, Request $request)

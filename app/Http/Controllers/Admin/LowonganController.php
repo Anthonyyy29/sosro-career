@@ -45,9 +45,9 @@ class LowonganController extends Controller
     {
         $query = Lowongan::withCount('applications')->with('admin');
 
-        // Filter milik sendiri jika bukan superadmin
+        // Filter berdasarkan cabang admin jika bukan superadmin
         if (Auth::user()->role !== 'superadmin') {
-            $query->where('created_by', Auth::id());
+            $query->where('penempatan_cabang', Auth::user()->cabang);
         }
         
         // Filter Berdasarkan Judul
@@ -90,13 +90,20 @@ class LowonganController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:today',
         ]);
 
+        // Admin cabang hanya boleh membuat lowongan untuk cabangnya sendiri
+        $penempatanCabang = $request->penempatan_cabang;
+        if (Auth::user()->role !== 'superadmin') {
+            abort_if(!Auth::user()->cabang, 403, 'Akun Anda belum di-assign ke cabang manapun. Hubungi Super Admin.');
+            $penempatanCabang = Auth::user()->cabang;
+        }
+
         Lowongan::create([
             'kode_lowongan' => $this->generateKodeLowongan(),
             'judul_lowongan' => $request->judul_lowongan,
             'kategori' => $request->kategori,
             'bidang' => $request->bidang,
             'tipe_lowongan' => $request->tipe_lowongan,
-            'penempatan_cabang' => $request->penempatan_cabang,
+            'penempatan_cabang' => $penempatanCabang,
             'lokasi_kerja' => $request->lokasi_kerja,
             'tanggal_mulai' => now()->toDateString(),
             'tanggal_akhir' => $request->tanggal_akhir,
@@ -120,12 +127,18 @@ class LowonganController extends Controller
 
         $lowongan = Lowongan::findOrFail($id);
 
+        $isSuperAdmin = Auth::user()->role === 'superadmin';
+        abort_if(!$isSuperAdmin && $lowongan->penempatan_cabang !== Auth::user()->cabang, 403, 'Anda tidak memiliki akses ke lowongan cabang lain.');
+
+        // Admin cabang tidak boleh memindahkan lowongan ke cabang lain
+        $penempatanCabang = $isSuperAdmin ? $request->penempatan_cabang : $lowongan->penempatan_cabang;
+
         $lowongan->update([
             'judul_lowongan' => $request->judul_lowongan,
             'kategori' => $request->kategori,
             'bidang' => $request->bidang,
             'tipe_lowongan' => $request->tipe_lowongan,
-            'penempatan_cabang' => $request->penempatan_cabang,
+            'penempatan_cabang' => $penempatanCabang,
             'lokasi_kerja' => $request->lokasi_kerja,
             'tanggal_akhir' => $request->tanggal_akhir,
             'jobdesk' => $request->jobdesk ?? '',
@@ -139,6 +152,8 @@ class LowonganController extends Controller
 
     public function destroy(Lowongan $lowongan)
     {
+        abort_if(Auth::user()->role !== 'superadmin' && $lowongan->penempatan_cabang !== Auth::user()->cabang, 403, 'Anda tidak memiliki akses ke lowongan cabang lain.');
+
         $lowongan->delete();
 
         return back()->with('success', 'Lowongan '. $lowongan->judul_lowongan .' berhasil dihapus');
