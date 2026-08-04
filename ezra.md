@@ -78,3 +78,22 @@ Fitur email aplikasi (dipicu dari `ApplicantController::updateStage()` saat admi
 Semua 9 ditest lewat `php artisan tinker` menggunakan data pelamar palsu (fake object, tidak menyentuh database — karena `.env` di-set untuk MySQL via Docker/Sail hostname `mysql` yang tidak resolve kalau `artisan` dijalankan di luar container) ke email `adiezraanthoni@student.esaunggul.ac.id`. **Semua 9 email berhasil terkirim dan diterima**, memvalidasi bahwa setup SMTP baru sudah bekerja untuk seluruh alur email fitur rekrutmen ini.
 
 **Catatan teknis:** menjalankan `php artisan` langsung di host akan gagal connect ke database (`DB_HOST=mysql` cuma resolve di dalam jaringan Docker Compose/Sail). Untuk operasi yang butuh akses DB asli, jalankan lewat `./vendor/bin/sail artisan ...` (kalau container Sail sedang aktif), bukan `php artisan ...` langsung.
+
+## 5. Fitur Forgot Password untuk Admin (sudah selesai & di-push)
+
+Sebelumnya forgot-password cuma jalan untuk pelamar (bawaan Breeze). Admin (guard `admin`, tabel `admins`) tidak punya alur ini sama sekali — padahal link "Lupa Password?" di `admin/login.blade.php` sudah ada tapi salah arah ke route pelamar.
+
+Yang ditambahkan:
+- Broker baru `admins` di `config/auth.php` (reuse tabel `password_reset_tokens` yang sama, tidak ada migration baru)
+- `App\Notifications\AdminResetPasswordNotification` (baru) — override `resetUrl()` supaya link di email admin mengarah ke route admin, bukan pelamar
+- `Admin::sendPasswordResetNotification()` (baru) — pakai notification di atas
+- `AdminPasswordResetLinkController` & `AdminNewPasswordController` (baru, di `app/Http/Controllers/Admin/Auth/`) — pola sama seperti punya Breeze pelamar, tapi pakai `Password::broker('admins')`
+- View `admin/forgot-password.blade.php` & `admin/reset-password.blade.php` (baru) — di-copy dari view pelamar, layout diganti `<x-guest-layout>`, dibungkus komponen yang sama persis dengan `admin/login.blade.php` (logo SGS, badge "Administrator Portal", tombol kuning)
+- 4 route baru di `routes/web.php` (`admin.password.request/email/reset/store`), dibungkus `middleware('guest:admin')`
+- Fix link "Lupa Password?" di `admin/login.blade.php` yang tadinya salah arah ke route pelamar
+
+**Bug yang ditemukan & diperbaiki sekalian:** di beberapa view (termasuk `auth/reset-password.blade.php` & `auth/forgot-password.blade.php` milik pelamar yang sudah ada sebelumnya), field email pakai `:value="old(...)"` di tag `<input>` biasa. Sintaks `:atribut=""` itu cuma jalan di Blade **component** (`<x-*>`), bukan di tag HTML native — jadi value-nya tidak pernah ke-set dan field selalu kosong meski link reset dari email sudah bawa parameter email yang benar. Diganti jadi `value="{{ old(...) }}"` di semua tempat yang kena.
+
+**Sudah ditest end-to-end**: kirim reset link ke akun admin test, klik link, field email otomatis terisi, set password baru, redirect ke login, berhasil login pakai password baru.
+
+**Status**: sudah di-commit (`66ca91f` — "Add forgot password flow for admin, fix reset-password value binding bug") dan di-push ke `origin/main` di repo pribadi.
