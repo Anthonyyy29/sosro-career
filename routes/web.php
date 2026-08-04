@@ -15,6 +15,8 @@ use App\Http\Controllers\Applicant\ProfileController;
 
 // Admin
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\Admin\Auth\AdminPasswordResetLinkController;
+use App\Http\Controllers\Admin\Auth\AdminNewPasswordController;
 use App\Http\Controllers\Admin\ApplicantController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\UserController;
@@ -108,6 +110,20 @@ Route::post('/apply/{lowongan}', [ApplyController::class, 'store'])
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout')->middleware('auth:admin');
+
+Route::middleware('guest:admin')->group(function () {
+    Route::get('admin/forgot-password', [AdminPasswordResetLinkController::class, 'create'])
+        ->name('admin.password.request');
+
+    Route::post('admin/forgot-password', [AdminPasswordResetLinkController::class, 'store'])
+        ->name('admin.password.email');
+
+    Route::get('admin/reset-password/{token}', [AdminNewPasswordController::class, 'create'])
+        ->name('admin.password.reset');
+
+    Route::post('admin/reset-password', [AdminNewPasswordController::class, 'store'])
+        ->name('admin.password.store');
+});
 
 Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function () {
 

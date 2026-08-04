@@ -37,7 +37,7 @@
                         <span class="ml-2 text-sm text-gray-500 group-hover:text-gray-700">Ingat Sesi Ini</span>
                     </label>
 
-                    <a href="{{ route('password.request') }}" class="text-sm font-semibold text-gray-400 hover:text-red-600 transition-colors">
+                    <a href="{{ route('admin.password.request') }}" class="text-sm font-semibold text-gray-400 hover:text-red-600 transition-colors">
                         Lupa Password?
                     </a>
                 </div>

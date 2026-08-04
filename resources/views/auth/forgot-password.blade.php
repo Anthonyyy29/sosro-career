@@ -11,9 +11,6 @@
 
             <h2 class="text-2xl font-bold text-gray-800 text-center mb-2">Lupa Password?</h2>
             
-            <div class="mb-6 text-sm text-gray-500 text-center leading-relaxed">
-                {{ __('Jangan khawatir. Masukkan alamat email Anda dan kami akan mengirimkan tautan reset password yang baru.') }}
-            </div>
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -23,12 +20,13 @@
                 <div class="group">
                     <label for="email" class="text-[13px] font-semibold text-gray-600 ml-1 mb-1.5 block group-focus-within:text-red-600 transition-colors">
                         {{ __('Alamat Email') }}
+                        {{-- Ini cuma buat multi bahasa aja. opsional kalo kamu mau ganti ke string normal --}}
                     </label>
                     <input id="email" 
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm transition-all focus:bg-white focus:ring-4 focus:ring-red-50 focus:border-red-500 outline-none" 
                            type="email" 
                            name="email" 
-                           :value="old('email')" 
+                           value="{{ old('email') }}" 
                            placeholder="nama@email.com"
                            required autofocus />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
