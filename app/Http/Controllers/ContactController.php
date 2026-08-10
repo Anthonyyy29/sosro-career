@@ -29,6 +29,9 @@ class ContactController extends Controller
             'message.max' => 'Pesan maksimal 2000 karakter',
         ]);
 
+        // Auto-assign ke cabang kalau "Wilayah Tujuan" yang dipilih pengunjung cocok dengan cabangs.nama
+        $validated['cabang_id'] = Cabang::where('nama', $validated['city'])->value('id');
+
         Contact::create($validated);
 
         return redirect()->back()->with('success_modal', 'Pesan Anda telah berhasil kami terima. Tim kami akan segera menindaklanjuti.');

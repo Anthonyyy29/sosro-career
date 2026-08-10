@@ -90,7 +90,7 @@
                             <option value="Pabrik Ungaran">Pabrik Ungaran</option>
                         </optgroup>
                         <optgroup label="Lainnya:" class="font-semibold">
-                            <option value="Perkebunan">Perkebunan</option>
+                            <option value="Kebun">Perkebunan</option>
                             <option value="Poci Kreasi Mandiri">Poci Kreasi Mandiri</option>
                         </optgroup>
                     </select>
