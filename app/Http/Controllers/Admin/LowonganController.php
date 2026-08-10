@@ -26,14 +26,19 @@ class LowonganController extends Controller
 
     public function toggleStatus(Lowongan $lowongan)
     {
-        if (Auth::user()->role !== 'superadmin') {
-            return back()->with('error', 'Hanya Superadmin yang dapat mengubah status lowongan.');
-        }
+        $user = Auth::user();
+        abort_if(
+            $user->role !== 'superadmin' && $lowongan->cabang_id !== $user->cabang_id,
+            403,
+            'Anda tidak memiliki akses ke lowongan cabang lain.'
+        );
 
         if ($lowongan->status_lowongan === 'aktif') {
             $lowongan->status_lowongan = 'tidak aktif';
         } elseif ($lowongan->status_lowongan === 'tidak aktif') {
             $lowongan->status_lowongan = 'aktif';
+        } else {
+            return back()->with('error', "Status '{$lowongan->status_lowongan}' sudah final, tidak bisa diubah lewat tombol ini.");
         }
 
         $lowongan->save();

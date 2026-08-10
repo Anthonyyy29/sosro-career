@@ -89,32 +89,37 @@
                         </td>
 
                         <td class="px-6 py-4">
-                            @if(Auth::user()->role === 'superadmin')
-                                {{-- Jika Superadmin: Tampilkan Form Toggle (Bisa Klik) --}}
+                            @php
+                                $canToggle = Auth::user()->role === 'superadmin' || Auth::user()->cabang_id === $item->cabang_id;
+                                $isToggleable = in_array($item->status_lowongan, ['aktif', 'tidak aktif']);
+                            @endphp
+                            @if($canToggle && $isToggleable)
+                                {{-- Punya akses ke cabang ini & status masih bisa di-toggle: Tampilkan Form Toggle (Bisa Klik) --}}
                                 <form method="POST" action="{{ route('admin.lowongan.toggle-status', $item->id) }}" onclick="event.stopPropagation()">
                                     @csrf @method('PATCH')
-                                    <button type="submit" title="Ubah Status" 
+                                    <button type="submit" title="Ubah Status"
                                         class="group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ease-in-out
-                                        {{ $item->status_lowongan === 'aktif' 
-                                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:shadow-sm' 
+                                        {{ $item->status_lowongan === 'aktif'
+                                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:shadow-sm'
                                             : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100' }}">
-                                        
+
                                         <span class="relative flex h-2 w-2">
                                             @if($item->status_lowongan === 'aktif')
                                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                             @endif
                                             <span class="relative inline-flex rounded-full h-2 w-2 {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
                                         </span>
-                                        
+
                                         <span class="text-[10px] tracking-wider font-bold uppercase">
                                             {{ $item->status_lowongan }}
                                         </span>
                                     </button>
                                 </form>
                             @else
-                                {{-- Jika Admin Biasa: Tampilkan Badge Saja (Tidak Bisa Klik) --}}
+                                {{-- Tidak punya akses, ATAU status sudah final (selesai/dihapus, tidak bisa di-toggle): Badge Saja (Tidak Bisa Klik) --}}
                                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border opacity-70 cursor-not-allowed
-                                    {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                                    {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-500' }}"
+                                    title="{{ $isToggleable ? 'Tidak memiliki akses ke lowongan cabang lain.' : 'Status sudah final, tidak bisa diubah lewat tombol ini.' }}">
                                     <span class="relative flex h-2 w-2">
                                         <span class="relative inline-flex rounded-full h-2 w-2 {{ $item->status_lowongan === 'aktif' ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
                                     </span>
