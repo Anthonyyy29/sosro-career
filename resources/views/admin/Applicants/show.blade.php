@@ -298,17 +298,15 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
-                                @forelse($applicant->profile->pendidikan_formal ?? [] as $edu)
+                                @forelse($applicant->profile->formalEducations as $edu)
                                 <tr class="hover:bg-gray-50/50">
-                                    <td class="px-4 py-3 font-bold text-gray-700">{{ $edu['jenjang'] ?? '-' }}</td>
-                                    <td class="px-4 py-3">{{ $edu['sekolah'] ?? '-' }}</td>
-                                    <td class="px-4 py-3 italic text-gray-600">{{ $edu['jurusan'] ?? '-' }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-600">{{ $edu['tahun_masuk'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 font-bold text-gray-700">{{ $edu->jenjang ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $edu->sekolah ?? '-' }}</td>
+                                    <td class="px-4 py-3 italic text-gray-600">{{ $edu->jurusan ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-center text-gray-600">{{ $edu->tahun_masuk ?? '-' }}</td>
                                     <td class="px-4 py-3 text-center">
                                         @php
-                                            // Logika: Jika tahun_lulus tidak ada ATAU is_current_edu bernilai true/on
-                                            $masihSekolah = !isset($edu['tahun_lulus']) || 
-                                                            (isset($edu['is_current_edu']) && ($edu['is_current_edu'] == 'on' || $edu['is_current_edu'] == '1'));
+                                            $masihSekolah = !$edu->tahun_lulus || $edu->is_current_edu;
                                         @endphp
 
                                         @if($masihSekolah)
@@ -316,10 +314,10 @@
                                                 Masih Masa Pendidikan
                                             </span>
                                         @else
-                                            <span class="font-semibold text-gray-700">{{ $edu['tahun_lulus'] }}</span>
+                                            <span class="font-semibold text-gray-700">{{ $edu->tahun_lulus }}</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 text-center font-bold text-gray-800">{{ $edu['nilai'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-center font-bold text-gray-800">{{ $edu->nilai ?? '-' }}</td>
                                 </tr>
                                 @empty
                                 <tr>
@@ -546,13 +544,13 @@
                     <section>
                         <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">Pelatihan / Kursus</h3>
                         <div class="space-y-2">
-                            @foreach($applicant->profile->pendidikan_informal ?? [] as $info)
+                            @foreach($applicant->profile->informalEducations as $info)
                                 <div class="p-3 bg-white border border-gray-100 rounded-lg flex justify-between items-center">
                                     <div>
-                                        <p class="text-xs font-bold text-gray-800 uppercase">{{ $info['kursus'] }}</p>
-                                        <p class="text-[10px] text-gray-500">{{ $info['penyelenggara'] }}</p>
+                                        <p class="text-xs font-bold text-gray-800 uppercase">{{ $info->kursus }}</p>
+                                        <p class="text-[10px] text-gray-500">{{ $info->penyelenggara }}</p>
                                     </div>
-                                    <span class="text-[10px] font-bold text-gray-400 italic">{{ $info['tahun'] }}</span>
+                                    <span class="text-[10px] font-bold text-gray-400 italic">{{ $info->tahun }}</span>
                                 </div>
                             @endforeach
                         </div>

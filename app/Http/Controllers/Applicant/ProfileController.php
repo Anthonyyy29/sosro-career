@@ -105,8 +105,6 @@ class ProfileController extends Controller
             // Menangani Data Array/JSON
             $profileData['jenis_sim'] = $request->jenis_sim;
             $profileData['minat'] = $request->minat_ordered; // Menyimpan urutan dari SortableJS
-            $profileData['pendidikan_formal'] = $request->pendidikan_formal;
-            $profileData['pendidikan_informal'] = $request->pendidikan_informal;
 
             // 5️⃣ UPDATE ATAU CREATE PROFILE
             $profile = \App\Models\ApplicantProfile::updateOrCreate(
@@ -114,9 +112,9 @@ class ProfileController extends Controller
                 $profileData
             );
 
-            // Helper: kolom date tidak terima string kosong (beda dari JSON lama yang terima apa saja)
-            $blankDatesToNull = function (array $item, array $dateKeys) {
-                foreach ($dateKeys as $key) {
+            // Helper: kolom date/integer tidak terima string kosong (beda dari JSON lama yang terima apa saja)
+            $blankToNull = function (array $item, array $keys) {
+                foreach ($keys as $key) {
                     if (($item[$key] ?? null) === '') {
                         $item[$key] = null;
                     }
@@ -127,16 +125,26 @@ class ProfileController extends Controller
             // 6️⃣ KELUARGA -> applicant_family_members (hapus semua, tulis ulang)
             $profile->familyMembers()->delete();
             foreach ($request->k_inti ?? [] as $item) {
-                $profile->familyMembers()->create([...$blankDatesToNull($item, ['tgl_lahir']), 'tipe' => 'inti']);
+                $profile->familyMembers()->create([...$blankToNull($item, ['tgl_lahir']), 'tipe' => 'inti']);
             }
             foreach ($request->k_kandung ?? [] as $item) {
-                $profile->familyMembers()->create([...$blankDatesToNull($item, ['tgl_lahir']), 'tipe' => 'kandung']);
+                $profile->familyMembers()->create([...$blankToNull($item, ['tgl_lahir']), 'tipe' => 'kandung']);
             }
 
             // 7️⃣ PENGALAMAN KERJA -> applicant_work_experiences (hapus semua, tulis ulang)
             $profile->workExperiences()->delete();
             foreach ($request->pengalaman_kerja ?? [] as $item) {
-                $profile->workExperiences()->create($blankDatesToNull($item, ['tanggal_masuk', 'tanggal_keluar']));
+                $profile->workExperiences()->create($blankToNull($item, ['tanggal_masuk', 'tanggal_keluar']));
+            }
+
+            // 8️⃣ PENDIDIKAN FORMAL & INFORMAL -> 2 tabel terpisah (hapus semua, tulis ulang)
+            $profile->formalEducations()->delete();
+            foreach ($request->pendidikan_formal ?? [] as $item) {
+                $profile->formalEducations()->create($blankToNull($item, ['tahun_masuk', 'tahun_lulus']));
+            }
+            $profile->informalEducations()->delete();
+            foreach ($request->pendidikan_informal ?? [] as $item) {
+                $profile->informalEducations()->create($blankToNull($item, ['tahun']));
             }
         });
 
@@ -149,7 +157,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         // Load relasi agar data di view muncul
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');
@@ -161,7 +169,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');

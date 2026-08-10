@@ -56,17 +56,28 @@
             }
         },
 
-        pendidikanFormal: {{ Js::from(old('pendidikan_formal', $applicant->profile->pendidikan_formal ?? [[
-            'jenjang' => '', 
-            'sekolah' => '', // diubah dari instansi
-            'jurusan' => '', 
-            'nilai' => '', 
-            'tahun_masuk' => '', 
-            'tahun_lulus' => '', 
-            'is_current_edu' => false
-        ]])) }},
-        
-        pendidikanInformal: {{ Js::from(old('pendidikan_informal', $applicant->profile->pendidikan_informal ?? [['kursus' => '', 'penyelenggara' => '', 'tahun' => '']])) }},
+        @php
+            $formalEducationsArr = $applicant->profile->formalEducations->map(fn($edu) => [
+                'jenjang' => $edu->jenjang, 'sekolah' => $edu->sekolah, 'jurusan' => $edu->jurusan,
+                'nilai' => $edu->nilai, 'tahun_masuk' => $edu->tahun_masuk, 'tahun_lulus' => $edu->tahun_lulus,
+                'is_current_edu' => $edu->is_current_edu,
+            ])->values();
+            if ($formalEducationsArr->isEmpty()) {
+                $formalEducationsArr = collect([[
+                    'jenjang' => '', 'sekolah' => '', 'jurusan' => '', 'nilai' => '',
+                    'tahun_masuk' => '', 'tahun_lulus' => '', 'is_current_edu' => false,
+                ]]);
+            }
+            $informalEducationsArr = $applicant->profile->informalEducations->map(fn($info) => [
+                'kursus' => $info->kursus, 'penyelenggara' => $info->penyelenggara, 'tahun' => $info->tahun,
+            ])->values();
+            if ($informalEducationsArr->isEmpty()) {
+                $informalEducationsArr = collect([['kursus' => '', 'penyelenggara' => '', 'tahun' => '']]);
+            }
+        @endphp
+        pendidikanFormal: {{ Js::from(old('pendidikan_formal', $formalEducationsArr)) }},
+
+        pendidikanInformal: {{ Js::from(old('pendidikan_informal', $informalEducationsArr)) }},
         
         @php
             $workExperiencesArr = $applicant->profile->workExperiences->map(fn($job) => [

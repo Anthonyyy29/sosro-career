@@ -340,28 +340,25 @@
             </tr>
         </thead>
         <tbody>
-            @forelse ($applicant->profile->pendidikan_formal ?? [] as $edu)
+            @forelse ($applicant->profile->formalEducations as $edu)
                 @php
-                    // Logika: Jika tahun_lulus tidak ada ATAU is_current_edu bernilai true/on/1
-                    $masihSekolah = !isset($edu['tahun_lulus']) || 
-                                    (isset($edu['is_current_edu']) && 
-                                    ($edu['is_current_edu'] == 'on' || $edu['is_current_edu'] == '1' || $edu['is_current_edu'] === true));
+                    $masihSekolah = !$edu->tahun_lulus || $edu->is_current_edu;
                 @endphp
                 <tr>
-                    <td class="font-bold">{{ $edu['jenjang'] ?? '-' }}</td>
-                    <td>{{ $edu['sekolah'] ?? '-' }}</td>
-                    <td style="font-style: italic; color: #4a5568;">{{ $edu['jurusan'] ?? '-' }}</td>
-                    <td class="text-center">{{ $edu['tahun_masuk'] ?? '-' }}</td>
+                    <td class="font-bold">{{ $edu->jenjang ?? '-' }}</td>
+                    <td>{{ $edu->sekolah ?? '-' }}</td>
+                    <td style="font-style: italic; color: #4a5568;">{{ $edu->jurusan ?? '-' }}</td>
+                    <td class="text-center">{{ $edu->tahun_masuk ?? '-' }}</td>
                     <td class="text-center">
                         @if($masihSekolah)
                             <span style="font-size: 8px; color: #2b6cb0; font-weight: bold; text-transform: uppercase;">
                                 Sedang Ditempuh
                             </span>
                         @else
-                            {{ $edu['tahun_lulus'] ?? '-' }}
+                            {{ $edu->tahun_lulus ?? '-' }}
                         @endif
                     </td>
-                    <td class="text-center font-bold">{{ $edu['nilai'] ?? '-' }}</td>
+                    <td class="text-center font-bold">{{ $edu->nilai ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
@@ -373,7 +370,7 @@
 
     {{-- Section Pendidikan Informal --}}
     <div class="section-title">Pendidikan Informal (Pelatihan & Kursus)</div>
-    @if (!empty($applicant->profile->pendidikan_informal))
+    @if ($applicant->profile->informalEducations->isNotEmpty())
         <table class="data-table">
             <thead>
                 <tr>
@@ -383,11 +380,11 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($applicant->profile->pendidikan_informal as $info)
+                @foreach ($applicant->profile->informalEducations as $info)
                     <tr>
-                        <td>{{ $info['kursus'] }}</td>
-                        <td>{{ $info['penyelenggara'] }}</td>
-                        <td>{{ $info['tahun'] }}</td>
+                        <td>{{ $info->kursus }}</td>
+                        <td>{{ $info->penyelenggara }}</td>
+                        <td>{{ $info->tahun }}</td>
                     </tr>
                 @endforeach
             </tbody>
