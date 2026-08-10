@@ -11,7 +11,7 @@ class ApplicantProfile extends Model
         'tinggi_badan', 'berat_badan', 'alamat', 'domisili', 'phone', 'agama',
         'status_nikah', 'jenis_sim', 'instagram', 'linkedin', 'expected_salary', 'expected_facilities',
         'ready_dinas', 'ready_placed_out', 'company_reference', 'minat',
-        'pendidikan_formal', 'pendidikan_informal', 'pengalaman_kerja',
+        'pendidikan_formal', 'pendidikan_informal',
         'ex_employee','ex_company_name','ex_last_position', 'penyakit', 'perokok', 'bertato',
     ];
 
@@ -21,7 +21,6 @@ class ApplicantProfile extends Model
         'minat' => 'array',
         'pendidikan_formal' => 'array',
         'pendidikan_informal' => 'array',
-        'pengalaman_kerja' => 'array',
     ];
 
     public function applicant()
@@ -32,5 +31,10 @@ class ApplicantProfile extends Model
     public function familyMembers()
     {
         return $this->hasMany(ApplicantFamilyMember::class, 'applicant_profile_id');
+    }
+
+    public function workExperiences()
+    {
+        return $this->hasMany(ApplicantWorkExperience::class, 'applicant_profile_id');
     }
 }

@@ -337,50 +337,50 @@
                         Pengalaman Kerja <div class="h-[1px] flex-1 bg-gray-100"></div>
                     </h3>
                     <div class="space-y-6">
-                        @forelse($applicant->profile->pengalaman_kerja ?? [] as $job)
+                        @forelse($applicant->profile->workExperiences as $job)
                         <div class="bg-slate-50 border border-gray-100 rounded-lg p-4">
                             <div class="flex justify-between items-start border-b border-gray-200 pb-2 mb-3">
                                 <div>
-                                    <h4 class="text-sm font-bold text-gray-900 uppercase">{{ $job['perusahaan'] ?? '-' }}</h4>
+                                    <h4 class="text-sm font-bold text-gray-900 uppercase">{{ $job->perusahaan ?? '-' }}</h4>
                                     <p class="text-xs text-red-600 font-bold uppercase">
-                                        {{ $job['jabatan'] ?? '-' }} • 
-                                        <span class="text-gray-400 font-medium italic uppercase">{{ $job['divisi'] ?? '-' }}</span>
+                                        {{ $job->jabatan ?? '-' }} •
+                                        <span class="text-gray-400 font-medium italic uppercase">{{ $job->divisi ?? '-' }}</span>
                                     </p>
                                 </div>
                                 {{-- Periode dengan Logika Tanggal & Masih Bekerja --}}
                                 <div class="text-right">
                                     <span class="text-[10px] font-bold bg-white px-2 py-1 rounded shadow-sm border border-gray-100">
-                                        {{ isset($job['tanggal_masuk']) ? \Carbon\Carbon::parse($job['tanggal_masuk'])->format('M Y') : '?' }} 
-                                        - 
-                                        @if(isset($job['masih_bekerja']) && ($job['masih_bekerja'] == true || $job['masih_bekerja'] == 'on'))
+                                        {{ $job->tanggal_masuk?->format('M Y') ?? '?' }}
+                                        -
+                                        @if($job->masih_bekerja)
                                             <span class="text-green-600">Sekarang</span>
                                         @else
-                                            {{ isset($job['tanggal_keluar']) ? \Carbon\Carbon::parse($job['tanggal_keluar'])->format('M Y') : '?' }}
+                                            {{ $job->tanggal_keluar?->format('M Y') ?? '?' }}
                                         @endif
                                     </span>
                                 </div>
                             </div>
-                            
+
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-[11px]">
                                 <div>
                                     <p class="text-gray-400 font-bold uppercase text-[9px]">Gaji Terakhir</p>
-                                    <p class="font-semibold text-gray-700">{{ $job['gaji'] ?? '-' }}</p>
+                                    <p class="font-semibold text-gray-700">{{ $job->gaji ?? '-' }}</p>
                                 </div>
                                 <div>
                                     <p class="text-gray-400 font-bold uppercase text-[9px]">Fasilitas</p>
-                                    <p class="font-semibold text-gray-700">{{ $job['fasilitas'] ?? '-' }}</p>
+                                    <p class="font-semibold text-gray-700">{{ $job->fasilitas ?? '-' }}</p>
                                 </div>
                                 <div>
                                     <p class="text-gray-400 font-bold uppercase text-[9px]">Referensi (Kontak)</p>
-                                    <p class="font-semibold text-gray-700">{{ $job['kontak_referensi'] ?? '-' }}</p>
+                                    <p class="font-semibold text-gray-700">{{ $job->kontak_referensi ?? '-' }}</p>
                                 </div>
                                 <div>
                                     <p class="text-gray-400 font-bold uppercase text-[9px]">Alasan Berhenti</p>
                                     <p class="font-semibold text-gray-700">
-                                        @if(isset($job['masih_bekerja']) && ($job['masih_bekerja'] == true || $job['masih_bekerja'] == 'on'))
+                                        @if($job->masih_bekerja)
                                             <span class="italic text-gray-400 italic">Masih Aktif Bekerja</span>
                                         @else
-                                            {{ $job['alasan'] ?? '-' }}
+                                            {{ $job->alasan ?? '-' }}
                                         @endif
                                     </p>
                                 </div>

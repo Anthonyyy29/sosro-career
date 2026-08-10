@@ -398,29 +398,29 @@
 
     {{-- Section Pengalaman Kerja --}}
     <div class="section-title">Pengalaman Kerja</div>
-    @forelse($applicant->profile->pengalaman_kerja ?? [] as $job)
+    @forelse($applicant->profile->workExperiences as $job)
         <div style="background-color: #f8fafc; border: 1px solid #edf2f7; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
             <table width="100%" style="border-bottom: 1px solid #e2e8f0; margin-bottom: 8px; padding-bottom: 5px;">
                 <tr>
                     <td>
                         <div style="font-weight: bold; font-size: 11px; text-transform: uppercase; color: #1a202c;">
-                            {{ $job['perusahaan'] ?? '-' }}
+                            {{ $job->perusahaan ?? '-' }}
                         </div>
                         <div style="font-size: 9px; font-weight: bold; color: #e53e3e; text-transform: uppercase;">
-                            {{ $job['jabatan'] ?? '-' }} 
+                            {{ $job->jabatan ?? '-' }}
                             <span style="color: #797a7b; font-style: italic; font-weight: normal;">
-                                • {{ $job['divisi'] ?? '-' }}
+                                • {{ $job->divisi ?? '-' }}
                             </span>
                         </div>
                     </td>
                     <td align="right" valign="top">
                         <span style="font-size: 9px; font-weight: bold; background-color: #ffffff; padding: 2px 5px; border: 1px solid #edf2f7;">
-                            {{ isset($job['tanggal_masuk']) ? \Carbon\Carbon::parse($job['tanggal_masuk'])->format('M Y') : '?' }} 
-                            - 
-                            @if(isset($job['masih_bekerja']) && ($job['masih_bekerja'] == true || $job['masih_bekerja'] == 'on'))
+                            {{ $job->tanggal_masuk?->format('M Y') ?? '?' }}
+                            -
+                            @if($job->masih_bekerja)
                                 <span style="color: #38a169;">Sekarang</span>
                             @else
-                                {{ isset($job['tanggal_keluar']) ? \Carbon\Carbon::parse($job['tanggal_keluar'])->format('M Y') : '?' }}
+                                {{ $job->tanggal_keluar?->format('M Y') ?? '?' }}
                             @endif
                         </span>
                     </td>
@@ -431,23 +431,23 @@
                 <tr>
                     <td width="25%">
                         <div style="color: #797a7b; font-weight: bold; text-transform: uppercase; font-size: 7px;">Gaji Terakhir</div>
-                        <div style="color: #414b5c; font-weight: bold;">{{ $job['gaji'] ?? '-' }}</div>
+                        <div style="color: #414b5c; font-weight: bold;">{{ $job->gaji ?? '-' }}</div>
                     </td>
                     <td width="25%">
                         <div style="color: #797a7b; font-weight: bold; text-transform: uppercase; font-size: 7px;">Fasilitas</div>
-                        <div style="color: #414b5c;">{{ $job['fasilitas'] ?? '-' }}</div>
+                        <div style="color: #414b5c;">{{ $job->fasilitas ?? '-' }}</div>
                     </td>
                     <td width="25%">
                         <div style="color: #797a7b; font-weight: bold; text-transform: uppercase; font-size: 7px;">Referensi</div>
-                        <div style="color: #414b5c;">{{ $job['kontak_referensi'] ?? '-' }}</div>
+                        <div style="color: #414b5c;">{{ $job->kontak_referensi ?? '-' }}</div>
                     </td>
                     <td width="25%">
                         <div style="color: #797a7b; font-weight: bold; text-transform: uppercase; font-size: 7px;">Alasan Berhenti</div>
                         <div style="color: #414b5c;">
-                            @if(isset($job['masih_bekerja']) && ($job['masih_bekerja'] == true || $job['masih_bekerja'] == 'on'))
+                            @if($job->masih_bekerja)
                                 <span style="font-style: italic; color: #9ca4ac;">Masih Aktif Bekerja</span>
                             @else
-                                {{ $job['alasan'] ?? '-' }}
+                                {{ $job->alasan ?? '-' }}
                             @endif
                         </div>
                     </td>

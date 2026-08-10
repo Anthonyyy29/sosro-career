@@ -107,7 +107,6 @@ class ProfileController extends Controller
             $profileData['minat'] = $request->minat_ordered; // Menyimpan urutan dari SortableJS
             $profileData['pendidikan_formal'] = $request->pendidikan_formal;
             $profileData['pendidikan_informal'] = $request->pendidikan_informal;
-            $profileData['pengalaman_kerja'] = $request->pengalaman_kerja;
 
             // 5️⃣ UPDATE ATAU CREATE PROFILE
             $profile = \App\Models\ApplicantProfile::updateOrCreate(
@@ -115,13 +114,29 @@ class ProfileController extends Controller
                 $profileData
             );
 
+            // Helper: kolom date tidak terima string kosong (beda dari JSON lama yang terima apa saja)
+            $blankDatesToNull = function (array $item, array $dateKeys) {
+                foreach ($dateKeys as $key) {
+                    if (($item[$key] ?? null) === '') {
+                        $item[$key] = null;
+                    }
+                }
+                return $item;
+            };
+
             // 6️⃣ KELUARGA -> applicant_family_members (hapus semua, tulis ulang)
             $profile->familyMembers()->delete();
             foreach ($request->k_inti ?? [] as $item) {
-                $profile->familyMembers()->create([...$item, 'tipe' => 'inti']);
+                $profile->familyMembers()->create([...$blankDatesToNull($item, ['tgl_lahir']), 'tipe' => 'inti']);
             }
             foreach ($request->k_kandung ?? [] as $item) {
-                $profile->familyMembers()->create([...$item, 'tipe' => 'kandung']);
+                $profile->familyMembers()->create([...$blankDatesToNull($item, ['tgl_lahir']), 'tipe' => 'kandung']);
+            }
+
+            // 7️⃣ PENGALAMAN KERJA -> applicant_work_experiences (hapus semua, tulis ulang)
+            $profile->workExperiences()->delete();
+            foreach ($request->pengalaman_kerja ?? [] as $item) {
+                $profile->workExperiences()->create($blankDatesToNull($item, ['tanggal_masuk', 'tanggal_keluar']));
             }
         });
 
@@ -134,7 +149,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         // Load relasi agar data di view muncul
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');
@@ -146,7 +161,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');

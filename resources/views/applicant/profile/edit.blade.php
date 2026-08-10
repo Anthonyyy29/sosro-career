@@ -68,18 +68,22 @@
         
         pendidikanInformal: {{ Js::from(old('pendidikan_informal', $applicant->profile->pendidikan_informal ?? [['kursus' => '', 'penyelenggara' => '', 'tahun' => '']])) }},
         
-        pengalamanKerja: {{ Js::from(old('pengalaman_kerja', $applicant->profile->pengalaman_kerja ?? [[
-            'perusahaan' => '', 
-            'jabatan' => '', 
-            'divisi' => '', 
-            'tanggal_masuk' => '',    // Sesuaikan dengan x-model di form
-            'tanggal_keluar' => '',   // Sesuaikan dengan x-model di form
-            'masih_bekerja' => false, 
-            'gaji' => '', 
-            'fasilitas' => '', 
-            'kontak_referensi' => '', 
-            'alasan' => ''
-        ]])) }},
+        @php
+            $workExperiencesArr = $applicant->profile->workExperiences->map(fn($job) => [
+                'perusahaan' => $job->perusahaan, 'jabatan' => $job->jabatan, 'divisi' => $job->divisi,
+                'tanggal_masuk' => $job->tanggal_masuk?->format('Y-m-d'), 'tanggal_keluar' => $job->tanggal_keluar?->format('Y-m-d'),
+                'masih_bekerja' => $job->masih_bekerja, 'gaji' => $job->gaji, 'fasilitas' => $job->fasilitas,
+                'kontak_referensi' => $job->kontak_referensi, 'alasan' => $job->alasan,
+            ])->values();
+            if ($workExperiencesArr->isEmpty()) {
+                $workExperiencesArr = collect([[
+                    'perusahaan' => '', 'jabatan' => '', 'divisi' => '',
+                    'tanggal_masuk' => '', 'tanggal_keluar' => '', 'masih_bekerja' => false,
+                    'gaji' => '', 'fasilitas' => '', 'kontak_referensi' => '', 'alasan' => '',
+                ]]);
+            }
+        @endphp
+        pengalamanKerja: {{ Js::from(old('pengalaman_kerja', $workExperiencesArr)) }},
 
         // Logic Helper
         syncDomisili() {
