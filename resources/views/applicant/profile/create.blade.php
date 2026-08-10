@@ -94,7 +94,7 @@
             event.target.innerHTML = 'Menyimpan...';
             event.target.classList.add('opacity-50');
         }
-    }" class="min-h-screen bg-[#FDFDFD] py-12 px-4 flex flex-col items-center justify-center font-figtree">
+    }" class="min-h-screen bg-[#FDFDFD] py-12 px-4 flex flex-col items-center justify-start font-figtree">
 
         <div class="max-w-4xl w-full">
             
