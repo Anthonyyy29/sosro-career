@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Admin;
+use App\Models\Cabang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -40,34 +41,37 @@ class ContactController extends Controller
 
         if ($user->role === 'superadmin') {
             // Superadmin melihat semua pesan
-            $messages = Contact::with('admin')->latest()->paginate(10);
-            $branchAdmins = Admin::where('role', 'admin')->get();
-            return view('admin.kontak.index', compact('messages', 'branchAdmins'));
+            $messages = Contact::with(['admin', 'cabang'])->latest()->paginate(10);
+            $cabangs = Cabang::orderBy('kelompok')->orderBy('nama')->get();
+            return view('admin.kontak.index', compact('messages', 'cabangs'));
         } else {
-            // Admin Cabang hanya melihat yang ditugaskan ke mereka
-            $messages = Contact::where('admin_id', $user->id)->latest()->paginate(10);
+            // Admin Cabang melihat semua pesan yang ditugaskan ke cabangnya (bukan cuma ke dirinya)
+            $messages = Contact::with(['admin', 'cabang'])
+                ->where('cabang_id', $user->cabang_id)
+                ->latest()->paginate(10);
             return view('admin.kontak.index', compact('messages'));
         }
     }
 
-    // 3. Superadmin menugaskan ke Admin Cabang
+    // 3. Superadmin menugaskan ke Cabang -- semua admin di cabang itu bisa lihat & balas
     public function assign(Request $request, Contact $contact)
     {
-        $request->validate(['admin_id' => 'required|exists:admins,id']);
+        $request->validate(['cabang_id' => 'required|exists:cabangs,id']);
 
         $contact->update([
-            'admin_id' => $request->admin_id,
+            'cabang_id' => $request->cabang_id,
             'status' => 'forwarded'
         ]);
 
-        return back()->with('success', 'Pesan berhasil diteruskan ke Admin Cabang.');
+        return back()->with('success', 'Pesan berhasil diteruskan ke Cabang.');
     }
 
     public function destroy(Contact $contact)
     {
-        // Proteksi tambahan: Pastikan hanya superadmin yang bisa hapus
-        if (Auth::user()->role !== 'superadmin') {
-            return back()->with('error', 'Hanya Superadmin yang dapat menghapus pesan.');
+        // Superadmin boleh hapus semua; admin cabang cuma boleh hapus pesan yang ditugaskan ke cabangnya
+        $user = Auth::user();
+        if ($user->role !== 'superadmin' && $contact->cabang_id !== $user->cabang_id) {
+            return back()->with('error', 'Anda tidak memiliki akses ke pesan ini.');
         }
 
         $contact->delete();

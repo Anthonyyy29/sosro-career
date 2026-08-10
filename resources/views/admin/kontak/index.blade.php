@@ -42,11 +42,11 @@
                                     ✓ Terbalas
                                 </span>
                                 <div class="text-[9px] text-gray-400 mt-1">Oleh: {{ $msg->admin->name ?? 'Superadmin' }}</div>
-                            @elseif($msg->admin_id)
+                            @elseif($msg->cabang_id)
                                 <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-[10px] font-bold uppercase">
                                     Diteruskan
                                 </span>
-                                <div class="text-[9px] text-gray-400 mt-1 pl-1">{{ $msg->admin->name }}</div>
+                                <div class="text-[9px] text-gray-400 mt-1 pl-1">{{ $msg->cabang->nama }}</div>
                             @else
                                 <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-[10px] font-bold uppercase animate-pulse">
                                     Baru/Pending
@@ -60,17 +60,17 @@
 
                                 {{-- FITUR TERUSKAN (Hanya Superadmin) --}}
                                 @if(auth()->user()->role === 'superadmin')
-                                    <form action="{{ route('admin.kontak.assign', $msg->id) }}" method="POST" 
-                                        x-data="{ adminSelected: '{{ $msg->admin_id ?? '' }}' }" class="flex items-center gap-1">
+                                    <form action="{{ route('admin.kontak.assign', $msg->id) }}" method="POST"
+                                        x-data="{ cabangSelected: '{{ $msg->cabang_id ?? '' }}' }" class="flex items-center gap-1">
                                         @csrf
-                                        <select name="admin_id" x-model="adminSelected" required 
+                                        <select name="cabang_id" x-model="cabangSelected" required
                                                 class="text-[10px] border-gray-300 rounded p-1 w-28 focus:ring-red-500">
                                             <option value="" disabled>Teruskan ke...</option>
-                                            @foreach($branchAdmins as $admin)
-                                                <option value="{{ $admin->id }}">{{ $admin->name }}</option>
+                                            @foreach($cabangs as $cabang)
+                                                <option value="{{ $cabang->id }}">{{ $cabang->nama }}</option>
                                             @endforeach
                                         </select>
-                                        <button type="submit" :disabled="!adminSelected" 
+                                        <button type="submit" :disabled="!cabangSelected"
                                                 class="bg-gray-800 text-white text-[10px] px-2 py-1 rounded disabled:opacity-50">
                                             Teruskan
                                         </button>
@@ -89,8 +89,8 @@
                                     </a>
                                 </form>
 
-                                {{-- FITUR HAPUS (Semua Role - Tapi Admin hanya bisa hapus yang ditugaskan ke dia) --}}
-                                @if(auth()->user()->role === 'superadmin' || auth()->id() === $msg->admin_id)
+                                {{-- FITUR HAPUS (Semua Role - Tapi Admin hanya bisa hapus yang ditugaskan ke cabangnya) --}}
+                                @if(auth()->user()->role === 'superadmin' || auth()->user()->cabang_id === $msg->cabang_id)
                                     <form action="{{ route('admin.kontak.destroy', $msg->id) }}" method="POST" 
                                         onsubmit="return confirm('Hapus pesan ini?')">
                                         @csrf @method('DELETE')
