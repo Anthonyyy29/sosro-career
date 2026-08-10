@@ -105,20 +105,24 @@ class ProfileController extends Controller
             // Menangani Data Array/JSON
             $profileData['jenis_sim'] = $request->jenis_sim;
             $profileData['minat'] = $request->minat_ordered; // Menyimpan urutan dari SortableJS
-
-            $profileData['data_keluarga'] = [
-                'inti' => $request->k_inti ?? [],
-                'kandung' => $request->k_kandung ?? []
-            ];
             $profileData['pendidikan_formal'] = $request->pendidikan_formal;
             $profileData['pendidikan_informal'] = $request->pendidikan_informal;
             $profileData['pengalaman_kerja'] = $request->pengalaman_kerja;
 
             // 5️⃣ UPDATE ATAU CREATE PROFILE
-            \App\Models\ApplicantProfile::updateOrCreate(
+            $profile = \App\Models\ApplicantProfile::updateOrCreate(
                 ['applicant_id' => $realApplicantId],
                 $profileData
             );
+
+            // 6️⃣ KELUARGA -> applicant_family_members (hapus semua, tulis ulang)
+            $profile->familyMembers()->delete();
+            foreach ($request->k_inti ?? [] as $item) {
+                $profile->familyMembers()->create([...$item, 'tipe' => 'inti']);
+            }
+            foreach ($request->k_kandung ?? [] as $item) {
+                $profile->familyMembers()->create([...$item, 'tipe' => 'kandung']);
+            }
         });
 
         return redirect()
@@ -130,7 +134,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         // Load relasi agar data di view muncul
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');
@@ -142,7 +146,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');

@@ -382,32 +382,32 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    @forelse($applicant->profile->data_keluarga[$key] ?? [] as $fam)
-                                        @php 
-                                            $isDeceased = str_contains($fam['nama'] ?? '', '+'); 
-                                            $cleanName = trim(str_replace('+', '', $fam['nama'] ?? '-'));
-                                            $age = !empty($fam['tgl_lahir']) ? \Carbon\Carbon::parse($fam['tgl_lahir'])->age : null;
+                                    @forelse($applicant->profile->familyMembers->where('tipe', $key) as $fam)
+                                        @php
+                                            $isDeceased = str_contains($fam->nama ?? '', '+');
+                                            $cleanName = trim(str_replace('+', '', $fam->nama ?? '-'));
+                                            $age = $fam->tgl_lahir?->age;
                                         @endphp
                                         <tr class="hover:bg-gray-50/50">
                                             <td class="px-4 py-3 font-bold text-gray-700">
                                                 {{ $isDeceased ? '(Alm/h) ' : '' }}{{ $cleanName }}
                                             </td>
                                             <td class="px-4 py-3 uppercase font-medium text-red-600 text-[10px]">
-                                                {{ $fam['hubungan'] ?? '-' }}
+                                                {{ $fam->hubungan ?? '-' }}
                                             </td>
                                             <td class="px-4 py-3 text-gray-600">
-                                                {{ $fam['tempat_lahir'] ?? '-' }}, 
-                                                <span class="text-gray-400">{{ !empty($fam['tgl_lahir']) ? \Carbon\Carbon::parse($fam['tgl_lahir'])->format('d/m/Y') : '-' }}</span>
+                                                {{ $fam->tempat_lahir ?? '-' }},
+                                                <span class="text-gray-400">{{ $fam->tgl_lahir?->format('d/m/Y') ?? '-' }}</span>
                                                 @if($age) <span class="font-bold text-gray-500 text-[10px]">({{ $age }} Th)</span> @endif
                                             </td>
                                             <td class="px-4 py-3 text-center text-gray-600 font-medium">
-                                                {{ $fam['pendidikan'] ?? '-' }}
+                                                {{ $fam->pendidikan ?? '-' }}
                                             </td>
                                             <td class="px-4 py-3 text-gray-700">
-                                                {{ $fam['pekerjaan'] ?? '-' }}
+                                                {{ $fam->pekerjaan ?? '-' }}
                                             </td>
                                             <td class="px-4 py-3 text-center text-gray-600">
-                                                {{ $fam['hp'] ?? '-' }}
+                                                {{ $fam->hp ?? '-' }}
                                             </td>
                                         </tr>
                                     @empty

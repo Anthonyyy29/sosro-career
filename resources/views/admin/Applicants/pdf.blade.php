@@ -474,23 +474,23 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($applicant->profile->data_keluarga['inti'] ?? [] as $fam)
-                @php 
-                    $isDeceased = str_contains($fam['nama'] ?? '', '+'); 
-                    $cleanName = trim(str_replace('+', '', $fam['nama'] ?? '-'));
-                    $age = !empty($fam['tgl_lahir']) ? \Carbon\Carbon::parse($fam['tgl_lahir'])->age : null;
+            @forelse($applicant->profile->familyMembers->where('tipe', 'inti') as $fam)
+                @php
+                    $isDeceased = str_contains($fam->nama ?? '', '+');
+                    $cleanName = trim(str_replace('+', '', $fam->nama ?? '-'));
+                    $age = $fam->tgl_lahir?->age;
                 @endphp
                 <tr>
                     <td class="font-bold">{{ $isDeceased ? '(Alm/h) ' : '' }}{{ $cleanName }}</td>
-                    <td class="text-red font-bold" style="font-size: 9px; text-transform: uppercase;">{{ $fam['hubungan'] ?? '-' }}</td>
+                    <td class="text-red font-bold" style="font-size: 9px; text-transform: uppercase;">{{ $fam->hubungan ?? '-' }}</td>
                     <td>
-                        {{ $fam['tempat_lahir'] ?? '-' }}, 
-                        {{ !empty($fam['tgl_lahir']) ? \Carbon\Carbon::parse($fam['tgl_lahir'])->format('d/m/Y') : '-' }}
+                        {{ $fam->tempat_lahir ?? '-' }},
+                        {{ $fam->tgl_lahir?->format('d/m/Y') ?? '-' }}
                         @if($age) <span class="font-bold text-gray">({{ $age }} Th)</span> @endif
                     </td>
-                    <td class="text-center">{{ $fam['pendidikan'] ?? '-' }}</td>
-                    <td>{{ $fam['pekerjaan'] ?? '-' }}</td>
-                    <td class="text-center">{{ $fam['hp'] ?? '-' }}</td>
+                    <td class="text-center">{{ $fam->pendidikan ?? '-' }}</td>
+                    <td>{{ $fam->pekerjaan ?? '-' }}</td>
+                    <td class="text-center">{{ $fam->hp ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
@@ -514,23 +514,23 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($applicant->profile->data_keluarga['kandung'] ?? [] as $fam)
-                @php 
-                    $isDeceased = str_contains($fam['nama'] ?? '', '+'); 
-                    $cleanName = trim(str_replace('+', '', $fam['nama'] ?? '-'));
-                    $age = !empty($fam['tgl_lahir']) ? \Carbon\Carbon::parse($fam['tgl_lahir'])->age : null;
+            @forelse($applicant->profile->familyMembers->where('tipe', 'kandung') as $fam)
+                @php
+                    $isDeceased = str_contains($fam->nama ?? '', '+');
+                    $cleanName = trim(str_replace('+', '', $fam->nama ?? '-'));
+                    $age = $fam->tgl_lahir?->age;
                 @endphp
                 <tr>
                     <td class="font-bold">{{ $isDeceased ? '(Alm/h) ' : '' }}{{ $cleanName }}</td>
-                    <td class="text-red font-bold" style="font-size: 9px; text-transform: uppercase;">{{ $fam['hubungan'] ?? '-' }}</td>
+                    <td class="text-red font-bold" style="font-size: 9px; text-transform: uppercase;">{{ $fam->hubungan ?? '-' }}</td>
                     <td>
-                        {{ $fam['tempat_lahir'] ?? '-' }}, 
-                        {{ !empty($fam['tgl_lahir']) ? \Carbon\Carbon::parse($fam['tgl_lahir'])->format('d/m/Y') : '-' }}
+                        {{ $fam->tempat_lahir ?? '-' }},
+                        {{ $fam->tgl_lahir?->format('d/m/Y') ?? '-' }}
                         @if($age) <span class="font-bold text-gray">({{ $age }} Th)</span> @endif
                     </td>
-                    <td class="text-center">{{ $fam['pendidikan'] ?? '-' }}</td>
-                    <td>{{ $fam['pekerjaan'] ?? '-' }}</td>
-                    <td class="text-center">{{ $fam['hp'] ?? '-' }}</td>
+                    <td class="text-center">{{ $fam->pendidikan ?? '-' }}</td>
+                    <td>{{ $fam->pekerjaan ?? '-' }}</td>
+                    <td class="text-center">{{ $fam->hp ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>

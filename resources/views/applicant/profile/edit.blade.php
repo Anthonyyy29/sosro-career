@@ -36,8 +36,15 @@
         domisili: '{{ old('domisili', $applicant->profile->domisili) }}',
         isSameAddress: {{ old('alamat', $applicant->profile->alamat) === old('domisili', $applicant->profile->domisili) ? 'true' : 'false' }},
         
-        keluargaInti: {{ Js::from(old('k_inti', $applicant->profile->data_keluarga['inti'] ?? [])) }},
-        keluargaKandung: {{ Js::from(old('k_kandung', $applicant->profile->data_keluarga['kandung'] ?? [])) }},
+        @php
+            $mapFamily = fn($tipe) => $applicant->profile->familyMembers->where('tipe', $tipe)->map(fn($fam) => [
+                'nama' => $fam->nama, 'hubungan' => $fam->hubungan, 'tempat_lahir' => $fam->tempat_lahir,
+                'tgl_lahir' => $fam->tgl_lahir?->format('Y-m-d'), 'pendidikan' => $fam->pendidikan,
+                'pekerjaan' => $fam->pekerjaan, 'hp' => $fam->hp,
+            ])->values();
+        @endphp
+        keluargaInti: {{ Js::from(old('k_inti', $mapFamily('inti'))) }},
+        keluargaKandung: {{ Js::from(old('k_kandung', $mapFamily('kandung'))) }},
 
         init() {
             // Jika data dari database kosong, buatkan 1 baris kosong agar form tidak hilang

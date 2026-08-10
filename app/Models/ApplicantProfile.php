@@ -10,7 +10,7 @@ class ApplicantProfile extends Model
         'applicant_id', 'nik', 'jk', 'tempat_lahir', 'tanggal_lahir',
         'tinggi_badan', 'berat_badan', 'alamat', 'domisili', 'phone', 'agama',
         'status_nikah', 'jenis_sim', 'instagram', 'linkedin', 'expected_salary', 'expected_facilities',
-        'ready_dinas', 'ready_placed_out', 'company_reference', 'minat', 'data_keluarga',
+        'ready_dinas', 'ready_placed_out', 'company_reference', 'minat',
         'pendidikan_formal', 'pendidikan_informal', 'pengalaman_kerja',
         'ex_employee','ex_company_name','ex_last_position', 'penyakit', 'perokok', 'bertato',
     ];
@@ -19,7 +19,6 @@ class ApplicantProfile extends Model
         'tanggal_lahir' => 'date',
         'jenis_sim' => 'array',
         'minat' => 'array',
-        'data_keluarga' => 'array',
         'pendidikan_formal' => 'array',
         'pendidikan_informal' => 'array',
         'pengalaman_kerja' => 'array',
@@ -28,5 +27,10 @@ class ApplicantProfile extends Model
     public function applicant()
     {
         return $this->belongsTo(Applicant::class);
+    }
+
+    public function familyMembers()
+    {
+        return $this->hasMany(ApplicantFamilyMember::class, 'applicant_profile_id');
     }
 }
