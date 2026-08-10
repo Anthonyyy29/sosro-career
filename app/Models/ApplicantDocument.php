@@ -10,6 +10,13 @@ class ApplicantDocument extends Model
         'applicant_id',
         'type',
         'file_path',
+        'is_required',
+        'extracted_data',
+    ];
+
+    protected $casts = [
+        'is_required' => 'boolean',
+        'extracted_data' => 'array',
     ];
 
     public function applicant()

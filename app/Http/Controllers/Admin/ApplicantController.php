@@ -78,7 +78,7 @@ class ApplicantController extends Controller
             abort(403, 'Anda tidak memiliki hak akses untuk melihat pelamar ini.');
         }
 
-        $application->load(['applicant.user', 'applicant.profile', 'lowongan']);
+        $application->load(['applicant.user', 'applicant.profile', 'applicant.documents', 'lowongan']);
         return view('admin.applicants.show', compact('application'));
     }
 
@@ -175,7 +175,7 @@ class ApplicantController extends Controller
             abort(403);
         }
 
-        $applicant = $application->applicant()->with('profile')->first();
+        $applicant = $application->applicant()->with(['profile', 'documents'])->first();
         if (!$applicant) abort(404);
 
         $pdf = Pdf::loadView('admin.applicants.pdf', [
@@ -297,7 +297,7 @@ class ApplicantController extends Controller
     public function downloadProfilePdf($applicantId)
     {
         // Cari applicant berdasarkan ID, muat user dan profilenya
-        $applicant = \App\Models\Applicant::with(['user', 'profile'])->findOrFail($applicantId);
+        $applicant = \App\Models\Applicant::with(['user', 'profile', 'documents'])->findOrFail($applicantId);
         
         // Gunakan view PDF yang sudah Anda punya
         $pdf = Pdf::loadView('admin.applicants.pdf', [

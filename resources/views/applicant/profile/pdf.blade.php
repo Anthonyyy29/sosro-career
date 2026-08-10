@@ -214,9 +214,10 @@
 
     <div class="identity-container clearfix">
         <div class="foto-box">
-            @if ($applicant->profile->doc_foto)
+            @php $docsByType = $applicant->documents->keyBy('type'); @endphp
+            @if ($docsByType->get('foto'))
                 @php
-                    $path = public_path('storage/' . $applicant->profile->doc_foto);
+                    $path = public_path('storage/' . $docsByType->get('foto')->file_path);
                     if (file_exists($path)) {
                         $type = pathinfo($path, PATHINFO_EXTENSION);
                         $data = file_get_contents($path);
@@ -631,16 +632,16 @@
     <div class="section-title">Lampiran Berkas</div>
     <table class="table-info" style="font-size: 11px;">
         <tr>
-            <td>CV: {{ $applicant->profile->doc_cv ? 'Tersedia' : 'Tidak' }}</td>
-            <td>KTP: {{ $applicant->profile->doc_ktp ? 'Tersedia' : 'Tidak' }}</td>
-            <td>Ijazah: {{ $applicant->profile->doc_ijazah ? 'Tersedia' : 'Tidak' }}</td>
-            <td>NPWP: {{ $applicant->profile->doc_npwp ? 'Tersedia' : 'Tidak' }}</td>
+            <td>CV: {{ $docsByType->get('cv') ? 'Tersedia' : 'Tidak' }}</td>
+            <td>KTP: {{ $docsByType->get('ktp') ? 'Tersedia' : 'Tidak' }}</td>
+            <td>Ijazah: {{ $docsByType->get('ijazah') ? 'Tersedia' : 'Tidak' }}</td>
+            <td>NPWP: {{ $docsByType->get('npwp') ? 'Tersedia' : 'Tidak' }}</td>
         </tr>
         <tr>
-            <td>SIM: {{ $applicant->profile->doc_sim ? 'Tersedia' : 'Tidak' }}</td>
-            <td>BPJS Kes: {{ $applicant->profile->doc_bpjs_kes ? 'Tersedia' : 'Tidak' }}</td>
-            <td>BPJS TK: {{ $applicant->profile->doc_bpjs_tk ? 'Tersedia' : 'Tidak' }}</td>
-            <td>Lainnya: {{ $applicant->profile->doc_lain ? 'Tersedia' : 'Tidak' }}</td>
+            <td>SIM: {{ $docsByType->get('sim') ? 'Tersedia' : 'Tidak' }}</td>
+            <td>BPJS Kes: {{ $docsByType->get('bpjs_kes') ? 'Tersedia' : 'Tidak' }}</td>
+            <td>BPJS TK: {{ $docsByType->get('bpjs_tk') ? 'Tersedia' : 'Tidak' }}</td>
+            <td>Lainnya: {{ $docsByType->get('lain') ? 'Tersedia' : 'Tidak' }}</td>
         </tr>
     </table>
 

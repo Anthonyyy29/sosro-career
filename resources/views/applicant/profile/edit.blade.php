@@ -843,6 +843,7 @@
                                 </span>
                             </div>
 
+                            @php $docsByType = $applicant->documents->keyBy('type'); @endphp
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {{-- Sisi Kiri: Wajib --}}
                                 <div class="space-y-4">
@@ -854,6 +855,7 @@
                                             'doc_ktp'    => ['label' => 'KTP', 'limit' => 2, 'accept' => 'image/*, .pdf'],
                                             'doc_ijazah' => ['label' => 'IJAZAH / TRANSKRIP NILAI', 'limit' => 2, 'accept' => 'image/*, .pdf']
                                         ] as $field => $info)
+                                        @php $existingDoc = $docsByType->get(substr($field, 4)); @endphp
                                         <div>
                                             <div class="flex justify-between items-center mb-1">
                                                 <p class="text-[10px] font-bold text-gray-400">{{ $info['label'] }} (Maks {{ $info['limit'] }}MB)</p>
@@ -872,11 +874,11 @@
                                                 class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-700">
 
                                             {{-- History File LAMA (Tetap Muncul) --}}
-                                            @if($applicant->profile && $applicant->profile->$field)
+                                            @if($existingDoc)
                                                 <div class="mt-2 flex items-center gap-1 text-[10px] text-green-600 font-bold italic bg-green-50 p-1.5 rounded-md border border-green-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                                     Sudah ada file
-                                                    <a href="{{ asset('storage/' . $applicant->profile->$field) }}" target="_blank" class="underline hover:text-green-800 ml-auto">(Lihat File Lama)</a>
+                                                    <a href="{{ asset('storage/' . $existingDoc->file_path) }}" target="_blank" class="underline hover:text-green-800 ml-auto">(Lihat File Lama)</a>
                                                 </div>
                                             @endif
                                         </div>
@@ -895,6 +897,7 @@
                                             'doc_bpjs_tk' => 'BPJS TK',
                                             'doc_lain' => 'LAINNYA'
                                         ] as $field => $label)
+                                        @php $existingDoc = $docsByType->get(substr($field, 4)); @endphp
                                         <div class="border-b border-gray-100 pb-3">
                                             <div class="flex items-center gap-2">
                                                 <input type="file" name="{{ $field }}" @change="validateFile($event, 2)" class="flex-1 text-xs">
@@ -902,10 +905,10 @@
                                             </div>
 
                                             {{-- History File LAMA --}}
-                                            @if($applicant->profile && $applicant->profile->$field)
+                                            @if($existingDoc)
                                                 <div class="mt-2 text-[9px] text-blue-500 font-bold italic flex items-center gap-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z" /></svg>
-                                                    Terunggah: <a href="{{ asset('storage/' . $applicant->profile->$field) }}" target="_blank" class="underline ml-1 truncate max-w-[150px]">{{ basename($applicant->profile->$field) }}</a>
+                                                    Terunggah: <a href="{{ asset('storage/' . $existingDoc->file_path) }}" target="_blank" class="underline ml-1 truncate max-w-[150px]">{{ basename($existingDoc->file_path) }}</a>
                                                 </div>
                                             @endif
                                         </div>

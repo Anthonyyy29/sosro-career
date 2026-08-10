@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Applicant;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Applicant;
 use App\Models\ApplicantProfile;
@@ -60,58 +61,65 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // 2️⃣ PASTIKAN APPLICANT ADA
-        $applicant = \App\Models\Applicant::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'name' => $user->name,
-                'status' => 'active',
-                'profile_completed' => true,
-            ]
-        );
+        DB::transaction(function () use ($request, $user) {
+            // 2️⃣ PASTIKAN APPLICANT ADA
+            $applicant = \App\Models\Applicant::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'name' => $user->name,
+                    'status' => 'active',
+                    'profile_completed' => true,
+                ]
+            );
 
-        $realApplicantId = $applicant->id;
+            $realApplicantId = $applicant->id;
 
-        // 3️⃣ HANDLE FILE UPLOAD
-        $fileData = [];
-        $docs = ['doc_foto', 'doc_cv', 'doc_ktp', 'doc_ijazah', 'doc_sim', 'doc_npwp', 'doc_bpjs_kes', 'doc_bpjs_tk', 'doc_lain'];
-        foreach ($docs as $doc) {
-            if ($request->hasFile($doc)) {
-                if ($applicant->profile && $applicant->profile->$doc) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($applicant->profile->$doc);
+            // 3️⃣ HANDLE FILE UPLOAD -> applicant_documents
+            $docs = ['doc_foto', 'doc_cv', 'doc_ktp', 'doc_ijazah', 'doc_sim', 'doc_npwp', 'doc_bpjs_kes', 'doc_bpjs_tk', 'doc_lain'];
+            foreach ($docs as $doc) {
+                if ($request->hasFile($doc)) {
+                    $type = substr($doc, 4); // hapus prefix 'doc_'
+                    $existing = $applicant->documents()->where('type', $type)->first();
+                    if ($existing) {
+                        Storage::disk('public')->delete($existing->file_path);
+                        $existing->delete();
+                    }
+                    $applicant->documents()->create([
+                        'type' => $type,
+                        'file_path' => $request->file($doc)->store('applicant_docs', 'public'),
+                    ]);
                 }
-                $fileData[$doc] = $request->file($doc)->store('applicant_docs', 'public');
             }
-        }
 
-        // 4️⃣ MAPPING DATA
-        $profileData = array_merge($request->only([
-            'nik', 'jk', 'tempat_lahir', 'tanggal_lahir',
-            'tinggi_badan', 'berat_badan', 'alamat', 'domisili', 'phone', 
-            'agama', 'status_nikah', 'instagram', 'linkedin', 
-            'ex_employee', 'ex_company_name', 'ex_last_position', 'penyakit',
-            // Field Baru
-            'expected_salary', 'expected_facilities', 'ready_dinas', 
-            'ready_placed_out', 'company_reference', 'perokok', 'bertato'
-        ]), $fileData);
+            // 4️⃣ MAPPING DATA
+            $profileData = $request->only([
+                'nik', 'jk', 'tempat_lahir', 'tanggal_lahir',
+                'tinggi_badan', 'berat_badan', 'alamat', 'domisili', 'phone',
+                'agama', 'status_nikah', 'instagram', 'linkedin',
+                'ex_employee', 'ex_company_name', 'ex_last_position', 'penyakit',
+                // Field Baru
+                'expected_salary', 'expected_facilities', 'ready_dinas',
+                'ready_placed_out', 'company_reference', 'perokok', 'bertato'
+            ]);
 
-        // Menangani Data Array/JSON
-        $profileData['jenis_sim'] = $request->jenis_sim; 
-        $profileData['minat'] = $request->minat_ordered; // Menyimpan urutan dari SortableJS
-        
-        $profileData['data_keluarga'] = [
-            'inti' => $request->k_inti ?? [],
-            'kandung' => $request->k_kandung ?? []
-        ];
-        $profileData['pendidikan_formal'] = $request->pendidikan_formal;
-        $profileData['pendidikan_informal'] = $request->pendidikan_informal;
-        $profileData['pengalaman_kerja'] = $request->pengalaman_kerja;
+            // Menangani Data Array/JSON
+            $profileData['jenis_sim'] = $request->jenis_sim;
+            $profileData['minat'] = $request->minat_ordered; // Menyimpan urutan dari SortableJS
 
-        // 5️⃣ UPDATE ATAU CREATE PROFILE
-        \App\Models\ApplicantProfile::updateOrCreate(
-            ['applicant_id' => $realApplicantId],
-            $profileData
-        );
+            $profileData['data_keluarga'] = [
+                'inti' => $request->k_inti ?? [],
+                'kandung' => $request->k_kandung ?? []
+            ];
+            $profileData['pendidikan_formal'] = $request->pendidikan_formal;
+            $profileData['pendidikan_informal'] = $request->pendidikan_informal;
+            $profileData['pengalaman_kerja'] = $request->pengalaman_kerja;
+
+            // 5️⃣ UPDATE ATAU CREATE PROFILE
+            \App\Models\ApplicantProfile::updateOrCreate(
+                ['applicant_id' => $realApplicantId],
+                $profileData
+            );
+        });
 
         return redirect()
             ->route('applicant.profile.show') // Saya arahkan ke show agar user bisa langsung lihat hasilnya
@@ -122,7 +130,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         // Load relasi agar data di view muncul
-        $applicant = Applicant::where('user_id', Auth::id())->with('profile')->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');
@@ -134,7 +142,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $applicant = Applicant::where('user_id', Auth::id())->with('profile')->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');
@@ -174,6 +182,7 @@ class ProfileController extends Controller
         // 3. Gabungkan untuk dikirim ke View PDF
         $applicant = $user;
         $applicant->profile = $profile;
+        $applicant->documents = $applicantData->documents;
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('applicant.profile.pdf', compact('applicant'))
                 ->setPaper('a4', 'portrait');

@@ -59,8 +59,9 @@
                     
                     {{-- Foto Profil --}}
                     <div class="w-32 h-40 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0 border-4 border-white shadow-md mx-auto md:mx-0 relative">
-                        @if($applicant->profile->doc_foto)
-                            <img src="{{ asset('storage/' . $applicant->profile->doc_foto) }}" class="w-full h-full object-cover">
+                        @php $docsByType = $applicant->documents->keyBy('type'); @endphp
+                        @if($docsByType->get('foto'))
+                            <img src="{{ asset('storage/' . $docsByType->get('foto')->file_path) }}" class="w-full h-full object-cover">
                         @else
                             <div class="h-full flex flex-col items-center justify-center text-gray-400 text-[10px] uppercase p-4 text-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -529,10 +530,10 @@
                     <section>
                         <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">Lampiran Berkas</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            @php $docs = ['doc_ktp' => 'KTP', 'doc_cv' => 'CV', 'doc_ijazah' => 'Ijazah', 'doc_npwp' => 'NPWP', 'doc_sim' => 'SIM', 'doc_bpjs_kes' => 'BPJS', "doc_lain" => 'Lainnya']; @endphp
-                            @foreach($docs as $key => $label)
-                                @if($applicant->profile->{$key})
-                                    <a href="{{ asset('storage/' . $applicant->profile->{$key}) }}" target="_blank" class="p-2 border border-dashed border-gray-200 rounded text-center text-[9px] font-bold text-gray-500 hover:bg-red-50 hover:text-red-600 uppercase">
+                            @php $docLabels = ['ktp' => 'KTP', 'cv' => 'CV', 'ijazah' => 'Ijazah', 'npwp' => 'NPWP', 'sim' => 'SIM', 'bpjs_kes' => 'BPJS', 'lain' => 'Lainnya']; @endphp
+                            @foreach($docLabels as $key => $label)
+                                @if($docsByType->get($key))
+                                    <a href="{{ asset('storage/' . $docsByType->get($key)->file_path) }}" target="_blank" class="p-2 border border-dashed border-gray-200 rounded text-center text-[9px] font-bold text-gray-500 hover:bg-red-50 hover:text-red-600 uppercase">
                                         {{ $label }}
                                     </a>
                                 @endif
