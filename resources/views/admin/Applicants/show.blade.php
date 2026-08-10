@@ -498,7 +498,7 @@
                             
                             <div class="grid grid-cols-2 gap-x-4">
                                 @php 
-                                    $minats = $applicant->profile->minat ?? [];
+                                    $minats = $applicant->profile->jobFieldInterests->sortBy('pivot.rank')->pluck('nama')->all();
                                     $total = count($minats);
                                     
                                     // Inisialisasi awal agar tidak error

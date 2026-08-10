@@ -20,7 +20,8 @@ class ProfileController extends Controller
         if ($user->applicant && $user->applicant->profile_completed) {
             return redirect()->route('applicant.profile.show');
         }
-        return view('applicant.profile.create');
+        $jobFields = \App\Models\JobField::orderBy('id')->get();
+        return view('applicant.profile.create', compact('jobFields'));
     }
 
     public function store(Request $request)
@@ -40,7 +41,8 @@ class ProfileController extends Controller
             'expected_salary'  => 'required|string|max:255',
             'ready_dinas'      => 'required|in:Ya,Tidak',
             'ready_placed_out' => 'required|in:Ya,Tidak',
-            'minat_ordered'    => 'required|array|min:13', 
+            'minat_ordered'    => 'required|array|min:13',
+            'minat_ordered.*'  => 'exists:job_fields,id',
             'perokok'          => 'required|in:Ya,Tidak',
             'bertato'          => 'required|in:Ya,Tidak',
             // Dokumen
@@ -104,7 +106,6 @@ class ProfileController extends Controller
 
             // Menangani Data Array/JSON
             $profileData['jenis_sim'] = $request->jenis_sim;
-            $profileData['minat'] = $request->minat_ordered; // Menyimpan urutan dari SortableJS
 
             // 5️⃣ UPDATE ATAU CREATE PROFILE
             $profile = \App\Models\ApplicantProfile::updateOrCreate(
@@ -146,6 +147,12 @@ class ProfileController extends Controller
             foreach ($request->pendidikan_informal ?? [] as $item) {
                 $profile->informalEducations()->create($blankToNull($item, ['tahun']));
             }
+
+            // 9️⃣ MINAT (BIDANG PEKERJAAN) -> applicant_job_field_interests (hapus semua, tulis ulang)
+            $profile->jobFieldInterests()->detach();
+            foreach ($request->minat_ordered ?? [] as $index => $jobFieldId) {
+                $profile->jobFieldInterests()->attach($jobFieldId, ['rank' => $index + 1]);
+            }
         });
 
         return redirect()
@@ -157,7 +164,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         // Load relasi agar data di view muncul
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'profile.jobFieldInterests', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');
@@ -169,7 +176,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'documents'])->first();
+        $applicant = Applicant::where('user_id', Auth::id())->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'profile.jobFieldInterests', 'documents'])->first();
 
         if (!$applicant || !$applicant->profile) {
             return redirect()->route('applicant.profile.create');

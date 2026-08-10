@@ -78,7 +78,7 @@ class ApplicantController extends Controller
             abort(403, 'Anda tidak memiliki hak akses untuk melihat pelamar ini.');
         }
 
-        $application->load(['applicant.user', 'applicant.profile.familyMembers', 'applicant.profile.workExperiences', 'applicant.profile.formalEducations', 'applicant.profile.informalEducations', 'applicant.documents', 'lowongan']);
+        $application->load(['applicant.user', 'applicant.profile.familyMembers', 'applicant.profile.workExperiences', 'applicant.profile.formalEducations', 'applicant.profile.informalEducations', 'applicant.profile.jobFieldInterests', 'applicant.documents', 'lowongan']);
         return view('admin.applicants.show', compact('application'));
     }
 
@@ -175,7 +175,7 @@ class ApplicantController extends Controller
             abort(403);
         }
 
-        $applicant = $application->applicant()->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'documents'])->first();
+        $applicant = $application->applicant()->with(['profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'profile.jobFieldInterests', 'documents'])->first();
         if (!$applicant) abort(404);
 
         $pdf = Pdf::loadView('admin.applicants.pdf', [
@@ -297,7 +297,7 @@ class ApplicantController extends Controller
     public function downloadProfilePdf($applicantId)
     {
         // Cari applicant berdasarkan ID, muat user dan profilenya
-        $applicant = \App\Models\Applicant::with(['user', 'profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'documents'])->findOrFail($applicantId);
+        $applicant = \App\Models\Applicant::with(['user', 'profile.familyMembers', 'profile.workExperiences', 'profile.formalEducations', 'profile.informalEducations', 'profile.jobFieldInterests', 'documents'])->findOrFail($applicantId);
         
         // Gunakan view PDF yang sudah Anda punya
         $pdf = Pdf::loadView('admin.applicants.pdf', [

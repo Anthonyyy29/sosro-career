@@ -363,19 +363,10 @@
 
                                     <div id="minat-list" class="space-y-3">
                                         @php
-                                            // Ambil dari database, jika kosong baru pakai default list
-                                            $saved_minat = $applicant->profile->minat;
-                                            
-                                            if (!$saved_minat || count($saved_minat) == 0) {
-                                                $minat_list = [
-                                                    'Marketing', 'Human Resources & People Development', 'Sales & Distribution',
-                                                    'General Affairs', 'Produksi / Teknik', 'Administrasi', 'Quality Control',
-                                                    'Finance & Accounting', 'Research & Development', 'Internal Audit', 'Purchasing',
-                                                    'Information Technology', 'Supply Chain & Logistic'
-                                                ];
-                                            } else {
-                                                $minat_list = $saved_minat;
-                                            }
+                                            // Urutkan sesuai rank yang tersimpan; job_fields baru yang belum pernah dirangking taruh di akhir
+                                            $rankedFields = $applicant->profile->jobFieldInterests->sortBy('pivot.rank')->values();
+                                            $missingFields = \App\Models\JobField::whereNotIn('id', $rankedFields->pluck('id'))->orderBy('id')->get();
+                                            $minat_list = $rankedFields->concat($missingFields);
                                         @endphp
 
                                         @foreach($minat_list as $index => $item)
@@ -383,9 +374,9 @@
                                             <div class="flex items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm mr-4">
                                                 <span class="text-xs font-black text-red-600 rank-number">{{ $index + 1 }}</span>
                                             </div>
-                                            <span class="text-sm font-bold text-gray-700">{{ $item }}</span>
-                                            <input type="hidden" name="minat_ordered[]" value="{{ $item }}">
-                                            
+                                            <span class="text-sm font-bold text-gray-700">{{ $item->nama }}</span>
+                                            <input type="hidden" name="minat_ordered[]" value="{{ $item->id }}">
+
                                             <div class="ml-auto text-gray-300 group-hover:text-red-300">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                     <path d="M7 7h2v2H7V7zm0 4h2v2H7v-2zm4-4h2v2h-2V7zm0 4h2v2h-2v-2z" />

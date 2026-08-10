@@ -281,23 +281,14 @@
                                     </div>
 
                                     <div id="minat-list" class="space-y-3">
-                                        @php
-                                            $minat_list = [
-                                                'Marketing', 'Human Resources & People Development', 'Sales & Distribution',
-                                                'General Affairs', 'Produksi / Teknik', 'Administrasi', 'Quality Control',
-                                                'Finance & Accounting', 'Research & Development', 'Internal Audit', 'Purchasing',
-                                                'Information Technology', 'Supply Chain & Logistic'
-                                            ];
-                                        @endphp
-
-                                        @foreach($minat_list as $index => $item)
+                                        @foreach($jobFields as $index => $field)
                                         <div class="flex items-center bg-gray-50 p-1 rounded-xl border-2 border-transparent hover:border-red-500 transition-all cursor-move group">
                                             <div class="flex items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm mr-4">
                                                 <span class="text-xs font-black text-red-600 rank-number">{{ $index + 1 }}</span>
                                             </div>
-                                            <span class="text-sm font-bold text-gray-700">{{ $item }}</span>
-                                            <input type="hidden" name="minat_ordered[]" value="{{ $item }}">
-                                            
+                                            <span class="text-sm font-bold text-gray-700">{{ $field->nama }}</span>
+                                            <input type="hidden" name="minat_ordered[]" value="{{ $field->id }}">
+
                                             {{-- Grip Icon --}}
                                             <div class="ml-auto text-gray-300 group-hover:text-red-300">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

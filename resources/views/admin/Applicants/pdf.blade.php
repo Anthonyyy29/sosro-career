@@ -583,7 +583,7 @@
                 <table width="100%">
                     <tr>
                         @php
-                            $minats = $applicant->profile->minat ?? [];
+                            $minats = $applicant->profile->jobFieldInterests->sortBy('pivot.rank')->pluck('nama')->all();
                             $total = count($minats);
                             
                             // Inisialisasi awal agar tidak error
