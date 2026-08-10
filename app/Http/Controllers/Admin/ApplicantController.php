@@ -18,11 +18,11 @@ class ApplicantController extends Controller
         // 1. Inisialisasi Query dengan Eager Loading
         $query = Application::with(['applicant.user', 'lowongan']);
 
-        // 2. SCOPE DATA: Filter berdasarkan kepemilikan (PENTING)
-        // Jika bukan superadmin, hanya tampilkan lamaran untuk lowongan yang dibuat admin ini
+        // 2. SCOPE DATA: Filter berdasarkan cabang (PENTING)
+        // Jika bukan superadmin, hanya tampilkan lamaran untuk lowongan di cabangnya
         if (Auth::user()->role !== 'superadmin') {
             $query->whereHas('lowongan', function($q) {
-                $q->where('created_by', Auth::id());
+                $q->where('cabang_id', Auth::user()->cabang_id);
             });
         }
 
@@ -47,7 +47,7 @@ class ApplicantController extends Controller
         $statsQuery = Application::query();
         if (Auth::user()->role !== 'superadmin') {
             $statsQuery->whereHas('lowongan', function($q) {
-                $q->where('created_by', Auth::id());
+                $q->where('cabang_id', Auth::user()->cabang_id);
             });
         }
         
@@ -74,7 +74,7 @@ class ApplicantController extends Controller
     public function show(Application $application)
     {
         // KEAMANAN: Cek apakah admin punya hak akses ke lamaran ini
-        if (Auth::user()->role !== 'superadmin' && $application->lowongan->created_by !== Auth::id()) {
+        if (Auth::user()->role !== 'superadmin' && $application->lowongan->cabang_id !== Auth::user()->cabang_id) {
             abort(403, 'Anda tidak memiliki hak akses untuk melihat pelamar ini.');
         }
 
@@ -86,8 +86,8 @@ class ApplicantController extends Controller
     {
         $lowongan = Lowongan::findOrFail($lowonganId);
 
-        // KEAMANAN: Cek apakah lowongan ini miliknya
-        if (Auth::user()->role !== 'superadmin' && $lowongan->created_by !== Auth::id()) {
+        // KEAMANAN: Cek apakah lowongan ini di cabangnya
+        if (Auth::user()->role !== 'superadmin' && $lowongan->cabang_id !== Auth::user()->cabang_id) {
             abort(403, 'Akses ditolak.');
         }
 
@@ -120,8 +120,8 @@ class ApplicantController extends Controller
 
         $application = Application::with(['applicant.user', 'lowongan'])->findOrFail($request->application_id);
 
-        // KEAMANAN: Cegah update status jika bukan pemilik data
-        if (Auth::user()->role !== 'superadmin' && $application->lowongan->created_by !== Auth::id()) {
+        // KEAMANAN: Cegah update status jika bukan di cabangnya
+        if (Auth::user()->role !== 'superadmin' && $application->lowongan->cabang_id !== Auth::user()->cabang_id) {
             abort(403, 'Akses ditolak.');
         }
         
@@ -171,7 +171,7 @@ class ApplicantController extends Controller
     public function downloadPdf(Application $application)
     {
         // KEAMANAN: Cek akses PDF
-        if (Auth::user()->role !== 'superadmin' && $application->lowongan->created_by !== Auth::id()) {
+        if (Auth::user()->role !== 'superadmin' && $application->lowongan->cabang_id !== Auth::user()->cabang_id) {
             abort(403);
         }
 
@@ -194,11 +194,11 @@ class ApplicantController extends Controller
         $ids = $request->selected_ids;
         $status = $request->status;
 
-        // KEAMANAN BULK: Hanya update data yang memang miliknya (jika bukan superadmin)
+        // KEAMANAN BULK: Hanya update data yang di cabangnya (jika bukan superadmin)
         $query = Application::whereIn('id', $ids);
         if (Auth::user()->role !== 'superadmin') {
             $query->whereHas('lowongan', function($q) {
-                $q->where('created_by', Auth::id());
+                $q->where('cabang_id', Auth::user()->cabang_id);
             });
         }
 
