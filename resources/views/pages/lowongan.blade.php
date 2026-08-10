@@ -162,7 +162,7 @@
                         data-title="{{ $item->judul_lowongan }}"
                         data-location="{{ $item->cabang?->nama }}"
                         data-category="{{ $item->kategori }}"
-                        data-bidang="{{ $item->bidang?->nama }}">
+                        data-bidang="{{ $item->bidang }}">
 
                         {{-- HEADER --}}
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">

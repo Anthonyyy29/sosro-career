@@ -43,7 +43,7 @@ class LowonganController extends Controller
 
     public function index(Request $request)
     {
-        $query = Lowongan::withCount('applications')->with(['admin', 'cabang', 'bidang']);
+        $query = Lowongan::withCount('applications')->with(['admin', 'cabang']);
 
         // Filter berdasarkan cabang admin jika bukan superadmin
         if (Auth::user()->role !== 'superadmin') {
@@ -76,9 +76,8 @@ class LowonganController extends Controller
         $lowongan = $query->get();
 
         $cabangs = \App\Models\Cabang::orderBy('kelompok')->orderBy('nama')->get();
-        $jobFields = \App\Models\JobField::orderBy('nama')->get();
 
-        return view('admin.lowongan.index', compact('lowongan', 'cabangs', 'jobFields'));
+        return view('admin.lowongan.index', compact('lowongan', 'cabangs'));
     }
 
     public function store(Request $request)
@@ -98,7 +97,7 @@ class LowonganController extends Controller
             'kode_lowongan' => $this->generateKodeLowongan(),
             'judul_lowongan' => $request->judul_lowongan,
             'kategori' => $request->kategori,
-            'bidang_id' => $request->bidang_id,
+            'bidang' => $request->bidang,
             'tipe_lowongan' => $request->tipe_lowongan,
             'cabang_id' => $cabangId,
             'lokasi_kerja' => $request->lokasi_kerja,
@@ -133,7 +132,7 @@ class LowonganController extends Controller
         $lowongan->update([
             'judul_lowongan' => $request->judul_lowongan,
             'kategori' => $request->kategori,
-            'bidang_id' => $request->bidang_id,
+            'bidang' => $request->bidang,
             'tipe_lowongan' => $request->tipe_lowongan,
             'cabang_id' => $cabangId,
             'lokasi_kerja' => $request->lokasi_kerja,

@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="flex flex-col">
                                     <span class="font-bold text-gray-800 group-hover:text-blue-700 transition-colors">{{ $item->judul_lowongan }}</span>
-                                    <span class="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-0.5">{{ $item->kategori }} • {{ $item->bidang?->nama }}</span>
+                                    <span class="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-0.5">{{ $item->kategori }} • {{ $item->bidang }}</span>
                                 </div>
                             </div>
                         </td>
@@ -185,11 +185,21 @@
                     </select>
 
                     <!-- BIDANG -->
-                    <select name="bidang_id" class="input" required>
+                    <select name="bidang" class="input" required>
                         <option value="" disabled selected>Pilih Bidang</option>
-                        @foreach($jobFields as $field)
-                            <option value="{{ $field->id }}">{{ $field->nama }}</option>
-                        @endforeach
+                        <option value="Administrasi">Administrasi</option>
+                        <option value="Finance & Accounting">Finance & Accounting</option>
+                        <option value="General Affairs">General Affairs</option>
+                        <option value="Human Resources & People Development">Human Resources & People Development</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Internal Audit">Internal Audit</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Produksi / Teknik">Produksi / Teknik</option>
+                        <option value="Purchasing">Purchasing</option>
+                        <option value="Quality Control">Quality Control</option>
+                        <option value="Research & Development">Research & Development</option>
+                        <option value="Sales & Distribution">Sales & Distribution</option>
+                        <option value="Supply Chain & Logistic">Supply Chain & Logistic</option>
                     </select>
 
                     <select name="tipe_lowongan" class="input" required>
@@ -269,11 +279,21 @@
                         <option value="Magang">Magang</option>
                     </select>
 
-                    <select name="bidang_id" class="input" x-model="form.bidang_id" required>
+                    <select name="bidang" class="input" x-model="form.bidang" required>
                         <option value="" disabled selected>Pilih Bidang</option>
-                        @foreach($jobFields as $field)
-                            <option value="{{ $field->id }}">{{ $field->nama }}</option>
-                        @endforeach
+                        <option value="Administrasi">Administrasi</option>
+                        <option value="Finance & Accounting">Finance & Accounting</option>
+                        <option value="General Affairs">General Affairs</option>
+                        <option value="Human Resources & People Development">Human Resources & People Development</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Internal Audit">Internal Audit</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Produksi / Teknik">Produksi / Teknik</option>
+                        <option value="Purchasing">Purchasing</option>
+                        <option value="Quality Control">Quality Control</option>
+                        <option value="Research & Development">Research & Development</option>
+                        <option value="Sales & Distribution">Sales & Distribution</option>
+                        <option value="Supply Chain & Logistic">Supply Chain & Logistic</option>
                     </select>
 
                     <select name="tipe_lowongan" class="input" x-model="form.tipe_lowongan" required>

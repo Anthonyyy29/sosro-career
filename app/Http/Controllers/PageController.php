@@ -21,7 +21,7 @@ class PageController extends Controller
             ->update(['status_lowongan' => 'selesai']);
 
         // 2. AMBIL LOWONGAN AKTIF
-        $lowongan = Lowongan::with(['cabang', 'bidang'])
+        $lowongan = Lowongan::with(['cabang'])
             ->where('status_lowongan', 'aktif')
             ->whereDate('tanggal_akhir', '>=', now())
             ->orderBy('tanggal_akhir', 'ASC')

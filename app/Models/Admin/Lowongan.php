@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Application;
 use App\Models\Admin;
 use App\Models\Cabang;
-use App\Models\JobField;
 
 class Lowongan extends Model
 {
@@ -16,7 +15,7 @@ class Lowongan extends Model
         'kode_lowongan',
         'judul_lowongan',
         'kategori',
-        'bidang_id',
+        'bidang',
         'tipe_lowongan',
         'cabang_id',
         'lokasi_kerja',
@@ -41,10 +40,5 @@ class Lowongan extends Model
     public function cabang()
     {
         return $this->belongsTo(Cabang::class, 'cabang_id');
-    }
-
-    public function bidang()
-    {
-        return $this->belongsTo(JobField::class, 'bidang_id');
     }
 }
