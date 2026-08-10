@@ -28,9 +28,10 @@
         </div>
     @endif
 
-    <div x-data="{ 
+    <div x-data="{
         step: 1,
-        
+        formTick: 0,
+
         // Fitur Autofill Domisili (Ambil data lama)
         alamat: '{{ old('alamat', $applicant->profile->alamat) }}',
         domisili: '{{ old('domisili', $applicant->profile->domisili) }}',
@@ -98,9 +99,57 @@
 
         // Logic Helper
         syncDomisili() {
-            if(this.isSameAddress) { 
-                this.domisili = this.alamat; 
+            if(this.isSameAddress) {
+                this.domisili = this.alamat;
             }
+        },
+
+        // Navigasi bebas: cek kelengkapan 1 tab (dipakai buat indikator & validasi submit)
+        isStepComplete(stepNum) {
+            this.formTick; // baca properti reaktif biar Alpine tau harus recompute pas ada input berubah
+            const stepEl = document.querySelector(`div[x-show='step === ${stepNum}']`);
+            if (!stepEl) return true;
+            const inputs = stepEl.querySelectorAll('[required]');
+            for (const input of inputs) {
+                if (input.type === 'radio') {
+                    const group = stepEl.querySelectorAll(`input[type='radio'][name='${input.name}']`);
+                    if (![...group].some(r => r.checked)) return false;
+                } else if (input.type === 'checkbox') {
+                    if (!input.checked) return false;
+                } else if (input.type === 'file') {
+                    if (!input.files || input.files.length === 0) return false;
+                } else if (!input.value || !input.value.trim()) {
+                    return false;
+                }
+            }
+            return true;
+        },
+
+        // Gerbang validasi akhir: cek SEMUA 5 tab, lompat ke tab pertama yang belum lengkap
+        validateAndSubmit(event) {
+            const labels = ['Personal', 'Keluarga', 'Pendidikan', 'Pengalaman', 'Dokumen'];
+            for (let s = 1; s <= 5; s++) {
+                if (!this.isStepComplete(s)) {
+                    event.preventDefault();
+                    this.step = s;
+                    window.scrollTo(0, 0);
+                    this.$nextTick(() => {
+                        const stepEl = document.querySelector(`div[x-show='step === ${s}']`);
+                        stepEl.querySelectorAll('[required]').forEach(input => {
+                            const invalid = input.type === 'checkbox' ? !input.checked
+                                : input.type === 'radio' ? ![...stepEl.querySelectorAll(`input[type='radio'][name='${input.name}']`)].some(r => r.checked)
+                                : input.type === 'file' ? (!input.files || input.files.length === 0)
+                                : (!input.value || !input.value.trim());
+                            input.classList.toggle('border-red-500', invalid);
+                            input.classList.toggle('bg-red-50', invalid);
+                        });
+                    });
+                    alert('Mohon lengkapi semua field wajib di tab \'' + labels[s - 1] + '\' sebelum mengirim.');
+                    return;
+                }
+            }
+            event.target.innerHTML = 'Menyimpan...';
+            event.target.classList.add('opacity-50');
         }
     }" class="min-h-screen bg-[#FDFDFD] py-12 px-4 flex flex-col items-center justify-center font-figtree">
         
@@ -109,10 +158,15 @@
             <div class="mb-10 relative px-4">
                 <div class="flex justify-between items-center relative z-10">
                     <template x-for="(label, index) in ['Personal', 'Keluarga', 'Pendidikan', 'Pengalaman', 'Dokumen']">
-                        <div class="flex flex-col items-center">
-                            <div :class="step >= index + 1 ? 'bg-red-600 border-red-100 text-white' : 'bg-gray-200 text-gray-400'" 
-                                 class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 border-4 mb-2">
-                                <span class="font-bold text-sm" x-text="index + 1"></span>
+                        <div class="flex flex-col items-center cursor-pointer" @click="step = index + 1; window.scrollTo(0,0)">
+                            <div class="relative">
+                                <div :class="step >= index + 1 ? 'bg-red-600 border-red-100 text-white' : 'bg-gray-200 text-gray-400'"
+                                     class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 border-4 mb-2">
+                                    <span class="font-bold text-sm" x-text="index + 1"></span>
+                                </div>
+                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black text-white"
+                                      :class="isStepComplete(index + 1) ? 'bg-green-500' : 'bg-red-400'"
+                                      x-text="isStepComplete(index + 1) ? '✓' : '!'"></span>
                             </div>
                             <span class="hidden md:block text-[10px] font-bold uppercase tracking-tighter" :class="step >= index + 1 ? 'text-red-600' : 'text-gray-400'" x-text="label"></span>
                         </div>
@@ -123,7 +177,7 @@
 
             <div class="bg-white rounded-[2.5rem] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.08)] border border-gray-50 overflow-hidden">
                 <div class="p-6 md:p-12">
-                    <form method="POST" action="{{ route('applicant.profile.update') }}" enctype="multipart/form-data" novalidate>
+                    <form method="POST" action="{{ route('applicant.profile.update') }}" enctype="multipart/form-data" novalidate @input="formTick++" @change="formTick++">
                         @csrf
                         @method('PUT')
 
@@ -139,7 +193,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">NIK (Sesuai KTP) <span class="text-red-500">*</span></label>
-                                    <input value="{{ old('nik', $applicant->profile->nik) }}" name="nik" :required="step === 1" type="text" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="16" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                    <input value="{{ old('nik', $applicant->profile->nik) }}" name="nik" required type="text" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="16" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Nama Lengkap</label>
@@ -151,7 +205,7 @@
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">No. Telepon / WA <span class="text-red-500">*</span></label>
-                                    <input name="phone" value="{{ old('phone', $applicant->profile->phone) }}" :required="step === 1" type="text" pattern="[0-9+\s\-]{10,20}" inputmode="numeric" 
+                                    <input name="phone" value="{{ old('phone', $applicant->profile->phone) }}" required type="text" pattern="[0-9+\s\-]{10,20}" inputmode="numeric" 
                                         class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 {{ $errors->has('phone') ? 'border-red-500' : 'border-transparent' }} focus:border-red-500 outline-none">
                                     @error('phone')
                                         <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p>
@@ -937,28 +991,8 @@
                             </template>
 
                             <template x-if="step < 5">
-                                <button type="button" 
-                                    @click="
-                                        const currentStepEl = $el.closest('form').querySelector(`div[x-show='step === ${step}']`);
-                                        const inputs = currentStepEl.querySelectorAll('[required]');
-                                        let isValid = true;
-
-                                        inputs.forEach(input => {
-                                            if (!input.value || (input.type === 'checkbox' && !input.checked)) {
-                                                isValid = false;
-                                                input.classList.add('border-red-500', 'bg-red-50');
-                                            } else {
-                                                input.classList.remove('border-red-500', 'bg-red-50');
-                                            }
-                                        });
-
-                                        if (isValid) {
-                                            step++;
-                                            window.scrollTo(0,0);
-                                        } else {
-                                            alert('Mohon isi semua bidang yang wajib diisi sebelum melanjutkan.');
-                                        }
-                                    " 
+                                <button type="button"
+                                    @click="step++; window.scrollTo(0,0)"
                                     class="h-auto md:h-14 py-4 flex-[2] h-14 bg-red-600 rounded-2xl text-white font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all flex items-center justify-center gap-2">
                                     Lanjutkan Ke Tahap Berikutnya
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
@@ -966,7 +1000,7 @@
                             </template>
 
                             <template x-if="step === 5">
-                                <button type="submit" onclick="this.innerHTML='Menyimpan...'; this.classList.add('opacity-50')" class="h-auto md:h-14 py-4 flex-[2] h-14 bg-green-600 rounded-2xl text-white font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all">Simpan Perubahan</button>
+                                <button type="submit" @click="validateAndSubmit($event)" class="h-auto md:h-14 py-4 flex-[2] h-14 bg-green-600 rounded-2xl text-white font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all">Simpan Perubahan</button>
                             </template>
                         </div>
 
