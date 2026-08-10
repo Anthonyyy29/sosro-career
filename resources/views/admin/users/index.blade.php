@@ -87,7 +87,7 @@
                                             "name" => $user->name,
                                             "email" => $user->email,
                                             "role" => $user->role,
-                                            "cabang" => $user->cabang,
+                                            "cabang_id" => $user->cabang_id,
                                         ]) }})'
                                         class="text-blue-500 hover:text-blue-700 transition-colors" title="Edit">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -182,7 +182,7 @@
 
                     <div id="createCabangField" class="hidden">
                         <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Cabang</label>
-                        <select name="cabang" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
+                        <select name="cabang_id" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
                             <option value="" disabled selected>Pilih Cabang</option>
                             @include('admin.partials.cabang-options')
                         </select>
@@ -256,7 +256,7 @@
 
                     <div id="editCabangField" class="hidden">
                         <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Cabang</label>
-                        <select name="cabang" id="editCabangSelect" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
+                        <select name="cabang_id" id="editCabangSelect" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all appearance-none">
                             <option value="" disabled>Pilih Cabang</option>
                             @include('admin.partials.cabang-options')
                         </select>
@@ -292,7 +292,7 @@
         document.getElementById('editEmail').value = user.email;
         document.getElementById('editPassword').value = '';
         document.getElementById('editRoleSelect').value = user.role;
-        document.getElementById('editCabangSelect').value = user.cabang || '';
+        document.getElementById('editCabangSelect').value = user.cabang_id || '';
         toggleCabangField('edit');
         document.getElementById('modalEditUser').classList.remove('hidden');
     }

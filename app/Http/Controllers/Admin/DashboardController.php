@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin\Lowongan as AdminLowongan;
 use App\Models\User;
 use App\Models\Applicant;
-use App\Models\Lowongan;
 use App\Models\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,11 +15,11 @@ class DashboardController extends Controller
     public function index()
     {
         $isSuperAdmin = Auth::user()->role === 'superadmin';
-        $cabang = Auth::user()->cabang;
+        $cabangId = Auth::user()->cabang_id;
 
         // Scope query Application berdasarkan cabang lowongan-nya, kecuali superadmin
-        $scopeApplicationByLowongan = fn ($query) => $query->when(!$isSuperAdmin, function ($q) use ($cabang) {
-            $q->whereHas('lowongan', fn ($q2) => $q2->where('penempatan_cabang', $cabang));
+        $scopeApplicationByLowongan = fn ($query) => $query->when(!$isSuperAdmin, function ($q) use ($cabangId) {
+            $q->whereHas('lowongan', fn ($q2) => $q2->where('cabang_id', $cabangId));
         });
 
         /*
@@ -29,20 +28,20 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $totalUsers = User::whereHas('applicant.applications.lowongan', function ($q) use ($isSuperAdmin, $cabang) {
+        $totalUsers = User::whereHas('applicant.applications.lowongan', function ($q) use ($isSuperAdmin, $cabangId) {
             if (!$isSuperAdmin) {
-                $q->where('penempatan_cabang', $cabang);
+                $q->where('cabang_id', $cabangId);
             }
         })->count();
 
-        $totalApplicants = Applicant::whereHas('applications.lowongan', function ($q) use ($isSuperAdmin, $cabang) {
+        $totalApplicants = Applicant::whereHas('applications.lowongan', function ($q) use ($isSuperAdmin, $cabangId) {
             if (!$isSuperAdmin) {
-                $q->where('penempatan_cabang', $cabang);
+                $q->where('cabang_id', $cabangId);
             }
         })->count();
 
         $lowonganActive = AdminLowongan::where('status_lowongan', 'aktif')
-            ->when(!$isSuperAdmin, fn ($q) => $q->where('penempatan_cabang', $cabang))
+            ->when(!$isSuperAdmin, fn ($q) => $q->where('cabang_id', $cabangId))
             ->count();
 
         $applicantsLolos = $scopeApplicationByLowongan(Application::where('status', 'accepted'))->count();
@@ -69,13 +68,13 @@ class DashboardController extends Controller
         $pipelineData = Application::join('lowongan', 'applications.lowongan_id', '=', 'lowongan.id')
             ->select('lowongan.kategori', 'applications.status', DB::raw('count(*) as total'))
             ->whereNotIn('applications.status', ['accepted', 'rejected'])
-            ->when(!$isSuperAdmin, fn ($q) => $q->where('lowongan.penempatan_cabang', $cabang))
+            ->when(!$isSuperAdmin, fn ($q) => $q->where('lowongan.cabang_id', $cabangId))
             ->groupBy('lowongan.kategori', 'applications.status')
             ->get()
             ->groupBy('kategori'); // Mengelompokkan hasil berdasarkan
 
         $lowonganByKategori = AdminLowongan::where('status_lowongan', 'aktif')
-            ->when(!$isSuperAdmin, fn ($q) => $q->where('penempatan_cabang', $cabang))
+            ->when(!$isSuperAdmin, fn ($q) => $q->where('cabang_id', $cabangId))
             ->select('kategori', DB::raw('count(*) as total'))
             ->groupBy('kategori')
             ->pluck('total', 'kategori'); // Hasilnya: ['Profesional' => 5, 'Magang' => 2, ...]

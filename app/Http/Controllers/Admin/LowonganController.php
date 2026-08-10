@@ -43,11 +43,11 @@ class LowonganController extends Controller
 
     public function index(Request $request)
     {
-        $query = Lowongan::withCount('applications')->with('admin');
+        $query = Lowongan::withCount('applications')->with(['admin', 'cabang', 'bidang']);
 
         // Filter berdasarkan cabang admin jika bukan superadmin
         if (Auth::user()->role !== 'superadmin') {
-            $query->where('penempatan_cabang', Auth::user()->cabang);
+            $query->where('cabang_id', Auth::user()->cabang_id);
         }
         
         // Filter Berdasarkan Judul
@@ -75,12 +75,10 @@ class LowonganController extends Controller
 
         $lowongan = $query->get();
 
-        return view('admin.lowongan.index', compact('lowongan'));
-    }
+        $cabangs = \App\Models\Cabang::orderBy('kelompok')->orderBy('nama')->get();
+        $jobFields = \App\Models\JobField::orderBy('nama')->get();
 
-    public function create()
-    {
-        return view('admin.lowongan.create');
+        return view('admin.lowongan.index', compact('lowongan', 'cabangs', 'jobFields'));
     }
 
     public function store(Request $request)
@@ -91,19 +89,18 @@ class LowonganController extends Controller
         ]);
 
         // Admin cabang hanya boleh membuat lowongan untuk cabangnya sendiri
-        $penempatanCabang = $request->penempatan_cabang;
+        $cabangId = $request->cabang_id;
         if (Auth::user()->role !== 'superadmin') {
-            abort_if(!Auth::user()->cabang, 403, 'Akun Anda belum di-assign ke cabang manapun. Hubungi Super Admin.');
-            $penempatanCabang = Auth::user()->cabang;
+            abort_if(!Auth::user()->cabang_id, 403, 'Akun Anda belum di-assign ke cabang manapun. Hubungi Super Admin.');
+            $cabangId = Auth::user()->cabang_id;
         }
-
         Lowongan::create([
             'kode_lowongan' => $this->generateKodeLowongan(),
             'judul_lowongan' => $request->judul_lowongan,
             'kategori' => $request->kategori,
-            'bidang' => $request->bidang,
+            'bidang_id' => $request->bidang_id,
             'tipe_lowongan' => $request->tipe_lowongan,
-            'penempatan_cabang' => $penempatanCabang,
+            'cabang_id' => $cabangId,
             'lokasi_kerja' => $request->lokasi_kerja,
             'tanggal_mulai' => now()->toDateString(),
             'tanggal_akhir' => $request->tanggal_akhir,
@@ -128,17 +125,17 @@ class LowonganController extends Controller
         $lowongan = Lowongan::findOrFail($id);
 
         $isSuperAdmin = Auth::user()->role === 'superadmin';
-        abort_if(!$isSuperAdmin && $lowongan->penempatan_cabang !== Auth::user()->cabang, 403, 'Anda tidak memiliki akses ke lowongan cabang lain.');
+        abort_if(!$isSuperAdmin && $lowongan->cabang_id !== Auth::user()->cabang_id, 403, 'Anda tidak memiliki akses ke lowongan cabang lain.');
 
         // Admin cabang tidak boleh memindahkan lowongan ke cabang lain
-        $penempatanCabang = $isSuperAdmin ? $request->penempatan_cabang : $lowongan->penempatan_cabang;
+        $cabangId = $isSuperAdmin ? $request->cabang_id : $lowongan->cabang_id;
 
         $lowongan->update([
             'judul_lowongan' => $request->judul_lowongan,
             'kategori' => $request->kategori,
-            'bidang' => $request->bidang,
+            'bidang_id' => $request->bidang_id,
             'tipe_lowongan' => $request->tipe_lowongan,
-            'penempatan_cabang' => $penempatanCabang,
+            'cabang_id' => $cabangId,
             'lokasi_kerja' => $request->lokasi_kerja,
             'tanggal_akhir' => $request->tanggal_akhir,
             'jobdesk' => $request->jobdesk ?? '',
@@ -152,7 +149,7 @@ class LowonganController extends Controller
 
     public function destroy(Lowongan $lowongan)
     {
-        abort_if(Auth::user()->role !== 'superadmin' && $lowongan->penempatan_cabang !== Auth::user()->cabang, 403, 'Anda tidak memiliki akses ke lowongan cabang lain.');
+        abort_if(Auth::user()->role !== 'superadmin' && $lowongan->cabang_id !== Auth::user()->cabang_id, 403, 'Anda tidak memiliki akses ke lowongan cabang lain.');
 
         $lowongan->delete();
 

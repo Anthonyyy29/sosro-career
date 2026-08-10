@@ -160,9 +160,9 @@
                     <div
                         class="job-card border border-grey-200 rounded-2xl p-6 md:p-8 bg-white shadow-xl inset-shadow-sm inset-shadow-indigo-500 hover:shadow-md transition flex flex-col gap-4"
                         data-title="{{ $item->judul_lowongan }}"
-                        data-location="{{ $item->penempatan_cabang }}"
+                        data-location="{{ $item->cabang?->nama }}"
                         data-category="{{ $item->kategori }}"
-                        data-bidang="{{ $item->bidang }}">
+                        data-bidang="{{ $item->bidang?->nama }}">
 
                         {{-- HEADER --}}
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">

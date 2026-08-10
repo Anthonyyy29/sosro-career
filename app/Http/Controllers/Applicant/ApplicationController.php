@@ -28,7 +28,7 @@ class ApplicationController extends Controller
                 ->with('warning', 'Profil Anda belum lengkap.');
         }
 
-        $applications = Application::with('lowongan')
+        $applications = Application::with('lowongan.cabang')
             ->where('applicant_id', $applicant->id)
             ->latest()
             ->get();

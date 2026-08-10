@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ApplicantProfile extends Model
 {
     protected $fillable = [
-        'applicant_id', 'nik', 'nama_lengkap', 'jk', 'tempat_lahir', 'tanggal_lahir',
+        'applicant_id', 'nik', 'jk', 'tempat_lahir', 'tanggal_lahir',
         'tinggi_badan', 'berat_badan', 'alamat', 'domisili', 'phone', 'agama',
         'status_nikah', 'jenis_sim', 'instagram', 'linkedin', 'expected_salary', 'expected_facilities',
         'ready_dinas', 'ready_placed_out', 'company_reference', 'minat', 'data_keluarga',

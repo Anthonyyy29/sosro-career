@@ -18,13 +18,18 @@ class Admin extends Authenticatable
         'password',
         'photo',
         'role',
-        'cabang',
+        'cabang_id',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id');
+    }
 
     public function isSuperAdmin(): bool
     {

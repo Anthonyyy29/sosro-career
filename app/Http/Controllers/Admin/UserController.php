@@ -21,7 +21,7 @@ class UserController extends Controller
         }
 
         // 1. Ambil data dari tabel admins (Tetap sama)
-        $admins = Admin::select('id', 'name', 'email', 'role', 'cabang', 'created_at')
+        $admins = Admin::select('id', 'name', 'email', 'role', 'cabang_id', 'created_at')
             ->get()
             ->map(function ($item) {
                 $item->source_table = 'admins';
@@ -47,7 +47,9 @@ class UserController extends Controller
 
         $allUsers = $admins->concat($users)->sortByDesc('created_at');
 
-        return view('admin.users.index', compact('allUsers'));
+        $cabangs = \App\Models\Cabang::orderBy('kelompok')->orderBy('nama')->get();
+
+        return view('admin.users.index', compact('allUsers', 'cabangs'));
     }
 
     public function store(Request $request)
@@ -57,7 +59,7 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email|unique:admins,email',
             'password' => 'required|min:8',
             'role'     => 'required|in:superadmin,admin,pelamar',
-            'cabang'   => 'required_if:role,admin|nullable|string',
+            'cabang_id' => 'required_if:role,admin|nullable|exists:cabangs,id',
         ]);
 
         $data = [
@@ -75,7 +77,7 @@ class UserController extends Controller
             $data['role'] = $request->role;
 
             if ($request->role === 'admin') {
-                $data['cabang'] = $request->cabang;
+                $data['cabang_id'] = $request->cabang_id;
             }
 
             Admin::create($data);
@@ -94,14 +96,14 @@ class UserController extends Controller
             'email'    => 'required|email|unique:admins,email,' . $admin->id,
             'password' => 'nullable|min:8',
             'role'     => 'required|in:superadmin,admin',
-            'cabang'   => 'required_if:role,admin|nullable|string',
+            'cabang_id' => 'required_if:role,admin|nullable|exists:cabangs,id',
         ]);
 
         $data = [
             'name'   => $request->name,
             'email'  => $request->email,
             'role'   => $request->role,
-            'cabang' => $request->role === 'admin' ? $request->cabang : null,
+            'cabang_id' => $request->role === 'admin' ? $request->cabang_id : null,
         ];
 
         if ($request->filled('password')) {

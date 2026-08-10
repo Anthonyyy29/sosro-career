@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="flex flex-col">
                                     <span class="font-bold text-gray-800 group-hover:text-blue-700 transition-colors">{{ $item->judul_lowongan }}</span>
-                                    <span class="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-0.5">{{ $item->kategori }} • {{ $item->bidang }}</span>
+                                    <span class="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-0.5">{{ $item->kategori }} • {{ $item->bidang?->nama }}</span>
                                 </div>
                             </div>
                         </td>
@@ -185,21 +185,11 @@
                     </select>
 
                     <!-- BIDANG -->
-                    <select name="bidang" class="input" required>
+                    <select name="bidang_id" class="input" required>
                         <option value="" disabled selected>Pilih Bidang</option>
-                        <option value="Administrasi">Administrasi</option>
-                        <option value="Finance & Accounting">Finance & Accounting</option>
-                        <option value="General Affairs">General Affairs</option>
-                        <option value="Human Resources & People Development">Human Resources & People Development</option>
-                        <option value="Information Technology">Information Technology</option>
-                        <option value="Internal Audit">Internal Audit</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Produksi / Teknik">Produksi / Teknik</option>
-                        <option value="Purchasing">Purchasing</option>
-                        <option value="Quality Control">Quality Control</option>
-                        <option value="Research & Development">Research & Development</option>
-                        <option value="Sales & Distribution">Sales & Distribution</option>
-                        <option value="Supply Chain & Logistic">Supply Chain & Logistic</option>
+                        @foreach($jobFields as $field)
+                            <option value="{{ $field->id }}">{{ $field->nama }}</option>
+                        @endforeach
                     </select>
 
                     <select name="tipe_lowongan" class="input" required>
@@ -211,14 +201,14 @@
                     </select>
 
                     @if(Auth::user()->role === 'superadmin')
-                        <select name="penempatan_cabang" class="input" required>
+                        <select name="cabang_id" class="input" required>
                             <option value="" disabled selected>Pilih Penempatan</option>
-                            @include('admin.partials.cabang-options')
+                            @include('admin.partials.cabang-options', ['cabangs' => $cabangs])
                         </select>
                     @else
                         <div>
-                            <input type="text" class="input bg-gray-100 cursor-not-allowed" value="{{ Auth::user()->cabang ?? 'Belum di-assign ke cabang manapun' }}" disabled>
-                            <input type="hidden" name="penempatan_cabang" value="{{ Auth::user()->cabang }}">
+                            <input type="text" class="input bg-gray-100 cursor-not-allowed" value="{{ Auth::user()->cabang?->nama ?? 'Belum di-assign ke cabang manapun' }}" disabled>
+                            <input type="hidden" name="cabang_id" value="{{ Auth::user()->cabang_id }}">
                         </div>
                     @endif
 
@@ -279,21 +269,11 @@
                         <option value="Magang">Magang</option>
                     </select>
 
-                    <select name="bidang" class="input" x-model="form.bidang" required>
+                    <select name="bidang_id" class="input" x-model="form.bidang_id" required>
                         <option value="" disabled selected>Pilih Bidang</option>
-                        <option value="Administrasi">Administrasi</option>
-                        <option value="Finance & Accounting">Finance & Accounting</option>
-                        <option value="General Affairs">General Affairs</option>
-                        <option value="Human Resources & People Development">Human Resources & People Development</option>
-                        <option value="Information Technology">Information Technology</option>
-                        <option value="Internal Audit">Internal Audit</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Produksi / Teknik">Produksi / Teknik</option>
-                        <option value="Purchasing">Purchasing</option>
-                        <option value="Quality Control">Quality Control</option>
-                        <option value="Research & Development">Research & Development</option>
-                        <option value="Sales & Distribution">Sales & Distribution</option>
-                        <option value="Supply Chain & Logistic">Supply Chain & Logistic</option>
+                        @foreach($jobFields as $field)
+                            <option value="{{ $field->id }}">{{ $field->nama }}</option>
+                        @endforeach
                     </select>
 
                     <select name="tipe_lowongan" class="input" x-model="form.tipe_lowongan" required>
@@ -305,14 +285,14 @@
                     </select>
 
                     @if(Auth::user()->role === 'superadmin')
-                        <select name="penempatan_cabang" class="input" x-model="form.penempatan_cabang" required>
+                        <select name="cabang_id" class="input" x-model="form.cabang_id" required>
                             <option value="" disabled selected>Pilih Penempatan</option>
-                            @include('admin.partials.cabang-options')
+                            @include('admin.partials.cabang-options', ['cabangs' => $cabangs])
                         </select>
                     @else
                         <div>
-                            <input type="text" class="input bg-gray-100 cursor-not-allowed" value="{{ Auth::user()->cabang ?? 'Belum di-assign ke cabang manapun' }}" disabled>
-                            <input type="hidden" name="penempatan_cabang" value="{{ Auth::user()->cabang }}">
+                            <input type="text" class="input bg-gray-100 cursor-not-allowed" value="{{ Auth::user()->cabang?->nama ?? 'Belum di-assign ke cabang manapun' }}" disabled>
+                            <input type="hidden" name="cabang_id" value="{{ Auth::user()->cabang_id }}">
                         </div>
                     @endif
                     

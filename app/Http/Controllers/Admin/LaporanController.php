@@ -26,7 +26,7 @@ class LaporanController extends Controller
         // Jika bukan superadmin, hanya tampilkan laporan dari lowongan miliknya sendiri
         if (Auth::user()->role !== 'superadmin') {
             $query->whereHas('lowongan', function($q) {
-                $q->where('penempatan_cabang', Auth::user()->cabang);
+                $q->where('cabang_id', Auth::user()->cabang_id);
             });
         }
 
@@ -52,7 +52,7 @@ class LaporanController extends Controller
         $statusQuery = Application::query();
         if (Auth::user()->role !== 'superadmin') {
             $statusQuery->whereHas('lowongan', function($q) {
-                $q->where('penempatan_cabang', Auth::user()->cabang);
+                $q->where('cabang_id', Auth::user()->cabang_id);
             });
         }
         $listStatus = $statusQuery->select('status')->distinct()->pluck('status');
@@ -60,7 +60,7 @@ class LaporanController extends Controller
         // Mengambil daftar lowongan untuk dropdown filter (sesuai scope)
         $lowonganQuery = Lowongan::whereHas('applications');
         if (Auth::user()->role !== 'superadmin') {
-            $lowonganQuery->where('penempatan_cabang', Auth::user()->cabang);
+            $lowonganQuery->where('cabang_id', Auth::user()->cabang_id);
         }
         $listLowongan = $lowonganQuery->get();
 
@@ -89,7 +89,7 @@ class LaporanController extends Controller
         // --- SCOPE DATA EXPORT (PENTING AGAR TIDAK BISA DITEMBAK) ---
         if (Auth::user()->role !== 'superadmin') {
             $query->whereHas('lowongan', function($q) {
-                $q->where('penempatan_cabang', Auth::user()->cabang);
+                $q->where('cabang_id', Auth::user()->cabang_id);
             });
         }
 
