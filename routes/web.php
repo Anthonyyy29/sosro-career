@@ -79,6 +79,7 @@ Route::middleware(['auth'])
         Route::post('/profile', [ProfileController::class, 'store'])->name('profile.store');
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::patch('/profile/draft', [ProfileController::class, 'saveDraft'])->name('profile.draft');
 
         Route::get('/profile/download', [ProfileController::class, 'downloadPdf'])->name('profile.download');
 

@@ -150,15 +150,44 @@
             }
             event.target.innerHTML = 'Menyimpan...';
             event.target.classList.add('opacity-50');
+        },
+
+        // Autosave draft: simpan progress berkala biar bisa lanjut nanti kalau ditinggal
+        autosaveTimer: null,
+        autosaveStatus: '',
+        queueAutosave() {
+            clearTimeout(this.autosaveTimer);
+            this.autosaveTimer = setTimeout(() => this.autosaveDraft(), 1500);
+        },
+        autosaveDraft() {
+            clearTimeout(this.autosaveTimer);
+            this.autosaveStatus = 'saving';
+            const form = this.$refs.bioForm;
+            const fd = new FormData(form);
+            form.querySelectorAll('input[type=file]').forEach(el => fd.delete(el.name));
+            fd.append('_step_complete', JSON.stringify({
+                1: this.isStepComplete(1), 2: this.isStepComplete(2),
+                3: this.isStepComplete(3), 4: this.isStepComplete(4),
+            }));
+            // PHP tidak parse body multipart/form-data untuk PATCH/PUT asli, cuma POST.
+            // Jadi dikirim sebagai POST + _method spoofing (pola sama kayak form utama).
+            // set() (bukan append) biar timpa _method=PUT yang udah ada dari form edit ini.
+            fd.set('_method', 'PATCH');
+            fetch('{{ route('applicant.profile.draft') }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                body: fd,
+            }).then(r => { this.autosaveStatus = r.ok ? 'saved' : 'error'; })
+              .catch(() => { this.autosaveStatus = 'error'; });
         }
     }" class="min-h-screen bg-[#FDFDFD] py-12 px-4 flex flex-col items-center justify-start font-figtree">
-        
+
         <div class="max-w-4xl w-full">
             
             <div class="mb-10 relative px-4">
                 <div class="flex justify-between items-center relative z-10">
                     <template x-for="(label, index) in ['Personal', 'Keluarga', 'Pendidikan', 'Pengalaman', 'Dokumen']">
-                        <div class="flex flex-col items-center cursor-pointer" @click="step = index + 1; window.scrollTo(0,0)">
+                        <div class="flex flex-col items-center cursor-pointer" @click="step = index + 1; window.scrollTo(0,0); autosaveDraft()">
                             <div class="relative">
                                 <div :class="step >= index + 1 ? 'bg-red-600 border-red-100 text-white' : 'bg-gray-200 text-gray-400'"
                                      class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 border-4 mb-2">
@@ -177,7 +206,7 @@
 
             <div class="bg-white rounded-[2.5rem] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.08)] border border-gray-50 overflow-hidden">
                 <div class="p-6 md:p-12">
-                    <form method="POST" action="{{ route('applicant.profile.update') }}" enctype="multipart/form-data" novalidate @input="formTick++" @change="formTick++">
+                    <form x-ref="bioForm" method="POST" action="{{ route('applicant.profile.update') }}" enctype="multipart/form-data" novalidate @input="formTick++; queueAutosave()" @change="formTick++; queueAutosave()">
                         @csrf
                         @method('PUT')
 
@@ -985,14 +1014,19 @@
                             </div>
                         </div>
 
-                        <div class="mt-12 flex flex-col md:flex-row gap-4">
+                        <div class="mt-4 text-right text-xs font-semibold h-4">
+                            <span x-show="autosaveStatus === 'saving'" class="text-gray-400">Menyimpan...</span>
+                            <span x-show="autosaveStatus === 'saved'" class="text-green-600">Tersimpan otomatis</span>
+                            <span x-show="autosaveStatus === 'error'" class="text-red-400">Gagal menyimpan draft</span>
+                        </div>
+                        <div class="mt-2 flex flex-col md:flex-row gap-4">
                             <template x-if="step > 1">
-                                <button type="button" @click="step--; window.scrollTo(0,0)" class="h-auto md:h-14 py-4 flex-1 h-14 bg-gray-100 rounded-2xl text-gray-600 font-bold hover:bg-gray-200 transition-all">Kembali</button>
+                                <button type="button" @click="step--; window.scrollTo(0,0); autosaveDraft()" class="h-auto md:h-14 py-4 flex-1 h-14 bg-gray-100 rounded-2xl text-gray-600 font-bold hover:bg-gray-200 transition-all">Kembali</button>
                             </template>
 
                             <template x-if="step < 5">
                                 <button type="button"
-                                    @click="step++; window.scrollTo(0,0)"
+                                    @click="step++; window.scrollTo(0,0); autosaveDraft()"
                                     class="h-auto md:h-14 py-4 flex-[2] h-14 bg-red-600 rounded-2xl text-white font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all flex items-center justify-center gap-2">
                                     Lanjutkan Ke Tahap Berikutnya
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>

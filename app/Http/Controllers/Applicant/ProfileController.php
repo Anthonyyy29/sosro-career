@@ -13,12 +13,27 @@ use Barryvdh\DomPDF\Facade\Pdf; // Import DomPDF
 
 class ProfileController extends Controller
 {
+    // Helper: kolom date/integer tidak terima string kosong (beda dari JSON lama yang terima apa saja)
+    private function blankToNull(array $item, array $keys)
+    {
+        foreach ($keys as $key) {
+            if (($item[$key] ?? null) === '') {
+                $item[$key] = null;
+            }
+        }
+        return $item;
+    }
+
     public function create()
     {
         $user = Auth::user();
         // Jika sudah isi profil, langsung lempar ke show atau dashboard
         if ($user->applicant && $user->applicant->profile_completed) {
             return redirect()->route('applicant.profile.show');
+        }
+        // Sudah ada draft (belum lengkap) -> lanjut dari edit, bukan mulai dari form kosong lagi
+        if ($user->applicant && $user->applicant->profile) {
+            return redirect()->route('applicant.profile.edit');
         }
         $jobFields = \App\Models\JobField::orderBy('id')->get();
         return view('applicant.profile.create', compact('jobFields'));
@@ -68,9 +83,14 @@ class ProfileController extends Controller
             $applicant = \App\Models\Applicant::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'name' => $user->name,
                     'status' => 'active',
                     'profile_completed' => true,
+                    'personal_completed' => true,
+                    'family_completed' => true,
+                    'education_completed' => true,
+                    'experience_completed' => true,
+                    'documents_completed' => true,
+                    'biodata_progress' => 100,
                 ]
             );
 
@@ -113,39 +133,29 @@ class ProfileController extends Controller
                 $profileData
             );
 
-            // Helper: kolom date/integer tidak terima string kosong (beda dari JSON lama yang terima apa saja)
-            $blankToNull = function (array $item, array $keys) {
-                foreach ($keys as $key) {
-                    if (($item[$key] ?? null) === '') {
-                        $item[$key] = null;
-                    }
-                }
-                return $item;
-            };
-
             // 6️⃣ KELUARGA -> applicant_family_members (hapus semua, tulis ulang)
             $profile->familyMembers()->delete();
             foreach ($request->k_inti ?? [] as $item) {
-                $profile->familyMembers()->create([...$blankToNull($item, ['tgl_lahir']), 'tipe' => 'inti']);
+                $profile->familyMembers()->create([...$this->blankToNull($item, ['tgl_lahir']), 'tipe' => 'inti']);
             }
             foreach ($request->k_kandung ?? [] as $item) {
-                $profile->familyMembers()->create([...$blankToNull($item, ['tgl_lahir']), 'tipe' => 'kandung']);
+                $profile->familyMembers()->create([...$this->blankToNull($item, ['tgl_lahir']), 'tipe' => 'kandung']);
             }
 
             // 7️⃣ PENGALAMAN KERJA -> applicant_work_experiences (hapus semua, tulis ulang)
             $profile->workExperiences()->delete();
             foreach ($request->pengalaman_kerja ?? [] as $item) {
-                $profile->workExperiences()->create($blankToNull($item, ['tanggal_masuk', 'tanggal_keluar']));
+                $profile->workExperiences()->create($this->blankToNull($item, ['tanggal_masuk', 'tanggal_keluar']));
             }
 
             // 8️⃣ PENDIDIKAN FORMAL & INFORMAL -> 2 tabel terpisah (hapus semua, tulis ulang)
             $profile->formalEducations()->delete();
             foreach ($request->pendidikan_formal ?? [] as $item) {
-                $profile->formalEducations()->create($blankToNull($item, ['tahun_masuk', 'tahun_lulus']));
+                $profile->formalEducations()->create($this->blankToNull($item, ['tahun_masuk', 'tahun_lulus']));
             }
             $profile->informalEducations()->delete();
             foreach ($request->pendidikan_informal ?? [] as $item) {
-                $profile->informalEducations()->create($blankToNull($item, ['tahun']));
+                $profile->informalEducations()->create($this->blankToNull($item, ['tahun']));
             }
 
             // 9️⃣ MINAT (BIDANG PEKERJAAN) -> applicant_job_field_interests (hapus semua, tulis ulang)
@@ -158,6 +168,108 @@ class ProfileController extends Controller
         return redirect()
             ->route('applicant.profile.show') // Saya arahkan ke show agar user bisa langsung lihat hasilnya
             ->with('success', 'Profil dan Dokumen berhasil disimpan.');
+    }
+
+    // Autosave partial: dipanggil berkala dari form (bukan submit final).
+    // Semua field nullable, dokumen & minat sengaja tidak disentuh di sini (lihat catatan di controller ini).
+    public function saveDraft(Request $request)
+    {
+        $request->validate([
+            'nik'              => 'nullable|digits:16',
+            'jk'               => 'nullable|in:L,P',
+            'tempat_lahir'     => 'nullable|string',
+            'tanggal_lahir'    => 'nullable|date',
+            'phone'            => 'nullable|string|regex:/^[0-9+\-\s]+$/|min:10|max:13',
+            'alamat'           => 'nullable|string',
+            'ex_employee'      => 'nullable|in:Ya,Tidak',
+            'ex_company_name'  => 'nullable|string|max:255',
+            'ex_last_position' => 'nullable|string|max:255',
+            'expected_salary'  => 'nullable|string|max:255',
+            'ready_dinas'      => 'nullable|in:Ya,Tidak',
+            'ready_placed_out' => 'nullable|in:Ya,Tidak',
+            'perokok'          => 'nullable|in:Ya,Tidak',
+            'bertato'          => 'nullable|in:Ya,Tidak',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $stepComplete = json_decode($request->input('_step_complete', '{}'), true) ?: [];
+        $flagByStep = [
+            1 => 'personal_completed',
+            2 => 'family_completed',
+            3 => 'education_completed',
+            4 => 'experience_completed',
+        ];
+
+        $progress = DB::transaction(function () use ($request, $user, $stepComplete, $flagByStep) {
+            $applicant = Applicant::firstOrCreate(
+                ['user_id' => $user->id],
+                ['status' => 'draft']
+            );
+
+            // Jangan pernah menurunkan status yang sudah 'active' (profil yang sudah lengkap)
+            if ($applicant->status !== 'active') {
+                $applicant->status = 'draft';
+            }
+            foreach ($flagByStep as $step => $column) {
+                if (array_key_exists($step, $stepComplete)) {
+                    $applicant->{$column} = (bool) $stepComplete[$step];
+                }
+            }
+            $applicant->save();
+
+            $profileData = $request->only([
+                'nik', 'jk', 'tempat_lahir', 'tanggal_lahir',
+                'tinggi_badan', 'berat_badan', 'alamat', 'domisili', 'phone',
+                'agama', 'status_nikah', 'instagram', 'linkedin',
+                'ex_employee', 'ex_company_name', 'ex_last_position', 'penyakit',
+                'expected_salary', 'expected_facilities', 'ready_dinas',
+                'ready_placed_out', 'company_reference', 'perokok', 'bertato',
+            ]);
+            if ($request->has('jenis_sim')) {
+                $profileData['jenis_sim'] = $request->jenis_sim;
+            }
+
+            $profile = ApplicantProfile::updateOrCreate(
+                ['applicant_id' => $applicant->id],
+                $profileData
+            );
+
+            $profile->familyMembers()->delete();
+            foreach ($request->k_inti ?? [] as $item) {
+                if (trim($item['nama'] ?? '') === '') continue;
+                $profile->familyMembers()->create([...$this->blankToNull($item, ['tgl_lahir']), 'tipe' => 'inti']);
+            }
+            foreach ($request->k_kandung ?? [] as $item) {
+                if (trim($item['nama'] ?? '') === '') continue;
+                $profile->familyMembers()->create([...$this->blankToNull($item, ['tgl_lahir']), 'tipe' => 'kandung']);
+            }
+
+            $profile->workExperiences()->delete();
+            foreach ($request->pengalaman_kerja ?? [] as $item) {
+                if (trim($item['perusahaan'] ?? '') === '') continue;
+                $profile->workExperiences()->create($this->blankToNull($item, ['tanggal_masuk', 'tanggal_keluar']));
+            }
+
+            $profile->formalEducations()->delete();
+            foreach ($request->pendidikan_formal ?? [] as $item) {
+                if (trim($item['sekolah'] ?? '') === '') continue;
+                $profile->formalEducations()->create($this->blankToNull($item, ['tahun_masuk', 'tahun_lulus']));
+            }
+            $profile->informalEducations()->delete();
+            foreach ($request->pendidikan_informal ?? [] as $item) {
+                if (trim($item['kursus'] ?? '') === '') continue;
+                $profile->informalEducations()->create($this->blankToNull($item, ['tahun']));
+            }
+
+            // Minat & dokumen sengaja tidak diautosave (lihat plan: rank NOT NULL + min:13, dan file tidak bisa diautosave ringan)
+
+            $applicant->calculateProgress();
+
+            return $applicant->biodata_progress;
+        });
+
+        return response()->json(['status' => 'ok', 'progress' => $progress]);
     }
 
     public function show()

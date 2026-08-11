@@ -1,4 +1,4 @@
-# Form Biodata: Navigasi Bebas + Simpan Progress (Belum Dieksekusi)
+# Form Biodata: Navigasi Bebas + Simpan Progress (Kebutuhan 1 Selesai, Kebutuhan 2 Belum)
 
 ## Konteks
 
@@ -41,4 +41,7 @@ Opsional: `localStorage` masih bisa dipakai sebagai lapisan cepat **tambahan** (
 
 ## Status
 
-**Belum ada yang dieksekusi sama sekali** — baru sebatas diskusi & rekomendasi. Kebutuhan 1 (navigasi bebas) dan Kebutuhan 2 (remember/draft) itu independen, bisa dikerjakan terpisah, tidak harus dibarengin. Kalau mau lanjut, mulai dari Kebutuhan 1 dulu (lebih kecil, murni frontend, tidak menyentuh DB).
+Kebutuhan 1 (navigasi bebas) dan Kebutuhan 2 (remember/draft) itu independen, bisa dikerjakan terpisah, tidak harus dibarengin.
+
+- **Kebutuhan 1 — SELESAI.** Sudah diimplementasi di `create.blade.php` & `edit.blade.php` (header tab bisa diklik, indikator kelengkapan per-tab, gerbang validasi dipindah ke tombol Submit lewat `validateAndSubmit()`), dikerjakan di branch `form-biodata-navigasi-draft`, sudah di-PR & merge ke `feature/normalisasi-database`.
+- **Kebutuhan 2 (remember/draft) — belum dieksekusi.** Masih sebatas diskusi & rekomendasi (Opsi 1 ringan vs Opsi 2 resume lintas device, lihat di atas). Belum diputuskan mau dikerjakan atau tidak, dan opsi mana kalau iya.
