@@ -244,11 +244,11 @@
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Jenis Kelamin <span class="text-red-500">*</span></label>
                                     <div class="flex gap-6 py-2">
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="jk" value="L" class="text-red-600 focus:ring-red-500" {{ old('jk', $applicant->profile->jk) == 'L' ? 'checked' : '' }}>
+                                            <input type="radio" name="jk" value="L" required class="text-red-600 focus:ring-red-500" {{ old('jk', $applicant->profile->jk) == 'L' ? 'checked' : '' }}>
                                             <span class="ml-2 text-sm text-gray-600">Laki-laki</span>
                                         </label>
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="jk" value="P" class="text-red-600 focus:ring-red-500" {{ old('jk', $applicant->profile->jk) == 'P' ? 'checked' : '' }}>
+                                            <input type="radio" name="jk" value="P" required class="text-red-600 focus:ring-red-500" {{ old('jk', $applicant->profile->jk) == 'P' ? 'checked' : '' }}>
                                             <span class="ml-2 text-sm text-gray-600">Perempuan</span>
                                         </label>
                                     </div>
