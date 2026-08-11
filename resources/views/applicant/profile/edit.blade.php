@@ -265,16 +265,16 @@
                                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Tempat Lahir <span class="text-red-500">*</span></label>
-                                        <input name="tempat_lahir" value="{{ old('tempat_lahir', $applicant->profile->tempat_lahir) }}" type="text" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
+                                        <input name="tempat_lahir" value="{{ old('tempat_lahir', $applicant->profile->tempat_lahir) }}" required type="text" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
                                     </div>
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Tanggal Lahir <span class="text-red-500">*</span></label>
-                                        <input name="tanggal_lahir" value="{{ old('tanggal_lahir', \Carbon\Carbon::parse($applicant->profile->tanggal_lahir)->format('Y-m-d')) }}" type="date" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
+                                        <input name="tanggal_lahir" value="{{ old('tanggal_lahir', \Carbon\Carbon::parse($applicant->profile->tanggal_lahir)->format('Y-m-d')) }}" required type="date" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
                                     </div>
                                 </div>
                                 <div class="space-y-1 md:col-span-2">
                                     <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Alamat lengkap (Sesuai KTP) <span class="text-red-500">*</span></label>
-                                    <textarea x-model="alamat" name="alamat" rows="2" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">{{ old('alamat', $applicant->profile->alamat) }}</textarea>
+                                    <textarea x-model="alamat" name="alamat" required rows="2" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">{{ old('alamat', $applicant->profile->alamat) }}</textarea>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="inline-flex items-center mb-2">
@@ -338,11 +338,11 @@
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Pernah Bekerja Disini? <span class="text-red-500">*</span></label>
                                         <div class="flex gap-6 py-2">
                                             <label class="inline-flex items-center cursor-pointer">
-                                                <input type="radio" name="ex_employee" value="Ya" x-model="isExEmployee" class="text-red-600">
+                                                <input type="radio" name="ex_employee" value="Ya" required x-model="isExEmployee" class="text-red-600">
                                                 <span class="ml-2 text-sm text-gray-600">Ya</span>
                                             </label>
                                             <label class="inline-flex items-center cursor-pointer">
-                                                <input type="radio" name="ex_employee" value="Tidak" x-model="isExEmployee" class="text-red-600">
+                                                <input type="radio" name="ex_employee" value="Tidak" required x-model="isExEmployee" class="text-red-600">
                                                 <span class="ml-2 text-sm text-gray-600">Tidak</span>
                                             </label>
                                         </div>
@@ -381,14 +381,14 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-6">
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Apakah Anda Perokok? <span class="text-red-500">*</span></label>
-                                        <select name="perokok" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="perokok" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             <option value="Ya" {{ ucfirst(old('perokok', $applicant->profile->perokok)) == 'Ya' ? 'selected' : '' }}>Ya</option>
                                             <option value="Tidak" {{ ucfirst(old('perokok', $applicant->profile->perokok)) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
                                         </select>
                                     </div>
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Apakah Anda Bertato? <span class="text-red-500">*</span></label>
-                                        <select name="bertato" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="bertato" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             <option value="Ya" {{ ucfirst(old('bertato', $applicant->profile->bertato)) == 'Ya' ? 'selected' : '' }}>Ya</option>
                                             <option value="Tidak" {{ ucfirst(old('bertato', $applicant->profile->bertato)) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
                                         </select>
@@ -398,9 +398,9 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-6">
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Gaji yang Diharapkan <span class="text-red-500">*</span></label>
-                                        <input type="text" name="expected_salary" 
-                                            value="{{ old('expected_salary', $applicant->profile->expected_salary) }}" 
-                                            class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all" 
+                                        <input type="text" name="expected_salary" required
+                                            value="{{ old('expected_salary', $applicant->profile->expected_salary) }}"
+                                            class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all"
                                             placeholder="Contoh: Rp 6.500.000">
                                     </div>
                                     <div class="space-y-1">
@@ -415,14 +415,14 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-6">
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Bersedia Dinas Luar Kota? <span class="text-red-500">*</span></label>
-                                        <select name="ready_dinas" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="ready_dinas" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             <option value="Ya" {{ old('ready_dinas', $applicant->profile->ready_dinas) == 'Ya' ? 'selected' : '' }}>Ya</option>
                                             <option value="Tidak" {{ old('ready_dinas', $applicant->profile->ready_dinas) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
                                         </select>
                                     </div>
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Bersedia Ditempatkan di Luar Kota? <span class="text-red-500">*</span></label>
-                                        <select name="ready_placed_out" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="ready_placed_out" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             <option value="Ya" {{ old('ready_placed_out', $applicant->profile->ready_placed_out) == 'Ya' ? 'selected' : '' }}>Ya</option>
                                             <option value="Tidak" {{ old('ready_placed_out', $applicant->profile->ready_placed_out) == 'Tidak' ? 'selected' : '' }}>Tidak</option>
                                         </select>

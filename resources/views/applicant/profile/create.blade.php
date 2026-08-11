@@ -202,7 +202,7 @@
                                     </div>
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Tanggal Lahir <span class="text-red-500">*</span></label>
-                                        <input name="tanggal_lahir" type="date" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
+                                        <input name="tanggal_lahir" required type="date" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none">
                                     </div>
                                 </div>
                                 <div class="space-y-1 md:col-span-2">
@@ -265,11 +265,11 @@
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Pernah Bekerja Disini? <span class="text-red-500">*</span></label>
                                         <div class="flex gap-6 py-2">
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="ex_employee" value="Ya" x-model="isExEmployee" class="text-red-600">
+                                                <input type="radio" name="ex_employee" value="Ya" required x-model="isExEmployee" class="text-red-600">
                                                 <span class="ml-2 text-sm text-gray-600">Ya</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="ex_employee" value="Tidak" x-model="isExEmployee" class="text-red-600">
+                                                <input type="radio" name="ex_employee" value="Tidak" required x-model="isExEmployee" class="text-red-600">
                                                 <span class="ml-2 text-sm text-gray-600">Tidak</span>
                                             </label>
                                         </div>
@@ -306,7 +306,7 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-6">
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Apakah Anda Perokok? <span class="text-red-500">*</span></label>
-                                        <select name="perokok" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="perokok" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             {{-- <option value="" disabled selected>Pilih Jawaban</option> --}}
                                             <option value="Ya">Ya</option>
                                             <option value="Tidak">Tidak</option>
@@ -314,7 +314,7 @@
                                     </div>
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Apakah Anda Bertato? <span class="text-red-500">*</span></label>
-                                        <select name="bertato" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="bertato" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             {{-- <option value="" disabled selected>Pilih Jawaban</option> --}}
                                             <option value="Ya">Ya</option>
                                             <option value="Tidak">Tidak</option>
@@ -326,7 +326,7 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-6">
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Gaji yang Diharapkan <span class="text-red-500">*</span></label>
-                                        <input type="text" name="expected_salary" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all" placeholder="Contoh: Rp 6.500.000">
+                                        <input type="text" name="expected_salary" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all" placeholder="Contoh: Rp 6.500.000">
                                     </div>
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Fasilitas yang Diharapkan <span class="text-red-500">*</span></label>
@@ -336,14 +336,14 @@
                                 <div class="md:col-span-2 grid grid-cols-2 gap-6">
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Bersedia Dinas Luar Kota? <span class="text-red-500">*</span></label>
-                                        <select name="ready_dinas" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="ready_dinas" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             <option value="Ya">Ya</option>
                                             <option value="Tidak">Tidak</option>
                                         </select>
                                     </div>
                                     <div class="flex-1">
                                         <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Bersedia Ditempatkan di Luar Kota? <span class="text-red-500">*</span></label>
-                                        <select name="ready_placed_out" class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
+                                        <select name="ready_placed_out" required class="w-full px-5 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 outline-none transition-all">
                                             <option value="Ya">Ya</option>
                                             <option value="Tidak">Tidak</option>
                                         </select>
