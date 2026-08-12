@@ -26,11 +26,4 @@ Kalau cuma langkah 1 tanpa langkah 2: tetap rawan balik ke masalah sama kalau ad
 
 ## Status
 
-**Sudah dieksekusi, kedua langkah.** Sempat kejadian lagi bug yang sama (raw `validation.required` bocor pas submit form biodata) — konfirmasi ulang kalau ini emang nyerang seluruh app, bukan cuma registrasi.
-
-1. `composer require laravel-lang/lang` + `php artisan lang:add id` → generate `lang/id/{validation,auth,passwords,pagination}.php` + `lang/id.json`.
-2. `.env`: `APP_FALLBACK_LOCALE` diganti dari `id` ke `en`.
-
-Diverifikasi lewat tinker: rule `required` & `unique` sekarang balikin kalimat Indonesia (`"Jk wajib diisi."`, `"Email sudah ada sebelumnya."`), bukan raw key lagi.
-
-Catatan sampingan (di luar scope, gak diapa-apain): `composer require` sempat munculin 9 advisory security level "high" buat `phpoffice/phpspreadsheet` (dependency `maatwebsite/excel`, sudah ada dari sebelumnya, gak related ke perubahan ini) — worth di-follow-up terpisah kalau mau.
+Baru ditemukan & didiskusikan, **belum dieksekusi**. Root cause sudah dikonfirmasi lewat tinker (bukan dugaan).
