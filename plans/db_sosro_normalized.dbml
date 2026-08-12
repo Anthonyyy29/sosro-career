@@ -1,55 +1,42 @@
-// db_sosro - DBML (SETELAH normalisasi sesuai plan)
-// Base: db_sosro.sql + normalisasi-keluarga-pilot.md + normalisasi-struktur-database-prioritas.md
+// db_sosro - DBML (SKEMA YANG BENERAN JALAN SEKARANG)
+// Sumber: introspeksi langsung ke MySQL dev (information_schema.columns/key_column_usage/statistics),
+// bukan lagi dokumen rencana. Kalau nanti ada migration baru, file ini harus di-generate ulang dari DB,
+// jangan diedit manual berdasar dugaan.
 //
-// Catatan keputusan yang dibuat di luar yang eksplisit tertulis di 2 MD di atas (perlu dikoreksi kalau tidak setuju):
-// 1. admins.cabang diikutkan jadi FK ke cabangs (MD asli cuma nyebut lowongan.penempatan_cabang)
-// 2. pendidikan_formal + pendidikan_informal digabung jadi 1 tabel applicant_educations dengan union
-//    semua field (field yang tidak relevan ke satu tipe jadi nullable) -- field shape dua tipe ini beda
-//    (formal: jenjang/sekolah/jurusan/nilai/tahun_masuk/tahun_lulus/is_current_edu, informal: tahun/kursus/penyelenggara),
-//    beda dari kasus keluarga inti/kandung yang field-nya identik persis. Worth dipikir ulang apakah
-//    lebih baik 2 tabel terpisah daripada 1 tabel dengan banyak kolom nullable.
+// Perbedaan dari draft normalisasi awal (plans/db_sosro_normalized.dbml versi lama, sebelum file ini
+// di-refresh) -- dicatat di sini biar ketauan mana yang berubah pikiran pas eksekusi:
 //
-// KOREKSI: applicant_job_field_interests awalnya didesain tanpa kolom `rank` (dikira cuma himpunan
-// minat biasa). Ternyata UI aslinya drag-to-rank (SortableJS) atas SEMUA 13 job_fields sekaligus
-// (ProfileController.php validasi 'minat_ordered' => 'required|array|min:13', urutan array = ranking).
-// Sudah ditambah kolom `rank` -- tiap pelamar akan selalu punya persis 13 baris di tabel ini.
+// 1. lowongan.bidang TETAP varchar bebas, BUKAN jadi bidang_id FK ke job_fields.
+//    Sempat dieksekusi jadi FK, lalu di-revert (commit "Revert lowongan.bidang from job_fields FK
+//    back to hardcoded string") -- job_fields tetap ada sebagai tabel tapi cuma dipakai buat
+//    applicant_job_field_interests (minat pelamar), tidak dipakai lowongan.
+// 2. pendidikan_formal & pendidikan_informal jadi 2 TABEL TERPISAH (applicant_formal_educations,
+//    applicant_informal_educations) -- BUKAN 1 tabel applicant_educations gabungan dengan kolom
+//    nullable seperti draft awal. Shape field 2 tipe pendidikan ini beda jauh, gabung 1 tabel bikin
+//    terlalu banyak kolom nullable per baris.
+// 3. contacts dapat kolom cabang_id (FK cabangs) TAMBAHAN di luar admin_id yang sudah ada --
+//    fitur "assign ke semua admin cabang" (bukan cuma 1 admin), admin_id sekarang berarti "siapa
+//    yang balas", cabang_id berarti "cabang tujuan pesan".
+// 4. applicants.user_id dan applicant_profiles.applicant_id TERNYATA TIDAK PERNAH dikasih unique
+//    constraint di DB (cuma index biasa dari FK) -- walau relasinya di kode Eloquent hasOne/belongsTo
+//    1:1. Draft lama sempat nyatet "ditambah unique" sebagai rencana, tapi tidak pernah benar-benar
+//    dieksekusi ke migration manapun. Dicatat apa adanya sesuai kondisi nyata di DB.
+// 5. jk, perokok, bertato, contacts.status, lowongan.status_lowongan itu ENUM asli di level MySQL
+//    (bukan varchar+note kayak draft lama nebak). cabangs.kelompok sebaliknya JUSTRU varchar biasa
+//    (bukan DB enum), validasinya cuma di level aplikasi.
 //
-// 2 tambahan lain yang kelewat dari daftar di atas (ketemu belakangan, sama-sama tidak dibahas di
-// 2 MD manapun -- perlu dicek data lama dulu sebelum dieksekusi, migration bisa gagal kalau data
-// existing melanggar constraint baru ini):
-// 4. applicant_profiles.nik -- ditambah `unique`. Migration asli (2025_12_29_071417) nik-nya nullable
-//    tanpa constraint apa pun. Cek dulu ada tidaknya NIK kosong/duplikat di data sekarang sebelum
-//    nambah constraint ini.
-// 5. lowongan.created_by / updated_by -- ditambah FK constraint ke admins.id. Migration asli
-//    (2025_12_07_123629) cuma unsignedBigInteger biasa, tidak ada ->constrained(). Cek dulu ada
-//    tidaknya baris lowongan yang created_by/updated_by-nya nunjuk ke admin yang sudah terhapus
-//    (data yatim) sebelum nambah FK constraint ini.
-//
-// 2 koreksi lagi hasil riset lanjutan (grep ke semua blade view + controller yang benar-benar jalan):
-// 6. cabangs.kelompok -- enum ditambah jadi 4 nilai (HO, KPW, Pabrik, Lainnya), bukan 3 (KPW, Pabrik,
-//    Lainnya) seperti draft awal. Kantor Pusat dipisah jadi grup HO sendiri supaya konsisten sama
-//    office_type (HO/KPW/KPB) yang sudah dipakai di admin/applicants/index.blade.php dan
-//    app/Mail/AcceptedEmail.php buat milih template email offering.
-// 7. applications.status -- nilai aktual yang benar-benar dipakai kode jauh lebih banyak dari enum lama
-//    (submitted/review/accepted/rejected): pending, psikotes, interview, offering, mcu, accepted,
-//    rejected. Kolom tetap varchar (bukan enum DB) karena state machine-nya masih bisa nambah tahap baru.
-//
-// 8. job_categories & job_types DIBATALKAN jadi tabel master -- dikembalikan jadi varchar biasa di
-//    lowongan (kategori, tipe_lowongan). Alasan: cuma 3-4 nilai, fixed vocabulary, sangat kecil
-//    kemungkinan berubah, dan cuma dipakai 1 tempat (lowongan) -- tidak sepadan biaya JOIN-nya.
-//    job_fields TETAP jadi tabel (beda kasus -- dipakai bareng 2 entitas: lowongan.bidang_id DAN
-//    applicant_job_field_interests, jadi tetap butuh direlasikan meski isinya sama-sama statis).
-//    cabangs TETAP jadi tabel juga -- datanya lebih mungkin berubah (buka/tutup cabang) dan sudah
-//    ada bukti nyata bug dari duplikasi string (Kebun vs Perkebunan) di skema lama.
+// Yang masih sama dengan keputusan di draft awal (lihat plans/normalisasi-struktur-database-prioritas.md
+// buat histori diskusinya): kategori & tipe_lowongan lowongan tetap varchar bebas (fixed vocabulary
+// kecil, tidak worth jadi tabel), cabangs & job_fields tetap tabel master.
 
 Table admins {
   id bigint [pk, increment]
   name varchar
-  email varchar [unique]
+  email varchar [unique, not null]
   role varchar [default: 'admin']
-  cabang_id bigint [ref: > cabangs.id, note: 'ganti dari cabang varchar bebas']
+  cabang_id bigint [ref: > cabangs.id, note: 'nullable -- superadmin tidak terikat 1 cabang']
   photo varchar
-  password varchar
+  password varchar [not null]
   remember_token varchar
   created_at timestamp
   updated_at timestamp
@@ -57,27 +44,27 @@ Table admins {
 
 Table applicants {
   id bigint [pk, increment]
-  status varchar [default: 'Pending']
+  status varchar [not null, default: 'Pending', note: 'nilai aktual dipakai kode: Pending/Reviewed/Accepted (seeder, huruf besar) dan "active"/"draft" (ProfileController, huruf kecil) -- tidak konsisten, varchar bebas bukan enum']
   created_at timestamp
   updated_at timestamp
-  user_id bigint [unique, ref: > users.id, note: 'ditambah unique -- relasi User::applicant() hasOne, tapi migration asli tidak pernah kasih unique constraint']
-  profile_completed boolean [default: 0]
-  biodata_progress int [default: 0]
-  consent_accepted boolean [default: 0]
-  personal_completed boolean [default: 0]
-  family_completed boolean [default: 0]
-  education_completed boolean [default: 0]
-  experience_completed boolean [default: 0]
-  documents_completed boolean [default: 0]
-  biodata_submitted boolean [default: 0]
+  user_id bigint [ref: > users.id, note: 'nullable, TIDAK unique di DB walau relasi User::applicant() hasOne di kode']
+  profile_completed boolean [not null, default: 0]
+  biodata_progress int [not null, default: 0]
+  consent_accepted boolean [not null, default: 0]
+  personal_completed boolean [not null, default: 0]
+  family_completed boolean [not null, default: 0]
+  education_completed boolean [not null, default: 0]
+  experience_completed boolean [not null, default: 0]
+  documents_completed boolean [not null, default: 0]
+  biodata_submitted boolean [not null, default: 0]
 }
 
 Table applicant_documents {
   id bigint [pk, increment]
-  applicant_id bigint [ref: > applicants.id]
-  type varchar [note: 'foto, cv, ktp, ijazah, sim, npwp, bpjs_kes, bpjs_tk, lain']
-  file_path varchar
-  is_required boolean [default: 0]
+  applicant_id bigint [not null, ref: > applicants.id]
+  type varchar [not null, note: 'foto, cv, ktp, ijazah, sim, npwp, bpjs_kes, bpjs_tk, lain']
+  file_path varchar [not null]
+  is_required boolean [not null, default: 0]
   extracted_data json
   created_at timestamp
   updated_at timestamp
@@ -85,9 +72,9 @@ Table applicant_documents {
 
 Table applicant_profiles {
   id bigint [pk, increment]
-  applicant_id bigint [unique, ref: > applicants.id, note: 'ditambah unique -- relasi Applicant::profile() hasOne, tapi migration asli tidak pernah kasih unique constraint']
-  nik varchar [unique, note: 'ditambah unique constraint']
-  jk varchar [note: 'enum: L,P']
+  applicant_id bigint [not null, ref: > applicants.id, note: 'TIDAK unique di DB walau relasi Applicant::profile() hasOne di kode']
+  nik varchar [unique]
+  jk enum('L','P')
   tempat_lahir varchar
   tanggal_lahir date
   tinggi_badan varchar
@@ -97,7 +84,7 @@ Table applicant_profiles {
   phone varchar
   agama varchar
   status_nikah varchar
-  jenis_sim json [note: 'tetap JSON, tidak dinormalisasi (opsional/low priority)']
+  jenis_sim json [note: 'tetap JSON, tidak dinormalisasi']
   instagram varchar
   linkedin varchar
   created_at timestamp
@@ -106,26 +93,21 @@ Table applicant_profiles {
   ex_company_name varchar
   ex_last_position varchar
   penyakit text
-  perokok varchar [note: 'enum: ya,tidak']
-  bertato varchar [note: 'enum: ya,tidak']
+  perokok enum('ya','tidak')
+  bertato enum('ya','tidak')
   expected_salary varchar
   expected_facilities text
-  ready_dinas varchar [default: 'Ya']
-  ready_placed_out varchar [default: 'Ya']
+  ready_dinas varchar(10) [not null, default: 'Ya']
+  ready_placed_out varchar(10) [not null, default: 'Ya']
   company_reference varchar
-
-  // DIHAPUS: data_keluarga, pendidikan_formal, pendidikan_informal, pengalaman_kerja,
-  //          minat, doc_foto..doc_lain (9 kolom), pendidikan_terakhir, jurusan, ipk, nama_lengkap
-  //          (nama_lengkap dead column -- tidak pernah masuk whitelist $request->only([...]) di
-  //          ProfileController, jadi tidak pernah tertulis. users.name jadi satu-satunya sumber nama.)
 }
 
-// ================= TABEL ANAK BARU (pengganti kolom JSON) =================
+// ================= TABEL ANAK (pengganti kolom JSON lama) =================
 
 Table applicant_family_members {
   id bigint [pk, increment]
-  applicant_profile_id bigint [ref: > applicant_profiles.id]
-  tipe varchar [note: 'enum: inti, kandung']
+  applicant_profile_id bigint [not null, ref: > applicant_profiles.id]
+  tipe varchar [not null, note: 'inti, kandung -- satu-satunya kolom NOT NULL selain FK/timestamp, jadi baris draft/partial tetap butuh ini keisi']
   nama varchar
   hubungan varchar
   pendidikan varchar
@@ -137,33 +119,39 @@ Table applicant_family_members {
   updated_at timestamp
 }
 
-Table applicant_educations {
+Table applicant_formal_educations {
   id bigint [pk, increment]
-  applicant_profile_id bigint [ref: > applicant_profiles.id]
-  tipe varchar [note: 'enum: formal, informal']
-  jenjang varchar [note: 'formal only']
-  sekolah varchar [note: 'formal only']
-  jurusan varchar [note: 'formal only']
-  nilai varchar [note: 'formal only']
-  tahun_masuk int [note: 'formal only']
-  tahun_lulus int [note: 'formal only']
-  is_current_edu boolean [note: 'formal only']
-  kursus varchar [note: 'informal only']
-  penyelenggara varchar [note: 'informal only']
-  tahun int [note: 'informal only']
+  applicant_profile_id bigint [not null, ref: > applicant_profiles.id]
+  jenjang varchar
+  sekolah varchar
+  jurusan varchar
+  nilai varchar
+  tahun_masuk int
+  tahun_lulus int
+  is_current_edu boolean [not null, default: 0]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table applicant_informal_educations {
+  id bigint [pk, increment]
+  applicant_profile_id bigint [not null, ref: > applicant_profiles.id]
+  kursus varchar
+  penyelenggara varchar
+  tahun int
   created_at timestamp
   updated_at timestamp
 }
 
 Table applicant_work_experiences {
   id bigint [pk, increment]
-  applicant_profile_id bigint [ref: > applicant_profiles.id]
+  applicant_profile_id bigint [not null, ref: > applicant_profiles.id]
   perusahaan varchar
   jabatan varchar
   divisi varchar
   gaji varchar
   fasilitas varchar
-  masih_bekerja boolean
+  masih_bekerja boolean [not null, default: 0]
   tanggal_masuk date
   tanggal_keluar date
   alasan text
@@ -173,37 +161,39 @@ Table applicant_work_experiences {
 }
 
 Table applicant_job_field_interests {
-  applicant_profile_id bigint [ref: > applicant_profiles.id]
-  job_field_id bigint [ref: > job_fields.id]
-  rank int [note: '1 = paling diminati, 13 = paling kurang diminati - dari urutan drag SortableJS di form. Setiap pelamar selalu punya persis 13 baris (semua bidang wajib diranking, bukan dipilih sebagian)']
+  applicant_profile_id bigint [not null, ref: > applicant_profiles.id]
+  job_field_id bigint [not null, ref: > job_fields.id]
+  rank int [not null, note: '1 = paling diminati, 13 = paling kurang diminati -- dari urutan drag SortableJS di form. Setiap pelamar selalu punya persis 13 baris']
 
   indexes {
     (applicant_profile_id, job_field_id) [pk]
   }
 }
 
-// ================= TABEL MASTER BARU (pengganti string bebas) =================
+// ================= TABEL MASTER (pengganti string bebas) =================
 
 Table cabangs {
   id bigint [pk, increment]
-  nama varchar [unique, note: 'KPW Jakarta Banten, Pabrik Cakung, Kantor Pusat, dst']
-  kelompok varchar [note: 'enum: HO, KPW, Pabrik, Lainnya -- HO khusus Kantor Pusat, dipisah dari Lainnya (Kebun, Poci Kreasi Mandiri) supaya cocok sama office_type (HO/KPW/KPB) yang dipakai app/Mail/AcceptedEmail.php']
+  nama varchar [not null, unique, note: 'KPW Jakarta Banten, Pabrik Cakung, Kantor Pusat, dst']
+  kelompok varchar [not null, note: 'HO, KPW, Pabrik, Lainnya -- varchar biasa di DB, validasi cuma di level aplikasi, bukan DB enum']
   created_at timestamp
   updated_at timestamp
 }
 
 Table job_fields {
   id bigint [pk, increment]
-  nama varchar [unique, note: 'Marketing, Finance & Accounting, dst - dipakai bareng lowongan.bidang & applicant minat']
+  nama varchar [not null, unique, note: 'Marketing, Finance & Accounting, dst -- cuma dipakai applicant_job_field_interests, TIDAK dipakai lowongan (lihat catatan #1 di atas)']
+  created_at timestamp
+  updated_at timestamp
 }
 
-// ================= applications, lowongan (kolom quasi-lookup diganti FK) =================
+// ================= applications, lowongan =================
 
 Table applications {
   id bigint [pk, increment]
-  applicant_id bigint [ref: > applicants.id]
-  lowongan_id bigint [ref: > lowongan.id]
-  status varchar [note: 'nilai aktual: pending, psikotes, interview, offering, mcu, accepted, rejected -- state machine pipeline rekrutmen, bukan cuma 4 nilai flat']
+  applicant_id bigint [not null, ref: > applicants.id]
+  lowongan_id bigint [not null, ref: > lowongan.id]
+  status varchar [not null, note: 'state machine pipeline rekrutmen: pending, psikotes, interview, offering, mcu, accepted, rejected -- varchar bebas, bukan DB enum, karena tahapnya masih bisa nambah']
   notes text
   created_at timestamp
   updated_at timestamp
@@ -215,102 +205,107 @@ Table applications {
 
 Table lowongan {
   id bigint [pk, increment]
-  kode_lowongan varchar [unique]
-  judul_lowongan varchar
-  kategori varchar [note: 'tetap string bebas, tidak dinormalisasi -- cuma 3 nilai (Profesional, Management Trainee, Magang), sangat kecil kemungkinan berubah, tidak worth jadi tabel']
-  bidang_id bigint [ref: > job_fields.id, note: 'ganti dari bidang varchar']
-  tipe_lowongan varchar [note: 'tetap string bebas, tidak dinormalisasi -- cuma 4 nilai (Full-time, Part-time, Freelance, Kontrak), fixed vocabulary, tidak worth jadi tabel']
-  cabang_id bigint [ref: > cabangs.id, note: 'ganti dari penempatan_cabang varchar']
-  lokasi_kerja varchar
+  kode_lowongan varchar(50) [not null, unique]
+  judul_lowongan varchar [not null]
+  kategori varchar [note: 'varchar bebas, tidak dinormalisasi -- fixed vocabulary kecil (Profesional, Management Trainee, Magang)']
+  bidang varchar [note: 'varchar bebas -- SEMPAT jadi bidang_id FK ke job_fields, di-revert balik jadi string (lihat catatan #1 di atas)']
+  tipe_lowongan varchar [note: 'varchar bebas, tidak dinormalisasi -- fixed vocabulary kecil (Full-time, Part-time, Freelance, Kontrak)']
+  cabang_id bigint [ref: > cabangs.id, note: 'ganti dari penempatan_cabang varchar lama']
+  lokasi_kerja varchar(100) [not null]
   jobdesk text
   kualifikasi text
-  tanggal_mulai date
-  tanggal_akhir date
-  status_lowongan varchar [default: 'aktif', note: 'enum: aktif,tidak aktif,dihapus,selesai']
-  created_by bigint [ref: > admins.id, note: 'ditambah FK constraint yang sebelumnya tidak ada']
+  tanggal_mulai date [not null]
+  tanggal_akhir date [not null]
+  status_lowongan enum('aktif','tidak aktif','dihapus','selesai') [not null, default: 'aktif']
+  created_by bigint [ref: > admins.id]
   updated_by bigint [ref: > admins.id]
   created_at timestamp
   updated_at timestamp
 }
 
-// ================= tidak berubah =================
+// ================= tidak berubah dari skema Laravel default / lama =================
 
 Table cache {
   key varchar [pk]
-  value text
-  expiration int
+  value mediumtext [not null]
+  expiration int [not null]
 }
 
 Table cache_locks {
   key varchar [pk]
-  owner varchar
-  expiration int
+  owner varchar [not null]
+  expiration int [not null]
 }
 
 Table contacts {
   id bigint [pk, increment]
-  name varchar
-  email varchar
-  city varchar
-  message text
-  status varchar [default: 'pending', note: 'enum: pending,forwarded,replied']
-  admin_id bigint [ref: > admins.id]
+  name varchar [not null]
+  email varchar [not null]
+  city varchar [not null]
+  message text [not null]
+  status enum('pending','forwarded','replied') [not null, default: 'pending']
+  admin_id bigint [ref: > admins.id, note: 'sekarang berarti "siapa yang balas", bukan lagi penerima tunggal']
+  cabang_id bigint [ref: > cabangs.id, note: 'BARU -- cabang tujuan pesan, resolve otomatis dari city pas contact masuk. Semua admin di cabang itu bisa lihat & balas (lihat catatan #3 di atas)']
   created_at timestamp
   updated_at timestamp
 }
 
 Table failed_jobs {
   id bigint [pk, increment]
-  uuid varchar [unique]
-  connection text
-  queue text
-  payload text
-  exception text
-  failed_at timestamp
+  uuid varchar [not null, unique]
+  connection text [not null]
+  queue text [not null]
+  payload longtext [not null]
+  exception longtext [not null]
+  failed_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
 }
 
 Table jobs {
   id bigint [pk, increment]
-  queue varchar
-  payload text
-  attempts int
+  queue varchar [not null]
+  payload longtext [not null]
+  attempts int [not null]
   reserved_at int
-  available_at int
-  created_at int
+  available_at int [not null]
+  created_at int [not null]
+
+  indexes {
+    queue
+  }
 }
 
 Table job_batches {
   id varchar [pk]
-  name varchar
-  total_jobs int
-  pending_jobs int
-  failed_jobs int
-  failed_job_ids text
-  options text
+  name varchar [not null]
+  total_jobs int [not null]
+  pending_jobs int [not null]
+  failed_jobs int [not null]
+  failed_job_ids longtext [not null]
+  options mediumtext
   cancelled_at int
-  created_at int
+  created_at int [not null]
   finished_at int
 }
 
 Table migrations {
   id int [pk, increment]
-  migration varchar
-  batch int
+  migration varchar [not null]
+  batch int [not null]
 }
 
 Table password_reset_tokens {
   email varchar [pk]
-  token varchar
+  token varchar [not null]
   created_at timestamp
 }
 
 Table sessions {
   id varchar [pk]
   user_id bigint
-  ip_address varchar
+  ip_address varchar(45)
   user_agent text
-  payload text
-  last_activity int
+  payload longtext [not null]
+  last_activity int [not null]
 
   indexes {
     user_id
@@ -320,11 +315,11 @@ Table sessions {
 
 Table users {
   id bigint [pk, increment]
-  name varchar
-  email varchar [unique]
-  role varchar [default: 'user']
+  name varchar [not null]
+  email varchar [not null, unique]
+  role varchar [not null, default: 'user']
   email_verified_at timestamp
-  password varchar
+  password varchar [not null]
   remember_token varchar
   created_at timestamp
   updated_at timestamp

@@ -1,6 +1,6 @@
-# List Tabel — db_sosro (skema final, 22 tabel)
+# List Tabel — db_sosro (skema yang beneran jalan sekarang, 23 tabel)
 
-Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
+Sinkron dengan `db_sosro_normalized.dbml` — sumbernya introspeksi langsung ke MySQL dev, bukan dokumen rencana. Kalau ada migration baru, refresh dari DB dulu, jangan edit manual berdasar dugaan.
 
 1. users — akun login pelamar (guard web), sumber nama tampilan
     1. id : PK
@@ -15,8 +15,8 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
 
 2. applicants — status proses lamaran & progress pengisian biodata per akun
     1. id : PK
-    2. status : default 'Pending'
-    3. user_id : unique, FK ke users.id (1 user = 1 applicant)
+    2. status : default 'Pending' — nilai aktual dipakai kode tidak konsisten kapitalisasinya (Pending/Reviewed/Accepted dari seeder vs "active"/"draft" dari ProfileController), varchar bebas bukan enum
+    3. user_id : FK ke users.id, nullable, **TIDAK unique di DB** (relasi 1 user = 1 applicant cuma dijaga di level kode, bukan constraint)
     4. profile_completed : boolean, default false
     5. biodata_progress : int, default 0 — persen progress isi biodata
     6. consent_accepted : boolean, default false
@@ -39,9 +39,9 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
 
 4. applicant_profiles — biodata inti pelamar (identitas, kontak, preferensi kerja)
     1. id : PK
-    2. applicant_id : unique, FK ke applicants.id (1 applicant = 1 profile)
+    2. applicant_id : FK ke applicants.id, **TIDAK unique di DB** (relasi 1 applicant = 1 profile cuma dijaga di level kode)
     3. nik : unique, nomor KTP
-    4. jk : enum L/P
+    4. jk : DB enum('L','P')
     5. tempat_lahir
     6. tanggal_lahir : date
     7. tinggi_badan
@@ -58,19 +58,19 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
     18. ex_company_name
     19. ex_last_position
     20. penyakit : text, riwayat penyakit
-    21. perokok : Ya/Tidak
-    22. bertato : Ya/Tidak
+    21. perokok : DB enum('ya','tidak')
+    22. bertato : DB enum('ya','tidak')
     23. expected_salary
     24. expected_facilities : text
-    25. ready_dinas : default 'Ya'
-    26. ready_placed_out : default 'Ya'
+    25. ready_dinas : varchar(10) not null, default 'Ya'
+    26. ready_placed_out : varchar(10) not null, default 'Ya'
     27. company_reference
     28. created_at / updated_at
 
 5. applicant_family_members — data anggota keluarga (inti & kandung) per pelamar
     1. id : PK
     2. applicant_profile_id : FK ke applicant_profiles.id
-    3. tipe : enum inti/kandung
+    3. tipe : inti/kandung (varchar, satu-satunya kolom wajib selain FK/timestamp)
     4. nama
     5. hubungan : hubungan keluarga
     6. pendidikan
@@ -80,23 +80,27 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
     10. hp
     11. created_at / updated_at
 
-6. applicant_educations — riwayat pendidikan formal & informal per pelamar
+6. applicant_formal_educations — riwayat pendidikan formal per pelamar (tabel terpisah dari informal, bukan digabung)
     1. id : PK
     2. applicant_profile_id : FK
-    3. tipe : enum formal/informal
-    4. jenjang : khusus formal
-    5. sekolah : khusus formal
-    6. jurusan : khusus formal
-    7. nilai : khusus formal
-    8. tahun_masuk : khusus formal
-    9. tahun_lulus : khusus formal
-    10. is_current_edu : boolean, khusus formal
-    11. kursus : khusus informal
-    12. penyelenggara : khusus informal
-    13. tahun : khusus informal
-    14. created_at / updated_at
+    3. jenjang
+    4. sekolah
+    5. jurusan
+    6. nilai
+    7. tahun_masuk
+    8. tahun_lulus
+    9. is_current_edu : boolean, default false
+    10. created_at / updated_at
 
-7. applicant_work_experiences — riwayat pengalaman kerja per pelamar
+7. applicant_informal_educations — riwayat pendidikan informal (kursus/pelatihan) per pelamar
+    1. id : PK
+    2. applicant_profile_id : FK
+    3. kursus
+    4. penyelenggara
+    5. tahun
+    6. created_at / updated_at
+
+8. applicant_work_experiences — riwayat pengalaman kerja per pelamar
     1. id : PK
     2. applicant_profile_id : FK
     3. perusahaan
@@ -104,35 +108,35 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
     5. divisi
     6. gaji
     7. fasilitas
-    8. masih_bekerja : boolean
+    8. masih_bekerja : boolean, default false
     9. tanggal_masuk : date
     10. tanggal_keluar : date nullable
     11. alasan : text, alasan keluar/pindah
     12. kontak_referensi
     13. created_at / updated_at
 
-8. applicant_job_field_interests — ranking minat bidang pekerjaan pelamar (pivot)
+9. applicant_job_field_interests — ranking minat bidang pekerjaan pelamar (pivot)
     1. applicant_profile_id : FK, bagian PK gabungan
     2. job_field_id : FK, bagian PK gabungan
     3. rank : int — 1 = paling diminati, selalu 13 baris per pelamar
 
-9. admins — akun staf internal (guard admin), dengan scoping per cabang
+10. admins — akun staf internal (guard admin), dengan scoping per cabang
     1. id : PK
     2. name
     3. email : unique
     4. role : default 'admin' (nilai lain: superadmin)
-    5. cabang_id : FK ke cabangs.id
+    5. cabang_id : FK ke cabangs.id, nullable (superadmin tidak terikat 1 cabang)
     6. photo
     7. password
     8. remember_token
     9. created_at / updated_at
 
-10. lowongan — data lowongan kerja yang dibuka admin
+11. lowongan — data lowongan kerja yang dibuka admin
     1. id : PK
     2. kode_lowongan : unique, format LWG-00001
     3. judul_lowongan
     4. kategori : varchar biasa, tidak dinormalisasi (cuma 3 nilai tetap: Profesional, Management Trainee, Magang)
-    5. bidang_id : FK ke job_fields.id
+    5. bidang : **varchar biasa** — sempat jadi bidang_id FK ke job_fields, di-revert balik jadi string
     6. tipe_lowongan : varchar biasa, tidak dinormalisasi (cuma 4 nilai tetap: Full-time, Part-time, Freelance, Kontrak)
     7. cabang_id : FK ke cabangs.id
     8. lokasi_kerja
@@ -140,51 +144,53 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
     10. kualifikasi : text
     11. tanggal_mulai : date
     12. tanggal_akhir : date
-    13. status_lowongan : enum aktif/tidak aktif/dihapus/selesai, default aktif
+    13. status_lowongan : DB enum aktif/tidak aktif/dihapus/selesai, default aktif
     14. created_by : FK ke admins.id
     15. updated_by : FK ke admins.id
     16. created_at / updated_at
 
-11. applications — lamaran pelamar ke lowongan tertentu, tracking pipeline rekrutmen
+12. applications — lamaran pelamar ke lowongan tertentu, tracking pipeline rekrutmen
     1. id : PK
     2. applicant_id : FK
     3. lowongan_id : FK
-    4. status : pending/psikotes/interview/offering/mcu/accepted/rejected
+    4. status : pending/psikotes/interview/offering/mcu/accepted/rejected (varchar bebas, bukan DB enum)
     5. notes : text nullable
     6. created_at / updated_at
     7. unique(applicant_id, lowongan_id)
 
-12. contacts — pesan masuk dari form kontak publik
+13. contacts — pesan masuk dari form kontak publik
     1. id : PK
     2. name : nama pengirim
     3. email
     4. city
     5. message : text
-    6. status : enum pending/forwarded/replied, default pending
-    7. admin_id : FK ke admins.id, admin yang menangani
-    8. created_at / updated_at
+    6. status : DB enum pending/forwarded/replied, default pending
+    7. admin_id : FK ke admins.id, nullable — sekarang berarti "siapa yang balas", bukan penerima tunggal
+    8. cabang_id : FK ke cabangs.id, nullable — **BARU**, cabang tujuan pesan (resolve otomatis dari city), semua admin cabang itu bisa lihat & balas
+    9. created_at / updated_at
 
-13. cabangs — master data cabang/kantor Sosro
+14. cabangs — master data cabang/kantor Sosro
     1. id : PK
     2. nama : unique (KPW Jakarta Banten, Pabrik Cakung, Kantor Pusat, dst)
-    3. kelompok : enum HO/KPW/Pabrik/Lainnya
+    3. kelompok : HO/KPW/Pabrik/Lainnya — varchar biasa di DB, validasi cuma di level aplikasi (bukan DB enum)
     4. created_at / updated_at
 
-14. job_fields — master bidang pekerjaan, dipakai lowongan & minat pelamar
+15. job_fields — master bidang pekerjaan, dipakai minat pelamar (BUKAN lowongan, lihat poin 11.5)
     1. id : PK
     2. nama : unique (13 bidang: Marketing, Finance & Accounting, dst)
+    3. created_at / updated_at
 
-15. cache — bawaan Laravel, key-value cache aplikasi
+16. cache — bawaan Laravel, key-value cache aplikasi
     1. key : PK
     2. value
     3. expiration
 
-16. cache_locks — bawaan Laravel, lock atomic untuk cache
+17. cache_locks — bawaan Laravel, lock atomic untuk cache
     1. key : PK
     2. owner
     3. expiration
 
-17. jobs — bawaan Laravel, antrian queue (dipakai kirim email async)
+18. jobs — bawaan Laravel, antrian queue (dipakai kirim email async)
     1. id : PK
     2. queue
     3. payload
@@ -193,7 +199,7 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
     6. available_at
     7. created_at
 
-18. job_batches — bawaan Laravel, tracking progress batch job
+19. job_batches — bawaan Laravel, tracking progress batch job
     1. id : PK
     2. name
     3. total_jobs
@@ -205,7 +211,7 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
     9. created_at
     10. finished_at
 
-19. failed_jobs — bawaan Laravel, log job queue yang gagal
+20. failed_jobs — bawaan Laravel, log job queue yang gagal
     1. id : PK
     2. uuid : unique
     3. connection
@@ -214,17 +220,17 @@ Anggap dibangun sebagai DB baru dari nol sesuai `db_sosro_normalized.dbml`.
     6. exception
     7. failed_at
 
-20. migrations — bawaan Laravel, tracking migration yang sudah jalan
+21. migrations — bawaan Laravel, tracking migration yang sudah jalan
     1. id : PK
     2. migration
     3. batch
 
-21. password_reset_tokens — bawaan Laravel, fitur lupa password (dipakai pelamar & admin)
+22. password_reset_tokens — bawaan Laravel, fitur lupa password (dipakai pelamar & admin)
     1. email : PK
     2. token
     3. created_at
 
-22. sessions — bawaan Laravel, penyimpanan session (kalau driver session = database)
+23. sessions — bawaan Laravel, penyimpanan session (kalau driver session = database)
     1. id : PK
     2. user_id
     3. ip_address
