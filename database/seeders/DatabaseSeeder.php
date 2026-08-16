@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CabangSeeder::class,
             JobFieldSeeder::class,
+            RecruitmentStageSeeder::class,
         ]);
     }
 }

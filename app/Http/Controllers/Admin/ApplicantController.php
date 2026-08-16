@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Admin\Lowongan;
+use App\Models\RecruitmentStage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ApplicantController extends Controller
@@ -104,7 +106,7 @@ class ApplicantController extends Controller
         // Validasi input
         $request->validate([
             'application_id' => 'required|exists:applications,id',
-            'next_status' => 'required',
+            'next_status' => ['required', Rule::in(RecruitmentStage::allKeys())],
             'rejection_reason' => 'required_if:next_status,rejected',
             'psikotes_type' => 'required_if:next_status,psikotes',
             'psikotes_date' => 'required_if:next_status,psikotes',
@@ -189,8 +191,12 @@ class ApplicantController extends Controller
     }
 
     // FITUR UPDATE MASSAL
-    public function bulkUpdate(Request $request) 
+    public function bulkUpdate(Request $request)
     {
+        $request->validate([
+            'status' => ['required', Rule::in(RecruitmentStage::bulkUpdateStages())],
+        ]);
+
         $ids = $request->selected_ids;
         $status = $request->status;
 

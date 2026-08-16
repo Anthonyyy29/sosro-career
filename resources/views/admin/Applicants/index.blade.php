@@ -2,11 +2,13 @@
 
 @section('content')
 
-<div x-data="{ 
-        statusModalOpen: false, 
-        selectedAppId: null, 
-        nextStatus: '', 
+<div x-data="{
+        statusModalOpen: false,
+        selectedAppId: null,
+        nextStatus: '',
         category: '',
+        pipelines: {{ Js::from(App\Models\RecruitmentStage::pipelines()) }},
+        stageLabels: {{ Js::from(App\Models\RecruitmentStage::labels()) }},
         openStatusModal(id, currentStatus, category) {
             this.selectedAppId = id;
             this.category = category;
@@ -142,27 +144,14 @@
                                 
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending ({{ $stats['pending'] ?? 0 }})</option>
 
-                                <optgroup label="Alur Profesional" x-show="selectedCat === 'Profesional'">
-                                    <option value="administration" {{ request('status') == 'administration' ? 'selected' : '' }}>Administrasi ({{ $stats['administration'] ?? 0 }})</option>
-                                    <option value="psikotes" {{ request('status') == 'psikotes' ? 'selected' : '' }}>Psikotes ({{ $stats['psikotes'] ?? 0 }})</option>
-                                    <option value="interview" {{ request('status') == 'interview' ? 'selected' : '' }}>Interview ({{ $stats['interview'] ?? 0 }})</option>
-                                    <option value="offering" {{ request('status') == 'offering' ? 'selected' : '' }}>Offering ({{ $stats['offering'] ?? 0 }})</option>
-                                    <option value="mcu" {{ request('status') == 'mcu' ? 'selected' : '' }}>MCU ({{ $stats['mcu'] ?? 0 }})</option>
-                                </optgroup>
-
-                                <optgroup label="Alur Management Trainee" x-show="selectedCat === 'Management Trainee'">
-                                    <option value="administration" {{ request('status') == 'administration' ? 'selected' : '' }}>Administrasi ({{ $stats['administration'] ?? 0 }})</option>
-                                    <option value="psikotes" {{ request('status') == 'psikotes' ? 'selected' : '' }}>Psikotes ({{ $stats['psikotes'] ?? 0 }})</option>
-                                    <option value="study case" {{ request('status') == 'study case' ? 'selected' : '' }}>Study Case ({{ $stats['study case'] ?? 0 }})</option>
-                                    <option value="panel bod" {{ request('status') == 'panel bod' ? 'selected' : '' }}>Panel BoD ({{ $stats['panel bod'] ?? 0 }})</option>
-                                </optgroup>
-
-                                <optgroup label="Alur Magang / Motoris" x-show="selectedCat === 'Magang'">
-                                    <option value="administration" {{ request('status') == 'administration' ? 'selected' : '' }}>Administrasi ({{ $stats['administration'] ?? 0 }})</option>
-                                    <option value="psikotes" {{ request('status') == 'psikotes' ? 'selected' : '' }}>Psikotes ({{ $stats['psikotes'] ?? 0 }})</option>
-                                    <option value="interview" {{ request('status') == 'interview' ? 'selected' : '' }}>Interview ({{ $stats['interview'] ?? 0 }})</option>
-                                    <option value="simulasi" {{ request('status') == 'simulasi' ? 'selected' : '' }}>Simulasi ({{ $stats['simulasi'] ?? 0 }})</option>
-                                </optgroup>
+                                @php $stageLabels = App\Models\RecruitmentStage::labels(); @endphp
+                                @foreach (App\Models\RecruitmentStage::pipelines() as $kategori => $stages)
+                                    <optgroup label="Alur {{ $kategori }}" x-show="selectedCat === '{{ $kategori }}'">
+                                        @foreach ($stages as $stage)
+                                            <option value="{{ $stage }}" {{ request('status') == $stage ? 'selected' : '' }}>{{ $stageLabels[$stage] ?? $stage }} ({{ $stats[$stage] ?? 0 }})</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
 
                                 <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted ({{ $stats['accepted'] ?? 0 }})</option>
                                 <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected ({{ $stats['rejected'] ?? 0 }})</option>
@@ -200,11 +189,10 @@
             <div id="bulkUpdateBtn" class="hidden flex items-center gap-3 mb-4">
                 <select name="status" class="border border-gray-200 rounded-lg px-3 py-2 text-sm" required>
                     <option value="">Pilih Status</option>
-                    <option value="administration">Lolos Administrasi</option>
-                    <option value="psikotes">Psikotes</option>
-                    <option value="interview">Interview</option>
-                    <option value="rejected" class="bg-red-200">Rejected</option>
-                    </select>
+                    @foreach (App\Models\RecruitmentStage::bulkUpdateStages() as $stage)
+                        <option value="{{ $stage }}" @class(['bg-red-200' => $stage === 'rejected'])>{{ App\Models\RecruitmentStage::labels()[$stage] ?? $stage }}</option>
+                    @endforeach
+                </select>
 
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
                     Update Massal
@@ -263,35 +251,15 @@
                                 
                                 <td class="px-6 py-4">
                                     @php
-                                        $statusStyle = match($application->status) {
-                                            'pending'        => 'bg-yellow-50 text-yellow-600 border-yellow-100',
-                                            'administration' => 'bg-purple-50 text-purple-600 border-purple-100',
-                                            'psikotes'       => 'bg-blue-50 text-blue-600 border-blue-100',
-                                            'interview'      => 'bg-cyan-50 text-cyan-600 border-cyan-100',
-                                            
-                                            // Alur MT & Spesifik
-                                            'study case'     => 'bg-indigo-50 text-indigo-600 border-indigo-100',
-                                            'panel bod'      => 'bg-violet-50 text-violet-600 border-violet-100',
-                                            
-                                            // Alur Magang/Motoris & Lapangan
-                                            'simulasi'       => 'bg-orange-50 text-orange-600 border-orange-100',
-                                            'practical_test' => 'bg-orange-50 text-orange-600 border-orange-100',
-                                            
-                                            // Tahap Akhir
-                                            'offering'       => 'bg-pink-50 text-pink-600 border-pink-100',
-                                            'mcu'            => 'bg-teal-50 text-teal-600 border-teal-100',
-                                            'accepted'       => 'bg-green-50 text-green-600 border-green-100',
-                                            'rejected'       => 'bg-red-50 text-red-600 border-red-100',
-                                            
-                                            default          => 'bg-gray-50 text-gray-600 border-gray-100'
-                                        };
+                                        $statusStyle = App\Models\RecruitmentStage::colors()[$application->status] ?? 'bg-gray-50 text-gray-600 border-gray-100';
+                                        $statusLabel = App\Models\RecruitmentStage::labels()[$application->status] ?? str_replace('_', ' ', $application->status);
                                     @endphp
                                     <button type="button" title="Ubah Status"
                                             @click="openStatusModal({{ $application->id }}, '{{ $application->status }}', '{{ $application->lowongan->kategori }}')"
                                             class="group flex items-center gap-2 p-1 rounded-lg transition-all hover:ring-2 hover:ring-blue-500/20">
-                                        
+
                                         <span class="px-3 py-1 rounded-lg text-[11px] font-bold border {{ $statusStyle }} uppercase tracking-wide">
-                                            {{ str_replace('_', ' ', $application->status) }}
+                                            {{ $statusLabel }}
                                         </span>
 
                                         <svg class="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -337,36 +305,12 @@
                             <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Pindah ke Tahap:</label>
                             <select name="next_status" x-model="nextStatus" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
                                 <option value="" disabled>-- Pilih Tahapan --</option>
-                                {{-- PROFESIONAL --}}
-                                <template x-if="category === 'Profesional'">
-                                    <optgroup label="Alur Profesional">
-                                        <option value="administration">Lolos Administrasi</option>
-                                        <option value="psikotes">Psikotes</option>
-                                        <option value="interview">Interview</option>
-                                        <option value="offering">Offering Letter</option>
-                                        <option value="mcu">MCU</option>
-                                    </optgroup>
-                                </template>
-                                {{-- MANAGEMENT TRAINEE --}}
-                                <template x-if="category === 'Management Trainee'">
-                                    <optgroup label="Alur Management Trainee (MT)">
-                                        <option value="administration">Lolos Administrasi</option>
-                                        <option value="psikotes">Psikotes</option>
-                                        <option value="interview">Interview</option>
-                                        <option value="study case">Study Case</option>
-                                        <option value="panel bod">Panel BoD</option>
-                                        <option value="offering">Offering Letter</option>
-                                        <option value="mcu">MCU</option>
-                                    </optgroup>
-                                </template>
-                                {{-- MAGANG --}}
-                                <template x-if="category === 'Magang' || category === 'Motoris'">
-                                    <optgroup label="Alur Magang / Motoris">
-                                        <option value="administration">Lolos Administrasi</option>
-                                        <option value="psikotes">Psikotes</option>
-                                        <option value="interview">Interview</option>
-                                        <option value="simulasi">Simulasi</option> 
-                                        <option value="offering">Offering Letter</option>
+                                {{-- Alur tahap dinamis sesuai kategori lowongan, sumbernya App\Models\RecruitmentStage::pipelines() (tabel recruitment_stage_pipeline) --}}
+                                <template x-if="pipelines[category]">
+                                    <optgroup :label="'Alur ' + category">
+                                        <template x-for="stage in (pipelines[category] || [])" :key="stage">
+                                            <option :value="stage" x-text="stageLabels[stage] || stage"></option>
+                                        </template>
                                     </optgroup>
                                 </template>
 
@@ -459,7 +403,7 @@
                             </div>
                         </div>
 
-                        {{-- Form input Tes Lapangan --}}
+                        {{-- Form input Tes Lapangan (disabled: dead code, gak ada opsi manapun yang set nextStatus ke 'practical_test', digantikan 'simulasi')
                         <div x-show="nextStatus === 'practical_test'" x-transition class="p-4 bg-orange-50 rounded-xl border border-orange-100 space-y-3">
                             <p class="text-[11px] font-bold text-orange-600 uppercase">Informasi Tes Lapangan</p>
                             <div>
@@ -467,6 +411,7 @@
                                 <input type="text" name="test_location" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Contoh: Gudang A / Parkiran Timur">
                             </div>
                         </div>
+                        --}}
 
                         {{-- Form input Lolos / Hiring --}}
                         <div x-show="nextStatus === 'accepted'" x-transition class="p-4 bg-green-50 rounded-xl border border-green-100 space-y-3">

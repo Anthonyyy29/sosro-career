@@ -33,18 +33,15 @@
             <div class="grid gap-6">
                 @foreach($applications as $app)
                     @php
-                        $statusData = match($app->status) {
-                            'pending', 'submitted' => ['color' => 'bg-amber-50 text-amber-700 border-amber-100', 'label' => 'Terkirim', 'step' => 1],
-                            'administration'       => ['color' => 'bg-purple-50 text-purple-700 border-purple-100', 'label' => 'Lolos Administrasi', 'step' => 2],
-                            'psikotes'             => ['color' => 'bg-blue-50 text-blue-700 border-blue-100', 'label' => 'Psikotes', 'step' => 2],
-                            'interview'            => ['color' => 'bg-cyan-50 text-cyan-700 border-cyan-100', 'label' => 'Interview', 'step' => 2],
-                            'study case'           => ['color' => 'bg-indigo-50 text-indigo-700 border-indigo-100', 'label' => 'Study Case', 'step' => 2],
-                            'simulasi'             => ['color' => 'bg-orange-50 text-orange-700 border-orange-100', 'label' => 'Simulasi Field', 'step' => 2],
-                            'offering'             => ['color' => 'bg-pink-50 text-pink-700 border-pink-100', 'label' => 'Offering Letter', 'step' => 2],
-                            'mcu'                  => ['color' => 'bg-teal-50 text-teal-700 border-teal-100', 'label' => 'Medical Check Up', 'step' => 2],
-                            'accepted'             => ['color' => 'bg-green-50 text-green-700 border-green-100', 'label' => 'Diterima (Hired)', 'step' => 3],
-                            'rejected'             => ['color' => 'bg-red-50 text-red-700 border-red-100', 'label' => 'Ditolak', 'step' => 3],
-                            default                => ['color' => 'bg-gray-50 text-gray-700 border-gray-100', 'label' => str_replace('_', ' ', $app->status), 'step' => 2],                        };
+                        // 'submitted' -- nilai default enum lama sebelum status jadi varchar bebas, gak pernah ditulis kode manapun sekarang, dianggap alias 'pending'.
+                        $statusKey = $app->status === 'submitted' ? 'pending' : $app->status;
+                        $statusData = [
+                            'color' => App\Models\RecruitmentStage::colors()[$statusKey] ?? 'bg-gray-50 text-gray-700 border-gray-100',
+                            'label' => App\Models\RecruitmentStage::applicantLabels()[$statusKey]
+                                ?? App\Models\RecruitmentStage::labels()[$statusKey]
+                                ?? str_replace('_', ' ', $app->status),
+                            'step' => $statusKey === 'pending' ? 1 : (in_array($statusKey, ['accepted', 'rejected']) ? 3 : 2),
+                        ];
                     @endphp
 
                     <div class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">

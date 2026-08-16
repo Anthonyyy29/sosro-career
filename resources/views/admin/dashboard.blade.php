@@ -121,7 +121,7 @@
                             @foreach($items as $item)
                             <div>
                                 <div class="flex justify-between text-[10px] mb-1.5">
-                                    <span class="font-bold text-gray-600 uppercase tracking-tight">{{ str_replace('_', ' ', $item->status) }}</span>
+                                    <span class="font-bold text-gray-600 uppercase tracking-tight">{{ App\Models\RecruitmentStage::labels()[$item->status] ?? str_replace('_', ' ', $item->status) }}</span>
                                     <span class="font-bold text-red-600">{{ $item->total }} Pelamar</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
@@ -195,7 +195,7 @@
                                 $class = $statusClasses[$applicant->status] ?? 'bg-slate-50 text-slate-600 ring-slate-600/10';
                             @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase ring-1 ring-inset {{ $class }}">
-                                {{ $applicant->status }}
+                                {{ App\Models\RecruitmentStage::labels()[$applicant->status] ?? str_replace('_', ' ', $applicant->status) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
