@@ -95,15 +95,9 @@
             event.target.classList.add('opacity-50');
         },
 
-        // Autosave draft: simpan progress berkala biar bisa lanjut nanti kalau ditinggal
-        autosaveTimer: null,
+        // Autosave draft: simpan progress cuma pas pindah tab, bukan tiap ketikan (hemat write DB)
         autosaveStatus: '',
-        queueAutosave() {
-            clearTimeout(this.autosaveTimer);
-            this.autosaveTimer = setTimeout(() => this.autosaveDraft(), 1500);
-        },
         autosaveDraft() {
-            clearTimeout(this.autosaveTimer);
             this.autosaveStatus = 'saving';
             const form = this.$refs.bioForm;
             const fd = new FormData(form);
@@ -148,7 +142,7 @@
 
             <div class="bg-white rounded-[2.5rem] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.08)] border border-gray-50 overflow-hidden">
                 <div class="p-6 md:p-12">
-                    <form x-ref="bioForm" method="POST" action="{{ route('applicant.profile.store') }}" enctype="multipart/form-data" novalidate @input="formTick++; queueAutosave()" @change="formTick++; queueAutosave()">
+                    <form x-ref="bioForm" method="POST" action="{{ route('applicant.profile.store') }}" enctype="multipart/form-data" novalidate @input="formTick++" @change="formTick++">
                         @csrf
 
                         <div x-show="step === 1" x-transition>
