@@ -90,101 +90,88 @@
         </div>
         
         {{-- Fitur filter --}}
-        <div x-data="{ 
-            showFilter: {{ (request('category') || request('status') || request('start_date')) ? 'true' : 'false' }}, 
-            selectedCat: '{{ request('category', '') }}' 
-            }" class="mb-8">
+        <div x-data="{
+            selectedCat: '{{ request('category', '') }}',
+            selectedLowongan: '{{ request('lowongan_id', '') }}',
+            lowonganMap: @js(($lowongans ?? collect())->pluck('kategori', 'id')),
+            get effectiveCat() { return this.selectedCat || (this.selectedLowongan ? (this.lowonganMap[this.selectedLowongan] ?? '') : ''); }
+            }" class="mb-6">
 
-            <div class="flex flex-wrap justify-between items-center gap-4 mb-5">
-                <div class="flex items-center gap-3">
-                    <button @click="showFilter = !showFilter" 
-                            class="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:shadow-md transition-all active:scale-95">
-                        <svg class="w-4 h-4 transition-transform duration-300" :class="showFilter ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                        <span>Filter & Periode</span>
-                        @if(request('category') || request('status') || request('start_date'))
-                            <span class="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
-                        @endif
+            <form action="{{ url()->current() }}" method="GET" class="flex flex-wrap items-end gap-3 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+
+                <div class="flex flex-col min-w-[180px]">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-1 ml-1">Posisi</label>
+                    <select name="lowongan_id" x-model="selectedLowongan" class="w-full border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50 transition-all">
+                        <option value="">Semua Posisi</option>
+                        @foreach ($lowongans ?? [] as $lw)
+                            <option value="{{ $lw->id }}" {{ (string) request('lowongan_id') === (string) $lw->id ? 'selected' : '' }}>{{ $lw->judul_lowongan }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="flex flex-col min-w-[160px]">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-1 ml-1">Kategori</label>
+                    <select name="category" x-model="selectedCat" class="w-full border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50 transition-all">
+                        <option value="">Semua Kategori</option>
+                        <option value="Profesional">Profesional</option>
+                        <option value="Management Trainee">Management Trainee</option>
+                        <option value="Magang">Magang / Motoris</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col min-w-[180px]">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-1 ml-1">Tahapan Seleksi</label>
+                    <select name="status" class="w-full border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50 transition-all">
+                        <option value="">Semua Tahapan</option>
+
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending ({{ $stats['pending'] ?? 0 }})</option>
+
+                        @php $stageLabels = App\Models\RecruitmentStage::labels(); @endphp
+                        @foreach (App\Models\RecruitmentStage::pipelines() as $kategori => $stages)
+                            <optgroup label="Alur {{ $kategori }}" x-show="effectiveCat === '{{ $kategori }}'">
+                                @foreach ($stages as $stage)
+                                    <option value="{{ $stage }}" {{ request('status') == $stage ? 'selected' : '' }}>{{ $stageLabels[$stage] ?? $stage }} ({{ $stats[$stage] ?? 0 }})</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+
+                        <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted ({{ $stats['accepted'] ?? 0 }})</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected ({{ $stats['rejected'] ?? 0 }})</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col min-w-[140px]">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-1 ml-1">Dari Tanggal</label>
+                    <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50">
+                </div>
+
+                <div class="flex flex-col min-w-[140px]">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-1 ml-1">Sampai Tanggal</label>
+                    <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50">
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 shadow-sm transition-all active:scale-95">
+                        Terapkan
                     </button>
-                    
-                    @if(request('category') || request('status'))
-                        <div class="hidden md:flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
-                            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-tight">
-                                {{ request('category') ?? 'Semua' }} ➔ {{ str_replace('_', ' ', request('status') ?? 'Semua Tahapan') }}
-                            </span>
-                        </div>
+                    @if(request()->anyFilled(['category', 'status', 'start_date', 'end_date', 'lowongan_id']))
+                        <a href="{{ url()->current() }}" class="px-4 py-2 text-gray-500 rounded-lg font-bold text-sm hover:bg-gray-100 transition-all">
+                            Reset
+                        </a>
                     @endif
                 </div>
-            </div>
-
-            <div x-show="showFilter" 
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 -translate-y-2"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                class="bg-white p-7 rounded-2xl border border-gray-100 shadow-xl shadow-gray-200/50" x-cloak>
-                
-                <form action="{{ url()->current() }}" method="GET">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-2 ml-1">Kategori Lowongan</label>
-                            <select name="category" x-model="selectedCat" class="w-full border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50 transition-all">
-                                <option value="">Semua Kategori</option>
-                                <option value="Profesional">Profesional</option>
-                                <option value="Management Trainee">Management Trainee</option>
-                                <option value="Magang">Magang / Motoris</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-2 ml-1">Tahapan Seleksi</label>
-                            <select name="status" class="w-full border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50 transition-all">
-                                <option value="">Semua Tahapan</option>
-                                
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending ({{ $stats['pending'] ?? 0 }})</option>
-
-                                @php $stageLabels = App\Models\RecruitmentStage::labels(); @endphp
-                                @foreach (App\Models\RecruitmentStage::pipelines() as $kategori => $stages)
-                                    <optgroup label="Alur {{ $kategori }}" x-show="selectedCat === '{{ $kategori }}'">
-                                        @foreach ($stages as $stage)
-                                            <option value="{{ $stage }}" {{ request('status') == $stage ? 'selected' : '' }}>{{ $stageLabels[$stage] ?? $stage }} ({{ $stats[$stage] ?? 0 }})</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-
-                                <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted ({{ $stats['accepted'] ?? 0 }})</option>
-                                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected ({{ $stats['rejected'] ?? 0 }})</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-2 ml-1">Dari Tanggal</label>
-                            <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50">
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-2 ml-1">Sampai Tanggal</label>
-                            <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50">
-                        </div>
-                    </div>
-
-                    <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end gap-3">
-                        <a href="{{ url()->current() }}" class="px-6 py-3 bg-gray-50 text-gray-500 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all">
-                            Reset Filter
-                        </a>
-                        <button type="submit" class="px-10 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
-                            Terapkan Filter
-                        </button>
-                    </div>
-                </form>
-            </div>
+            </form>
         </div>
 
         {{-- Fitur Update Masal --}}
+        @php($posisiSelected = request()->filled('lowongan_id') || isset($lowongan))
         <form id="bulkForm" method="POST" action="{{ route('admin.applicants.bulkPrepare') }}">
             @csrf
             <div id="hiddenIdsContainer"></div>
+
+            @unless($posisiSelected)
+                <p class="text-xs text-gray-400 italic mb-2">Pilih Posisi terlebih dahulu untuk mengaktifkan aksi massal.</p>
+            @endunless
 
             <div id="bulkUpdateBtn" class="hidden flex items-center gap-3 mb-4">
                 <select name="status" class="border border-gray-200 rounded-lg px-3 py-2 text-sm" required>
@@ -206,7 +193,7 @@
                 <table class="min-w-full text-sm" id="table">
                     <thead>
                         <tr class="bg-gray-50/50 border-b border-gray-100">
-                            <th class="py-4 px-4 text-[11px]"><input type="checkbox" id="selectAll" class="rounded border-gray-300"></th>
+                            <th class="py-4 px-4 text-[11px]"><input type="checkbox" id="selectAll" class="rounded border-gray-300" @disabled(!$posisiSelected)></th>
                             <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">No</th>
                             <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Kandidat</th>
                             <th class="py-4 px-6 text-left font-bold text-gray-500 uppercase tracking-wider text-[11px]">Posisi</th>
@@ -222,10 +209,11 @@
                             <tr class="group hover:bg-blue-50/50 transition-all duration-100">
                                 
                                 <td class="px-4 py-4">
-                                    <input 
-                                        type="checkbox" 
+                                    <input
+                                        type="checkbox"
                                         class="applicant-checkbox rounded border-gray-300"
-                                        value="{{ $application->id }}">
+                                        value="{{ $application->id }}"
+                                        @disabled(!$posisiSelected)>
                                 </td>
 
                                 <td class="px-6 py-4 text-gray-400 font-medium">{{ $loop->iteration }}</td>
@@ -482,6 +470,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const posisiSelected = @json($posisiSelected);
             const selectAll = document.getElementById('selectAll');
             const checkboxes = document.querySelectorAll('.applicant-checkbox');
             const bulkBtn = document.getElementById('bulkUpdateBtn');
@@ -501,6 +490,7 @@
 
             // 3. Fungsi Show/Hide Tombol Update
             function toggleBulkButton() {
+                if (!posisiSelected) { bulkBtn.classList.add('hidden'); return; }
                 const checkedCount = document.querySelectorAll('.applicant-checkbox:checked').length;
                 if (checkedCount > 0) {
                     bulkBtn.classList.remove('hidden');

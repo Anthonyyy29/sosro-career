@@ -35,6 +35,11 @@ class ApplicantController extends Controller
             });
         }
 
+        // 3b. Filter Posisi (lowongan spesifik)
+        if ($request->filled('lowongan_id')) {
+            $query->where('lowongan_id', $request->lowongan_id);
+        }
+
         // 4. Filter Status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -53,11 +58,14 @@ class ApplicantController extends Controller
             });
         }
         
-        // Tambahkan filter kategori/tanggal ke stats agar angka sinkron dengan tabel
+        // Tambahkan filter kategori/posisi/tanggal ke stats agar angka sinkron dengan tabel
         if ($request->filled('category')) {
             $statsQuery->whereHas('lowongan', function($q) use ($request) {
                 $q->where('kategori', $request->category);
             });
+        }
+        if ($request->filled('lowongan_id')) {
+            $statsQuery->where('lowongan_id', $request->lowongan_id);
         }
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $statsQuery->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
@@ -70,7 +78,14 @@ class ApplicantController extends Controller
 
         $applications = $query->latest()->paginate(50)->withQueryString();
 
-        return view('admin.applicants.index', compact('applications', 'stats'));
+        // Daftar lowongan (scoped cabang) untuk dropdown filter Posisi
+        $lowongans = Lowongan::query()
+            ->when(Auth::user()->role !== 'superadmin', fn($q) =>
+                $q->where('cabang_id', Auth::user()->cabang_id))
+            ->orderBy('judul_lowongan')
+            ->get(['id', 'judul_lowongan', 'kategori']);
+
+        return view('admin.applicants.index', compact('applications', 'stats', 'lowongans'));
     }
 
     public function show(Application $application)
