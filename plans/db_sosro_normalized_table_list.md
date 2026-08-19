@@ -1,4 +1,4 @@
-# List Tabel — db_sosro (skema yang beneran jalan sekarang, 23 tabel)
+# List Tabel — db_sosro (skema yang beneran jalan sekarang, 25 tabel)
 
 Sinkron dengan `db_sosro_normalized.dbml` — sumbernya introspeksi langsung ke MySQL dev, bukan dokumen rencana. Kalau ada migration baru, refresh dari DB dulu, jangan edit manual berdasar dugaan.
 
@@ -158,7 +158,26 @@ Sinkron dengan `db_sosro_normalized.dbml` — sumbernya introspeksi langsung ke 
     6. created_at / updated_at
     7. unique(applicant_id, lowongan_id)
 
-13. contacts — pesan masuk dari form kontak publik
+13. recruitment_stages — master tahapan seleksi rekrutmen (dulu hardcode array PHP, sekarang data-driven)
+    1. id : PK
+    2. key : unique — pending, administration, psikotes, interview, study case, panel bod, simulasi, offering, mcu, accepted, rejected
+    3. label : label sisi admin
+    4. applicant_label : nullable — override label sisi pelamar, null berarti fallback ke label admin
+    5. color_classes : kelas Tailwind badge
+    6. is_universal : boolean, default false — true cuma untuk pending/accepted/rejected (tersedia di semua kategori, di luar pipeline)
+    7. is_bulk_updatable : boolean, default false — true untuk stage yang bisa diubah lewat bulk-update admin
+    8. created_at / updated_at
+
+14. recruitment_stage_pipeline — urutan tahapan seleksi per kategori lowongan (pivot dengan kolom order)
+    1. id : PK
+    2. kategori : harus sama persis dengan lowongan.kategori, TIDAK ada FK (lowongan.kategori tetap varchar bebas)
+    3. recruitment_stage_id : FK ke recruitment_stages.id, ON DELETE CASCADE
+    4. order : int — urutan tahap dalam pipeline kategori ini, mulai dari 1. Cuma dipakai buat filter dropdown UI admin, **TIDAK ditegakkan** sebagai validasi transisi status di backend
+    5. created_at / updated_at
+    6. unique(kategori, recruitment_stage_id)
+    7. unique(kategori, order)
+
+15. contacts — pesan masuk dari form kontak publik
     1. id : PK
     2. name : nama pengirim
     3. email
@@ -169,28 +188,28 @@ Sinkron dengan `db_sosro_normalized.dbml` — sumbernya introspeksi langsung ke 
     8. cabang_id : FK ke cabangs.id, nullable — **BARU**, cabang tujuan pesan (resolve otomatis dari city), semua admin cabang itu bisa lihat & balas
     9. created_at / updated_at
 
-14. cabangs — master data cabang/kantor Sosro
+16. cabangs — master data cabang/kantor Sosro
     1. id : PK
     2. nama : unique (KPW Jakarta Banten, Pabrik Cakung, Kantor Pusat, dst)
     3. kelompok : HO/KPW/Pabrik/Lainnya — varchar biasa di DB, validasi cuma di level aplikasi (bukan DB enum)
     4. created_at / updated_at
 
-15. job_fields — master bidang pekerjaan, dipakai minat pelamar (BUKAN lowongan, lihat poin 11.5)
+17. job_fields — master bidang pekerjaan, dipakai minat pelamar (BUKAN lowongan, lihat poin 11.5)
     1. id : PK
     2. nama : unique (13 bidang: Marketing, Finance & Accounting, dst)
     3. created_at / updated_at
 
-16. cache — bawaan Laravel, key-value cache aplikasi
+18. cache — bawaan Laravel, key-value cache aplikasi
     1. key : PK
     2. value
     3. expiration
 
-17. cache_locks — bawaan Laravel, lock atomic untuk cache
+19. cache_locks — bawaan Laravel, lock atomic untuk cache
     1. key : PK
     2. owner
     3. expiration
 
-18. jobs — bawaan Laravel, antrian queue (dipakai kirim email async)
+20. jobs — bawaan Laravel, antrian queue (dipakai kirim email async)
     1. id : PK
     2. queue
     3. payload
@@ -199,7 +218,7 @@ Sinkron dengan `db_sosro_normalized.dbml` — sumbernya introspeksi langsung ke 
     6. available_at
     7. created_at
 
-19. job_batches — bawaan Laravel, tracking progress batch job
+21. job_batches — bawaan Laravel, tracking progress batch job
     1. id : PK
     2. name
     3. total_jobs
@@ -211,7 +230,7 @@ Sinkron dengan `db_sosro_normalized.dbml` — sumbernya introspeksi langsung ke 
     9. created_at
     10. finished_at
 
-20. failed_jobs — bawaan Laravel, log job queue yang gagal
+22. failed_jobs — bawaan Laravel, log job queue yang gagal
     1. id : PK
     2. uuid : unique
     3. connection
@@ -220,17 +239,17 @@ Sinkron dengan `db_sosro_normalized.dbml` — sumbernya introspeksi langsung ke 
     6. exception
     7. failed_at
 
-21. migrations — bawaan Laravel, tracking migration yang sudah jalan
+23. migrations — bawaan Laravel, tracking migration yang sudah jalan
     1. id : PK
     2. migration
     3. batch
 
-22. password_reset_tokens — bawaan Laravel, fitur lupa password (dipakai pelamar & admin)
+24. password_reset_tokens — bawaan Laravel, fitur lupa password (dipakai pelamar & admin)
     1. email : PK
     2. token
     3. created_at
 
-23. sessions — bawaan Laravel, penyimpanan session (kalau driver session = database)
+25. sessions — bawaan Laravel, penyimpanan session (kalau driver session = database)
     1. id : PK
     2. user_id
     3. ip_address

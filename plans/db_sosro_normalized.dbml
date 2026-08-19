@@ -24,6 +24,10 @@
 // 5. jk, perokok, bertato, contacts.status, lowongan.status_lowongan itu ENUM asli di level MySQL
 //    (bukan varchar+note kayak draft lama nebak). cabangs.kelompok sebaliknya JUSTRU varchar biasa
 //    (bukan DB enum), validasinya cuma di level aplikasi.
+// 6. BARU (belum ada di refresh sebelumnya): tahapan seleksi (dulu hardcode array PHP) sekarang
+//    tabel recruitment_stages + recruitment_stage_pipeline. applications.status tetap varchar bebas
+//    dan TIDAK ada FK ke recruitment_stages.key -- relasinya cuma konvensi nilai string yang harus
+//    sama persis, tidak ditegakkan di level DB.
 //
 // Yang masih sama dengan keputusan di draft awal (lihat plans/normalisasi-struktur-database-prioritas.md
 // buat histori diskusinya): kategori & tipe_lowongan lowongan tetap varchar bebas (fixed vocabulary
@@ -221,6 +225,34 @@ Table lowongan {
   updated_by bigint [ref: > admins.id]
   created_at timestamp
   updated_at timestamp
+}
+
+// ================= recruitment_stages, recruitment_stage_pipeline (tahapan seleksi, data-driven) =================
+
+Table recruitment_stages {
+  id bigint [pk, increment]
+  key varchar [not null, unique, note: 'pending, administration, psikotes, interview, study case, panel bod, simulasi, offering, mcu, accepted, rejected']
+  label varchar [not null, note: 'label sisi admin']
+  applicant_label varchar [note: 'override label sisi pelamar -- null berarti fallback ke label admin (mis. simulasi -> "Simulasi Field", mcu -> "Medical Check Up")']
+  color_classes varchar [not null, note: 'kelas Tailwind badge, mis. "bg-yellow-50 text-yellow-600 border-yellow-100"']
+  is_universal boolean [not null, default: 0, note: 'true cuma untuk pending/accepted/rejected -- tersedia di semua kategori lowongan, di luar urutan pipeline']
+  is_bulk_updatable boolean [not null, default: 0, note: 'true untuk stage yang bisa diubah lewat bulk-update admin: administration/psikotes/interview/rejected']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table recruitment_stage_pipeline {
+  id bigint [pk, increment]
+  kategori varchar [not null, note: 'Profesional, Management Trainee, Magang -- harus sama persis dengan lowongan.kategori, TIDAK ada FK karena lowongan.kategori tetap varchar bebas']
+  recruitment_stage_id bigint [not null, ref: > recruitment_stages.id, note: 'ON DELETE CASCADE']
+  order int [not null, note: 'urutan tahap dalam pipeline kategori ini, mulai dari 1 -- urutan ini cuma dipakai buat filter dropdown UI admin, TIDAK ditegakkan sebagai validasi transisi status di backend']
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (kategori, recruitment_stage_id) [unique]
+    (kategori, order) [unique]
+  }
 }
 
 // ================= tidak berubah dari skema Laravel default / lama =================
