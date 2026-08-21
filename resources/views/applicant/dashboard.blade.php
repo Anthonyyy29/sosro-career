@@ -145,6 +145,26 @@
                             </div>
                         </div>
                     @endif
+
+                    {{-- 4. Dokumen Saya --}}
+                    {{-- Muncul cuma setelah ada lamaran accepted -- sebelum itu dokumen memang
+                         bukan urusan pelamar. Setelah accepted kartunya MENETAP walau dokumen
+                         sudah lengkap: modal hilang begitu lengkap, jadi tanpa kartu ini
+                         pelamar tidak punya jalan untuk mengganti berkasnya lagi. --}}
+                    @if($applicant && $applicant->hasAcceptedApplication())
+                        <a href="{{ route('applicant.documents.edit') }}"
+                        class="group flex items-center p-5 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-md hover:border-amber-400 transition-all duration-200 active:scale-95">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <div class="ml-4">
+                                <span class="block font-bold text-gray-800">Dokumen Saya</span>
+                                <span class="block text-xs text-gray-400">
+                                    {{ $applicant->documents_completed ? 'Lengkap · ubah berkas' : 'Unggah berkas' }}
+                                </span>
+                            </div>
+                        </a>
+                    @endif
                 </div>
             </div>
 

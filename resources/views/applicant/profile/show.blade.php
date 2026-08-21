@@ -526,7 +526,13 @@
                     </section>
 
                     <section>
-                        <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">Lampiran Berkas</h3>
+                        <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center justify-between gap-2">
+                            Lampiran Berkas
+                            {{-- Digating sama seperti kartu "Dokumen Saya" di dashboard: baru relevan setelah accepted --}}
+                            @if($applicant->hasAcceptedApplication())
+                                <a href="{{ route('applicant.documents.edit') }}" class="text-[9px] font-bold text-red-600 hover:text-red-700 normal-case tracking-normal underline">Kelola Dokumen</a>
+                            @endif
+                        </h3>
                         <div class="grid grid-cols-3 gap-2">
                             {{-- Label diambil dari definisi terpusat di model, biar tipe dokumen baru
                                  otomatis ikut tampil tanpa perlu ubah view ini lagi. --}}
