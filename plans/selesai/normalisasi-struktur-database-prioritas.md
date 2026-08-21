@@ -132,4 +132,17 @@ Dengan `minat` masih JSON seperti sekarang, ini **mustahil** dilakukan lewat SQL
 
 ## Status
 
-Baru sebatas analisis/prioritas, **belum ada yang dieksekusi**. Ini overview struktural — implementasi detail per item (migration, model, controller) belum dirancang, beda dari `normalisasi-keluarga-pilot.md` yang sudah punya skema konkret siap eksekusi. Lihat juga `db_sosro_normalized.dbml` untuk visualisasi skema lengkap setelah normalisasi.
+**SELESAI** untuk seluruh item prioritas 1-4. Yang sudah dieksekusi (migration `2026_08_10_000002` s/d `000021`, commit Fase 0-8):
+
+1. Dokumen → `applicant_documents` aktif, 9 kolom `doc_*` di-drop (`000008`).
+2. `minat` → tabel master `job_fields` + pivot `applicant_job_field_interests` dengan kolom `rank` (`000003`, `000016`, `000017`).
+3. `penempatan_cabang` → tabel master `cabangs` + `cabang_id` di `lowongan`/`admins` (`000002`, `000004`, `000005`, `000006`, `000007`). Scoping admin-per-cabang ikut diubah dari perbandingan string ke `cabang_id` — dependency yang diwanti-wanti di atas sudah ditangani.
+4. `data_keluarga`, `pengalaman_kerja`, `pendidikan_formal`+`informal` → tabel anak per `applicant_profile` (`000009` s/d `000015`). Catatan: pendidikan formal & informal akhirnya jadi **2 tabel terpisah**, bukan 1 tabel gabungan seperti rencana awal di dokumen ini.
+
+Pengecualian yang sengaja dibatalkan/di-revert saat eksekusi:
+- `lowongan.bidang` **dikembalikan jadi string biasa**, tidak jadi FK ke `job_fields` (`000020`, commit `70816ee`) — jadi `job_fields` sekarang cuma dipakai sisi minat pelamar, tidak dipakai bareng seperti rencana awal.
+- `kategori` & `tipe_lowongan` tetap varchar, sesuai keputusan yang sudah ditulis di atas.
+
+Item prioritas 5 (`jenis_sim`, `alamat`/`domisili` terstruktur) **sengaja tidak dikerjakan** — sejak awal ditandai opsional & ditunda, bukan pekerjaan yang menggantung.
+
+Lihat `db_sosro_normalized.dbml` untuk skema aktual hasil akhirnya (di-introspeksi langsung dari DB, bukan dari rencana ini).
