@@ -108,8 +108,7 @@ Keputusan turunan saat menyusun daftar:
 - **SIM & "Lainnya" dihapus** dari form karena tidak ada di daftar baru. Data lama tidak dihapus, cuma tidak diminta lagi.
 - **Pas Foto & CV dipertahankan** sebagai wajib (tidak ada di daftar user) karena `foto` dipakai sebagai foto profil di PDF & halaman detail pelamar, dan `cv` muncul sebagai baris "CV: Tersedia/Tidak" di PDF — kalau dihapus, dua tampilan itu jadi kosong.
 
-**Belum dikerjakan (permintaan user: catat dulu, jangan dipasang):**
-- **Scan Sertifikat Vaksin** (sesuai dosis yang sudah diterima) — item no. 11 di daftar asli user. Kalau nanti mau dipasang, cukup tambah 1 entri di `Applicant::DOCUMENT_GROUPS` (kemungkinan di kelompok "Dokumen Pendukung", `required => false`); controller, view, dan perhitungan flag otomatis ikut tanpa perubahan lain.
+- **Scan Sertifikat Vaksin** (item no. 11 di daftar asli) — **dibatalkan**, diputuskan tidak diperlukan. Jangan ditambahkan lagi.
 
 ## Yang sengaja TIDAK disentuh (di luar scope)
 
