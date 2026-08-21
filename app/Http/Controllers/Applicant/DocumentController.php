@@ -31,6 +31,11 @@ class DocumentController extends Controller
             return redirect()->route('applicant.profile.create');
         }
 
+        // SEMENTARA / DEBUG: lewati kewajiban unggah dokumen biar alur sesudahnya bisa
+        // dites tanpa nyiapin 7 file. Cuma jalan kalau APP_DEBUG=true, jadi mustahil aktif
+        // di produksi. HAPUS bareng checkbox-nya di documents.blade.php kalau sudah tidak perlu.
+        $debugSkip = config('app.debug') && $request->boolean('debug_skip_validation');
+
         // Dokumen wajib cuma dipaksa kalau belum pernah diunggah -- yang sudah ada
         // tidak perlu diunggah ulang tiap kali halaman ini disubmit.
         $existingTypes = $applicant->documents->pluck('type')->all();
@@ -39,7 +44,7 @@ class DocumentController extends Controller
         $rules = [];
         $attributes = [];
         foreach ($definitions as $type => $def) {
-            $mustUpload = $def['required'] && ! in_array($type, $existingTypes, true);
+            $mustUpload = $def['required'] && ! in_array($type, $existingTypes, true) && ! $debugSkip;
 
             $rules['doc_'.$type] = [
                 Rule::requiredIf($mustUpload),
@@ -57,7 +62,7 @@ class DocumentController extends Controller
             'mimes' => 'Format file :attribute tidak valid, harus :values.',
         ], $attributes);
 
-        DB::transaction(function () use ($request, $applicant, $definitions) {
+        DB::transaction(function () use ($request, $applicant, $definitions, $debugSkip) {
             foreach (array_keys($definitions) as $type) {
                 $field = 'doc_'.$type;
 
@@ -78,11 +83,19 @@ class DocumentController extends Controller
                 ]);
             }
 
-            $applicant->recalculateDocumentsCompleted();
+            if ($debugSkip) {
+                // Paksa lengkap walau file belum semua ada -- lihat catatan DEBUG di atas.
+                $applicant->documents_completed = true;
+                $applicant->save();
+            } else {
+                $applicant->recalculateDocumentsCompleted();
+            }
         });
 
         return redirect()
             ->route('applicant.dashboard')
-            ->with('success', 'Dokumen berhasil diunggah.');
+            ->with('success', $debugSkip
+                ? 'MODE DEBUG: dokumen ditandai lengkap tanpa validasi.'
+                : 'Dokumen berhasil diunggah.');
     }
 }

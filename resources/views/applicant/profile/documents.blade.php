@@ -36,6 +36,7 @@
                     <form method="POST" action="{{ route('applicant.documents.update') }}" enctype="multipart/form-data"
                         x-data="{
                             fileSizes: {},
+                            debugSkip: false,
                             validateFile(e, limitMb) {
                                 const file = e.target.files[0];
                                 const name = e.target.name;
@@ -107,7 +108,7 @@
                                                     name="doc_{{ $type }}"
                                                     accept="{{ $type === 'cv' ? '.pdf' : 'image/*, .pdf' }}"
                                                     @change="validateFile($event, {{ $def['limit'] }})"
-                                                    {{ $def['required'] && ! $existingDoc ? 'required' : '' }}
+                                                    :required="{{ $def['required'] && ! $existingDoc ? 'true' : 'false' }} && !debugSkip"
                                                     class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold {{ $def['required'] ? 'file:bg-red-50 file:text-red-700' : 'file:bg-gray-100 file:text-gray-600' }} border border-dashed border-gray-200 p-2 rounded-lg">
 
                                                 @if($existingDoc)
@@ -125,6 +126,23 @@
                         </div>
 
                         <p class="mt-8 text-[11px] text-gray-400"><span class="text-red-500 font-bold">*</span> Wajib diunggah</p>
+
+                        {{-- SEMENTARA / DEBUG: cuma tampil kalau APP_DEBUG=true, jadi tidak mungkin
+                             kebawa ke produksi. Hapus blok ini bareng $debugSkip di DocumentController
+                             kalau sudah tidak dibutuhkan buat testing. --}}
+                        @if(config('app.debug'))
+                            <label class="mt-6 flex items-start gap-3 p-4 bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl cursor-pointer">
+                                <input type="checkbox" name="debug_skip_validation" value="1" x-model="debugSkip"
+                                       class="mt-0.5 rounded border-amber-400 text-amber-600 focus:ring-amber-500">
+                                <span class="text-xs">
+                                    <span class="block font-black text-amber-800 uppercase tracking-wider">Mode Debug — Lewati Validasi</span>
+                                    <span class="block text-amber-700 mt-0.5">
+                                        Tandai dokumen sebagai lengkap tanpa benar-benar mengunggah file, supaya alur setelah ini bisa dites sampai selesai.
+                                        Hanya muncul saat <code class="font-mono">APP_DEBUG=true</code>.
+                                    </span>
+                                </span>
+                            </label>
+                        @endif
 
                         <div class="mt-6 flex flex-col md:flex-row gap-4">
                             <a href="{{ route('applicant.dashboard') }}" class="h-auto md:h-14 py-4 flex-1 flex items-center justify-center bg-gray-100 rounded-2xl text-gray-600 font-bold hover:bg-gray-200 transition-all">Kembali</a>
