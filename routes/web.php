@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController as UserProfileController;
 use App\Http\Controllers\Applicant\DashboardController;
 use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\ProfileController;
+use App\Http\Controllers\Applicant\DocumentController;
 
 // Admin
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
@@ -82,6 +83,14 @@ Route::middleware(['auth'])
         Route::patch('/profile/draft', [ProfileController::class, 'saveDraft'])->name('profile.draft');
 
         Route::get('/profile/download', [ProfileController::class, 'downloadPdf'])->name('profile.download');
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOKUMEN (terpisah dari form biodata, wajib setelah lamaran accepted)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/documents', [DocumentController::class, 'edit'])->name('documents.edit');
+        Route::post('/documents', [DocumentController::class, 'update'])->name('documents.update');
 
             /*
             |--------------------------------------------------------------------------

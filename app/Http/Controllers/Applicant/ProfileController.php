@@ -89,7 +89,8 @@ class ProfileController extends Controller
                     'family_completed' => true,
                     'education_completed' => true,
                     'experience_completed' => true,
-                    'documents_completed' => true,
+                    // documents_completed sengaja tidak di-set di sini: dokumen sudah bukan bagian
+                    // form biodata, baru wajib setelah lamaran accepted (lihat DocumentController).
                     'biodata_progress' => 100,
                 ]
             );
@@ -163,6 +164,9 @@ class ProfileController extends Controller
             foreach ($request->minat_ordered ?? [] as $index => $jobFieldId) {
                 $profile->jobFieldInterests()->attach($jobFieldId, ['rank' => $index + 1]);
             }
+
+            // Flag dokumen dihitung dari isi tabel, bukan diasumsikan lengkap
+            $applicant->recalculateDocumentsCompleted();
         });
 
         return redirect()

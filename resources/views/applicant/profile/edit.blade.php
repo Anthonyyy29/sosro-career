@@ -127,8 +127,8 @@
 
         // Gerbang validasi akhir: cek SEMUA 5 tab, lompat ke tab pertama yang belum lengkap
         validateAndSubmit(event) {
-            const labels = ['Personal', 'Keluarga', 'Pendidikan', 'Pengalaman', 'Dokumen'];
-            for (let s = 1; s <= 5; s++) {
+            const labels = ['Personal', 'Keluarga', 'Pendidikan', 'Pengalaman'];
+            for (let s = 1; s <= 4; s++) {
                 if (!this.isStepComplete(s)) {
                     event.preventDefault();
                     this.step = s;
@@ -180,7 +180,7 @@
             
             <div class="mb-10 relative px-4">
                 <div class="flex justify-between items-center relative z-10">
-                    <template x-for="(label, index) in ['Personal', 'Keluarga', 'Pendidikan', 'Pengalaman', 'Dokumen']">
+                    <template x-for="(label, index) in ['Personal', 'Keluarga', 'Pendidikan', 'Pengalaman']">
                         <div class="flex flex-col items-center cursor-pointer" @click="step = index + 1; window.scrollTo(0,0); autosaveDraft()">
                             <div class="relative">
                                 <div :class="step >= index + 1 ? 'bg-red-600 border-red-100 text-white' : 'bg-gray-200 text-gray-400'"
@@ -894,120 +894,6 @@
                             </button>
                         </div>
 
-                        <div x-show="step === 5" x-transition 
-                            x-data="{ 
-                                fileSizes: {}, 
-                                validateFile(e, limitMb) {
-                                    const file = e.target.files[0];
-                                    const name = e.target.name;
-                                    
-                                    if (file) {
-                                        // 1. PROTEKSI EKSTENSI (Khusus CV harus PDF)
-                                        if (name === 'doc_cv') {
-                                            const fileExtension = file.name.split('.').pop().toLowerCase();
-                                            if (fileExtension !== 'pdf') {
-                                                alert('Peringatan: Dokumen CV harus berformat PDF! File .' + fileExtension + ' tidak diizinkan.');
-                                                e.target.value = ''; // Reset inputan file
-                                                delete this.fileSizes[name];
-                                                return; // Berhenti di sini, jangan lanjut cek ukuran
-                                            }
-                                        }
-
-                                        // 2. PROTEKSI UKURAN (Sudah ada sebelumnya)
-                                        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
-                                        if (sizeMb > limitMb) {
-                                            alert('File terlalu besar (' + sizeMb + 'MB). Maksimal hanya ' + limitMb + 'MB. Silakan kompres dulu ya!');
-                                            e.target.value = ''; 
-                                            delete this.fileSizes[name];
-                                        } else {
-                                            this.fileSizes[name] = sizeMb + ' MB';
-                                        }
-                                    }
-                                }
-                            }">
-                            
-                            <div class="mb-8">
-                                <h2 class="text-3xl font-black text-gray-900 tracking-tight">Upload <span class="text-red-600">Dokumen</span></h2>
-                                <span class="text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">
-                                    * File: Image atau PDF
-                                </span>
-                            </div>
-
-                            @php $docsByType = $applicant->documents->keyBy('type'); @endphp
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {{-- Sisi Kiri: Wajib --}}
-                                <div class="space-y-4">
-                                    <label class="text-[11px] font-black text-red-600 uppercase tracking-widest">Wajib Diunggah</label>
-                                    <div class="space-y-6">
-                                        @foreach([
-                                            'doc_foto'   => ['label' => 'PAS FOTO TERBARU', 'limit' => 2, 'accept' => 'image/*, .pdf'],
-                                            'doc_cv'     => ['label' => 'CV', 'limit' => 5, 'accept' => 'image/*, .pdf'],
-                                            'doc_ktp'    => ['label' => 'KTP', 'limit' => 2, 'accept' => 'image/*, .pdf'],
-                                            'doc_ijazah' => ['label' => 'IJAZAH / TRANSKRIP NILAI', 'limit' => 2, 'accept' => 'image/*, .pdf']
-                                        ] as $field => $info)
-                                        @php $existingDoc = $docsByType->get(substr($field, 4)); @endphp
-                                        <div>
-                                            <div class="flex justify-between items-center mb-1">
-                                                <p class="text-[10px] font-bold text-gray-400">{{ $info['label'] }} (Maks {{ $info['limit'] }}MB)</p>
-                                                
-                                                {{-- Label Ukuran File Baru --}}
-                                                <template x-if="fileSizes['{{ $field }}']">
-                                                    <span class="text-[9px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold" x-text="'Baru: ' + fileSizes['{{ $field }}']"></span>
-                                                </template>
-                                            </div>
-                                            
-                                            {{-- Input File dengan atribut ACCEPT --}}
-                                            <input type="file" 
-                                                name="{{ $field }}" 
-                                                accept="{{ $info['accept'] }}"
-                                                @change="validateFile($event, {{ $info['limit'] }})"
-                                                class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-700">
-
-                                            {{-- History File LAMA (Tetap Muncul) --}}
-                                            @if($existingDoc)
-                                                <div class="mt-2 flex items-center gap-1 text-[10px] text-green-600 font-bold italic bg-green-50 p-1.5 rounded-md border border-green-100">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                                                    Sudah ada file
-                                                    <a href="{{ asset('storage/' . $existingDoc->file_path) }}" target="_blank" class="underline hover:text-green-800 ml-auto">(Lihat File Lama)</a>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-
-                                {{-- Sisi Kanan: Pendukung --}}
-                                <div class="space-y-4">
-                                    <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Pendukung (Jika ada)</label>
-                                    <div class="space-y-4">
-                                        @foreach([
-                                            'doc_sim' => 'SIM',
-                                            'doc_npwp' => 'NPWP',
-                                            'doc_bpjs_kes' => 'BPJS KES',
-                                            'doc_bpjs_tk' => 'BPJS TK',
-                                            'doc_lain' => 'LAINNYA'
-                                        ] as $field => $label)
-                                        @php $existingDoc = $docsByType->get(substr($field, 4)); @endphp
-                                        <div class="border-b border-gray-100 pb-3">
-                                            <div class="flex items-center gap-2">
-                                                <input type="file" name="{{ $field }}" @change="validateFile($event, 2)" class="flex-1 text-xs">
-                                                <span class="text-[10px] font-bold text-gray-300 w-24 text-right">{{ $label }}</span>
-                                            </div>
-
-                                            {{-- History File LAMA --}}
-                                            @if($existingDoc)
-                                                <div class="mt-2 text-[9px] text-blue-500 font-bold italic flex items-center gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z" /></svg>
-                                                    Terunggah: <a href="{{ asset('storage/' . $existingDoc->file_path) }}" target="_blank" class="underline ml-1 truncate max-w-[150px]">{{ basename($existingDoc->file_path) }}</a>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="mt-4 text-right text-xs font-semibold h-4">
                             <span x-show="autosaveStatus === 'saving'" class="text-gray-400">Menyimpan...</span>
                             <span x-show="autosaveStatus === 'saved'" class="text-green-600">Tersimpan otomatis</span>
@@ -1018,7 +904,7 @@
                                 <button type="button" @click="step--; window.scrollTo(0,0); autosaveDraft()" class="h-auto md:h-14 py-4 flex-1 h-14 bg-gray-100 rounded-2xl text-gray-600 font-bold hover:bg-gray-200 transition-all">Kembali</button>
                             </template>
 
-                            <template x-if="step < 5">
+                            <template x-if="step < 4">
                                 <button type="button"
                                     @click="step++; window.scrollTo(0,0); autosaveDraft()"
                                     class="h-auto md:h-14 py-4 flex-[2] h-14 bg-red-600 rounded-2xl text-white font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all flex items-center justify-center gap-2">
@@ -1027,7 +913,7 @@
                                 </button>
                             </template>
 
-                            <template x-if="step === 5">
+                            <template x-if="step === 4">
                                 <button type="submit" @click="validateAndSubmit($event)" class="h-auto md:h-14 py-4 flex-[2] h-14 bg-green-600 rounded-2xl text-white font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all">Simpan Perubahan</button>
                             </template>
                         </div>

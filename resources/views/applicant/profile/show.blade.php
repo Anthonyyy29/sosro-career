@@ -528,13 +528,13 @@
                     <section>
                         <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">Lampiran Berkas</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            @php $docLabels = ['ktp' => 'KTP', 'cv' => 'CV', 'ijazah' => 'Ijazah', 'npwp' => 'NPWP', 'sim' => 'SIM', 'bpjs_kes' => 'BPJS', 'lain' => 'Lainnya']; @endphp
-                            @foreach($docLabels as $key => $label)
-                                @if($docsByType->get($key))
-                                    <a href="{{ asset('storage/' . $docsByType->get($key)->file_path) }}" target="_blank" class="p-2 border border-dashed border-gray-200 rounded text-center text-[9px] font-bold text-gray-500 hover:bg-red-50 hover:text-red-600 uppercase">
-                                        {{ $label }}
-                                    </a>
-                                @endif
+                            {{-- Label diambil dari definisi terpusat di model, biar tipe dokumen baru
+                                 otomatis ikut tampil tanpa perlu ubah view ini lagi. --}}
+                            @php $docDefs = \App\Models\Applicant::documentDefinitions(); @endphp
+                            @foreach($docsByType as $key => $doc)
+                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="p-2 border border-dashed border-gray-200 rounded text-center text-[9px] font-bold text-gray-500 hover:bg-red-50 hover:text-red-600 uppercase">
+                                    {{ $docDefs[$key]['label'] ?? str_replace('_', ' ', $key) }}
+                                </a>
                             @endforeach
                         </div>
                     </section>

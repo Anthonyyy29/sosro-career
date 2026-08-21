@@ -25,11 +25,35 @@
             </div>
         </div>
 
+        {{-- Modal dokumen: muncul selama ada lamaran accepted tapi dokumen belum lengkap.
+             Sengaja TIDAK bisa ditutup (tidak ada tombol X / "nanti saja" / klik luar) --
+             satu-satunya jalan keluar adalah mengisi dokumen. Kondisinya dibaca langsung
+             dari DB, jadi tetap muncul tiap kali dashboard dibuka sampai dokumen lengkap. --}}
+        @if($applicant && $applicant->needsDocumentSubmission())
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/70 backdrop-blur-sm">
+                <div class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full p-8 text-center">
+                    <div class="w-16 h-16 mx-auto bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-5">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+
+                    <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">Selamat, lamaran Anda diterima!</h3>
+                    <p class="text-gray-500 text-sm mb-6">
+                        Untuk melanjutkan proses rekrutmen, Anda wajib melengkapi dokumen terlebih dahulu.
+                    </p>
+
+                    <a href="{{ route('applicant.documents.edit') }}"
+                       class="block w-full py-4 bg-red-600 rounded-2xl text-white font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95">
+                        Lengkapi Dokumen Sekarang
+                    </a>
+                </div>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             {{-- Main Content (Left) --}}
             <div class="lg:col-span-2 space-y-6">
-                
+
                 {{-- Steps & Progress Card --}}
                 <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-50 overflow-hidden relative group">
                     <div class="absolute -right-20 -top-20 w-60 h-60 bg-red-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
