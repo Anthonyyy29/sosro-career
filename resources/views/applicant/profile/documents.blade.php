@@ -76,9 +76,11 @@
                         <div class="space-y-10">
                             @foreach(\App\Models\Applicant::DOCUMENT_GROUPS as $groupName => $fields)
                                 <div>
-                                    <div class="flex items-center gap-3 mb-5">
-                                        <h3 class="text-[11px] font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">{{ $groupName }}</h3>
-                                        <div class="h-px bg-gray-100 w-full"></div>
+                                    {{-- flex-shrink-0 wajib: tanpa itu garis pemisah (flex-1) mendesak
+                                         judulnya sampai membungkus jadi 2 baris walau ruang masih luas --}}
+                                    <div class="flex items-center gap-4 mb-5">
+                                        <h3 class="flex-shrink-0 text-[11px] font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">{{ $groupName }}</h3>
+                                        <div class="flex-1 h-px bg-gray-200"></div>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
