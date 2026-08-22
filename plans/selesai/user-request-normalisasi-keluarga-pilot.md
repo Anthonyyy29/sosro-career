@@ -65,4 +65,4 @@ DB::transaction(function () use ($profile, $request) {
 
 **SELESAI.** Tabel `applicant_family_members` sudah dibuat (`2026_08_10_000009`), kolom `data_keluarga` sudah di-drop (`2026_08_10_000010`), model `ApplicantFamilyMember` + relasi `familyMembers()` di `ApplicantProfile` sudah jalan, dan `ProfileController::store()`/`saveDraft()` sudah nulis ke tabel baru di dalam `DB::transaction()` sesuai rancangan. Commit: `b70b20c` (Fase 4).
 
-Pola yang sama sudah diulang juga untuk JSON lain (pengalaman kerja, pendidikan formal/informal, minat) — lihat `normalisasi-struktur-database-prioritas.md`.
+Pola yang sama sudah diulang juga untuk JSON lain (pengalaman kerja, pendidikan formal/informal, minat) — lihat `user-request-normalisasi-struktur-database-prioritas.md`.

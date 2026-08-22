@@ -2,7 +2,7 @@
 
 ## Konteks
 
-Analisis struktur database secara keseluruhan (bukan cuma keluarga — lihat `plans/normalisasi-keluarga-pilot.md` untuk pilot spesifik itu). Pertanyaan: dari semua tabel yang ada, mana yang "kepenuhan"/perlu dipecah, dan field mana aja yang perlu jadi tabel master/anak terpisah.
+Analisis struktur database secara keseluruhan (bukan cuma keluarga — lihat `plans/selesai/user-request-normalisasi-keluarga-pilot.md` untuk pilot spesifik itu). Pertanyaan: dari semua tabel yang ada, mana yang "kepenuhan"/perlu dipecah, dan field mana aja yang perlu jadi tabel master/anak terpisah.
 
 Tabel framework (`cache`, `cache_locks`, `failed_jobs`, `jobs`, `job_batches`, `migrations`, `password_reset_tokens`, `sessions`) tidak relevan — itu bawaan Laravel, sudah didesain benar.
 
