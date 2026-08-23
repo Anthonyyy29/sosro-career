@@ -22,8 +22,8 @@ use App\Mail\TesKepribadianEmail;
 | tempatnya. Tidak perlu menyentuh database.
 |
 | Isinya dibaca lewat App\Models\RecruitmentStage. Dulu data ini disimpan di
-| dua tabel database (recruitment_stages dan recruitment_stage_pipeline).
-| Tabelnya masih ada, tapi sudah tidak dibaca lagi oleh aplikasi.
+| dua tabel database (recruitment_stages dan recruitment_stage_pipeline);
+| kedua tabel itu sudah dihapus, jadi berkas ini satu-satunya sumbernya.
 |
 | ATURAN: isi berkas ini harus data biasa saja -- teks, angka, true/false,
 | dan array. JANGAN menaruh fungsi di sini, yaitu yang ditulis dengan

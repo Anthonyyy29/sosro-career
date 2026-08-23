@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\RecruitmentStage;
-use Database\Seeders\RecruitmentStageSeeder;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,8 +19,7 @@ use Database\Seeders\RecruitmentStageSeeder;
 */
 
 beforeEach(function () {
-    // RefreshDatabase mengosongkan DB tiap tes, jadi seeder harus jalan lagi.
-    $this->seed(RecruitmentStageSeeder::class);
+    // Tidak perlu seeding: sumber datanya config/recruitment.php, bukan database.
 
     // RecruitmentStage::$cache statis dan hidup sepanjang proses PHP, jadi
     // antar-tes bisa nyangkut dan bikin tes lolos padahal sumbernya tidak

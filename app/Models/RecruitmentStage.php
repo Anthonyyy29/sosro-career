@@ -2,23 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
-class RecruitmentStage extends Model
+/*
+ * Pembaca definisi tahapan seleksi dari config/recruitment.php.
+ *
+ * Dulu ini model Eloquent yang membaca tabel recruitment_stages dan
+ * recruitment_stage_pipeline. Kedua tabel itu sudah dihapus, dan kelasnya
+ * sekarang cuma kumpulan method statis -- tidak menyentuh database sama sekali.
+ *
+ * Namanya sengaja tidak diubah supaya 15 titik pemanggilan di 4 berkas tidak
+ * perlu ikut disunting.
+ */
+class RecruitmentStage
 {
-    protected $fillable = ['key', 'label', 'applicant_label', 'color_classes', 'is_universal', 'is_bulk_updatable'];
-
-    protected $casts = [
-        'is_universal' => 'boolean',
-        'is_bulk_updatable' => 'boolean',
-    ];
-
-    public function pipelineEntries()
-    {
-        return $this->hasMany(RecruitmentStagePipeline::class);
-    }
-
     // Daftar tahap disusun sekali saja tiap kali halaman dibuka, lalu dipakai ulang
     // oleh semua method di bawah -- soalnya dropdown dan badge memanggilnya
     // berkali-kali dalam satu halaman yang sama.
