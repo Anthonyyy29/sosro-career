@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Admin\Lowongan;
+use App\Http\Controllers\Admin\Concerns\ScopesToCabang;
 use App\Models\RecruitmentStage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -15,10 +16,14 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ApplicantController extends Controller
 {
+    use ScopesToCabang;
+
     public function index(Request $request)
     {
         // 1. Inisialisasi Query dengan Eager Loading
-        $query = Application::with(['applicant.user', 'lowongan']);
+        // konfirmasiItems ikut dimuat supaya daftar bisa menampilkan keadaan tahap
+        // "Konfirmasi User" (menunggu / terpilih / tidak dipilih) tanpa query per baris.
+        $query = Application::with(['applicant.user', 'lowongan', 'konfirmasiItems.confirmation']);
 
         // 2. SCOPE DATA: Filter berdasarkan cabang (PENTING)
         // Jika bukan superadmin, hanya tampilkan lamaran untuk lowongan di cabangnya
@@ -181,19 +186,6 @@ class ApplicantController extends Controller
     }
 
     // FITUR UPDATE MASSAL
-    // Menyaring lamaran ke cabang admin yang sedang login. Superadmin lihat semua.
-    // Dipakai semua jalur massal supaya penjagaannya tidak bisa terlewat di salah satu.
-    private function lingkupCabang($query)
-    {
-        if (Auth::user()->role !== 'superadmin') {
-            $query->whereHas('lowongan', function ($q) {
-                $q->where('cabang_id', Auth::user()->cabang_id);
-            });
-        }
-
-        return $query;
-    }
-
     // Update massal untuk tahap yang tidak butuh isian tambahan.
     public function bulkUpdate(Request $request)
     {

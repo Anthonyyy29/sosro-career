@@ -275,6 +275,41 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                                         </svg>
                                     </button>
+
+                                    {{-- Keadaan tahap "Konfirmasi User". Tanpa ini admin tidak punya cara
+                                         tahu user sudah memilih atau belum, karena kolom status lamaran
+                                         cuma berbunyi "Konfirmasi User" untuk semua kandidat dalam
+                                         kelompok itu. Sumbernya tabel kelompok konfirmasi. --}}
+                                    @php
+                                        $keadaan = $application->keadaanKonfirmasi();
+                                        $konfirmasi = $keadaan ? $application->konfirmasiTerbaru() : null;
+                                    @endphp
+
+                                    @if ($keadaan)
+                                        <div class="mt-1.5 flex items-center gap-2">
+                                            @if ($keadaan === 'menunggu')
+                                                <span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-wide">Menunggu user</span>
+                                                <form method="POST" action="{{ route('admin.user-confirmations.pilih', $konfirmasi) }}"
+                                                      onsubmit="return confirm('Tandai kandidat ini sebagai terpilih, tanpa menunggu user?')">
+                                                    @csrf
+                                                    <input type="hidden" name="application_id" value="{{ $application->id }}">
+                                                    <button type="submit" class="text-[10px] font-bold text-blue-600 hover:text-blue-800 underline">Tandai Terpilih</button>
+                                                </form>
+                                            @elseif ($keadaan === 'terpilih')
+                                                <span class="px-2 py-0.5 rounded-md bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wide">
+                                                    Terpilih{{ $konfirmasi?->dipilih_oleh ? ' oleh '.$konfirmasi->dipilih_oleh : '' }}
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-400 text-[10px] font-bold uppercase tracking-wide">Tidak dipilih</span>
+                                                <form method="POST" action="{{ route('admin.user-confirmations.pilih', $konfirmasi) }}"
+                                                      onsubmit="return confirm('Ganti pilihan ke kandidat ini? Keputusan sebelumnya akan digantikan.')">
+                                                    @csrf
+                                                    <input type="hidden" name="application_id" value="{{ $application->id }}">
+                                                    <button type="submit" class="text-[10px] font-bold text-gray-400 hover:text-blue-600 underline">Ganti ke ini</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </td>
 
                                 <td class="px-6 py-4">

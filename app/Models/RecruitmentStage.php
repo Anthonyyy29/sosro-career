@@ -154,7 +154,16 @@ class RecruitmentStage
     {
         $pipeline = config('recruitment.pipelines.'.$kategori, []);
 
-        return array_merge($pipeline, static::universalDestinations());
+        $daftar = array_merge($pipeline, static::universalDestinations());
+
+        // Tahap ber-'bulk_only' dibuang: tahap seperti itu butuh isian sekelompok
+        // pelamar sekaligus, jadi hanya masuk akal lewat Update Massal. Kalau ikut
+        // muncul di modal satu pelamar, statusnya bisa berubah tanpa kelengkapan
+        // yang dibutuhkan -- keadaan setengah jadi yang tidak ada jalan keluarnya.
+        return array_values(array_filter(
+            $daftar,
+            fn ($key) => ! config("recruitment.stages.{$key}.bulk_only", false)
+        ));
     }
 
     // Daftar berkas blade berisi isian tambahan per tahap, buat disertakan di modal

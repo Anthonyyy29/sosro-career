@@ -82,6 +82,8 @@ return [
     |                   apa pun ke pelamar
     |   form            berkas blade berisi isian tambahan yang muncul di modal
     |                   "Pindah ke Tahap" waktu tahap ini dipilih
+    |   bulk_only       true = tahap ini HANYA bisa lewat Update Massal, tidak
+    |                   muncul di modal "Pindah ke Tahap" untuk satu pelamar
     |   bulk_form       halaman persiapan yang muncul waktu tahap ini dipilih di
     |                   Update Massal, karena butuh isian per pelamar. Tanpa
     |                   baris ini, Update Massal langsung mengubah status
@@ -173,6 +175,19 @@ return [
             'bulk'            => false,
         ],
 
+        'konfirmasi user' => [
+            'label'           => 'Konfirmasi User',
+            'applicant_label' => 'Menunggu Keputusan',
+            'color'           => 'bg-amber-50 text-amber-600 border-amber-100',
+            'bulk'            => true,
+            'bulk_only'       => true,
+            'bulk_form'       => 'admin.applicants.bulk_konfirmasi_user',
+            // Sengaja TIDAK punya 'mail'. Tahap lain mengirim satu email ke tiap
+            // pelamar; tahap ini mengirim SATU email ke user (pihak yang meminta
+            // lowongan), berisi tautan untuk memilih salah satu kandidat. Karena
+            // polanya beda, pengirimannya diurus UserConfirmationController.
+        ],
+
         'offering' => [
             'label'           => 'Offering Letter',
             'applicant_label' => null,
@@ -245,11 +260,11 @@ return [
     'pipelines' => [
 
         'Profesional' => [
-            'administration', 'psikotes', 'interview', 'offering', 'mcu',
+            'administration', 'psikotes', 'interview', 'konfirmasi user', 'offering', 'mcu',
         ],
 
         'Management Trainee' => [
-            'administration', 'psikotes', 'interview', 'study case', 'panel bod', 'offering', 'mcu',
+            'administration', 'psikotes', 'interview', 'study case', 'panel bod', 'konfirmasi user', 'offering', 'mcu',
         ],
 
         'Magang' => [

@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ApplyController;
+use App\Http\Controllers\Admin\UserConfirmationController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\UserConfirmationPublicController;
 
 // Breeze (User)
 use App\Http\Controllers\ProfileController as UserProfileController;
@@ -39,6 +41,19 @@ Route::get('/', [PageController::class, 'lowongan'])->name('lowongan');
 // // // // // // // // // // // // // // // // // // // // // //
 
 // BARU: Route untuk publik :: Limit 3 kali kirim per 1 menit
+/*
+ | Halaman konfirmasi kandidat untuk user (pihak peminta lowongan).
+ | Tanpa login: yang menjaga adalah tanda tangan pada URL (middleware 'signed')
+ | plus batas waktu di kolom expires_at. Tautannya dikirim lewat email.
+ */
+Route::middleware('signed')->group(function () {
+    Route::get('/konfirmasi-user/{konfirmasi}', [UserConfirmationPublicController::class, 'show'])
+        ->name('konfirmasi-user.show');
+
+    Route::post('/konfirmasi-user/{konfirmasi}', [UserConfirmationPublicController::class, 'select'])
+        ->name('konfirmasi-user.select');
+});
+
 Route::post('/contact-us', [ContactController::class, 'store'])
     ->middleware('throttle:3,1')
     ->name('contact.store');
@@ -150,6 +165,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
     Route::post('/applicants/bulk-update', [ApplicantController::class, 'bulkUpdate'])->name('applicants.bulkUpdate');
     Route::post('/applicants/bulk-prepare', [ApplicantController::class, 'bulkPrepare'])->name('applicants.bulkPrepare');
     Route::post('/applicants/bulk-process', [ApplicantController::class, 'bulkProcess'])->name('applicants.bulkProcess');
+
+    Route::post('/user-confirmations', [UserConfirmationController::class, 'store'])
+        ->name('user-confirmations.store');
+    Route::post('/user-confirmations/{konfirmasi}/pilih', [UserConfirmationController::class, 'pilihManual'])
+        ->name('user-confirmations.pilih');
 
     Route::post('/applications/update-stage', [ApplicantController::class, 'updateStage'])
         ->name('applications.update-stage');
