@@ -61,6 +61,22 @@ class RecruitmentStage extends Model
         return static::loaded()->where('is_universal', true)->pluck('key')->all();
     }
 
+    // Tahap universal yang boleh DITUJU admin lewat dropdown, yaitu accepted/rejected.
+    //
+    // Bedanya dengan universalStages() di atas: yang ini membuang tahap awal
+    // ('pending'), karena tahap awal cuma titik berangkat -- admin tidak boleh
+    // memundurkan pelamar kembali ke sana.
+    //
+    // Dipakai buat merakit dropdown di admin/applicants/index.blade.php, supaya
+    // accepted/rejected tidak perlu ditulis tangan lagi di sana.
+    public static function universalDestinations(): array
+    {
+        return array_values(array_diff(
+            static::universalStages(),
+            [config('recruitment.initial')]
+        ));
+    }
+
     public static function labels(): array
     {
         return static::loaded()->pluck('label', 'key')->all();

@@ -9,6 +9,8 @@
         category: '',
         pipelines: {{ Js::from(App\Models\RecruitmentStage::pipelines()) }},
         stageLabels: {{ Js::from(App\Models\RecruitmentStage::labels()) }},
+        stageColors: {{ Js::from(App\Models\RecruitmentStage::colors()) }},
+        universalDestinations: {{ Js::from(App\Models\RecruitmentStage::universalDestinations()) }},
         openStatusModal(id, currentStatus, category) {
             this.selectedAppId = id;
             this.category = category;
@@ -142,9 +144,14 @@
                             <select name="status" class="w-full border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50/50 transition-all">
                                 <option value="">Semua Tahapan</option>
                                 
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending ({{ $stats['pending'] ?? 0 }})</option>
+                                @php
+                                    $stageLabels = App\Models\RecruitmentStage::labels();
+                                    $tahapAwal = config('recruitment.initial');
+                                @endphp
 
-                                @php $stageLabels = App\Models\RecruitmentStage::labels(); @endphp
+                                {{-- Tahap awal, di luar urutan pipeline --}}
+                                <option value="{{ $tahapAwal }}" {{ request('status') == $tahapAwal ? 'selected' : '' }}>{{ $stageLabels[$tahapAwal] ?? $tahapAwal }} ({{ $stats[$tahapAwal] ?? 0 }})</option>
+
                                 @foreach (App\Models\RecruitmentStage::pipelines() as $kategori => $stages)
                                     <optgroup label="Alur {{ $kategori }}" x-show="selectedCat === '{{ $kategori }}'">
                                         @foreach ($stages as $stage)
@@ -153,8 +160,10 @@
                                     </optgroup>
                                 @endforeach
 
-                                <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted ({{ $stats['accepted'] ?? 0 }})</option>
-                                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected ({{ $stats['rejected'] ?? 0 }})</option>
+                                {{-- Tahap akhir (accepted/rejected), berlaku di semua kategori --}}
+                                @foreach (App\Models\RecruitmentStage::universalDestinations() as $stage)
+                                    <option value="{{ $stage }}" {{ request('status') == $stage ? 'selected' : '' }}>{{ $stageLabels[$stage] ?? $stage }} ({{ $stats[$stage] ?? 0 }})</option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -305,7 +314,7 @@
                             <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Pindah ke Tahap:</label>
                             <select name="next_status" x-model="nextStatus" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
                                 <option value="" disabled>-- Pilih Tahapan --</option>
-                                {{-- Alur tahap dinamis sesuai kategori lowongan, sumbernya App\Models\RecruitmentStage::pipelines() (tabel recruitment_stage_pipeline) --}}
+                                {{-- Alur tahap sesuai kategori lowongan, sumbernya config/recruitment.php --}}
                                 <template x-if="pipelines[category]">
                                     <optgroup :label="'Alur ' + category">
                                         <template x-for="stage in (pipelines[category] || [])" :key="stage">
@@ -314,8 +323,10 @@
                                     </optgroup>
                                 </template>
 
-                                <option value="accepted" class="bg-green-100">Terpilih (Accepted)</option>
-                                <option value="rejected" class="bg-red-100">Tolak (Reject)</option>
+                                {{-- Tahap akhir (accepted/rejected): di luar urutan, bisa dipilih kapan saja --}}
+                                <template x-for="stage in universalDestinations" :key="stage">
+                                    <option :value="stage" :class="stageColors[stage]" x-text="stageLabels[stage] || stage"></option>
+                                </template>
                             </select>
                         </div>
 

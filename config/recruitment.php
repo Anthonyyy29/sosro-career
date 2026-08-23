@@ -29,6 +29,17 @@
 return [
 
     /*
+    | Tahap awal, yaitu status yang otomatis dipasang waktu pelamar menekan
+    | tombol lamar (lihat ApplyController).
+    |
+    | Tahap ini sengaja TIDAK ditampilkan di dropdown "Pindah ke Tahap",
+    | karena tidak masuk akal memundurkan pelamar kembali ke sini setelah
+    | admin menyentuhnya. Dia titik berangkat, bukan tujuan.
+    */
+
+    'initial' => 'pending',
+
+    /*
     | Daftar semua tahap seleksi.
     |
     | Tulisan di sebelah kiri (misalnya 'psikotes') itu KODE tahapnya. Kode ini
