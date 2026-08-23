@@ -19,31 +19,40 @@ class RecruitmentStage extends Model
         return $this->hasMany(RecruitmentStagePipeline::class);
     }
 
-    // Semua tahap + pivot-nya, di-query sekali per request lalu dipakai ulang oleh semua accessor
-    // di bawah (dropdown/badge manggil ini berkali-kali dalam 1 render halaman -- ini biar gak N+1).
-    // Aman lintas-request: PHP shared-nothing per request (non-Octane), static property gak nyangkut.
+    // Daftar tahap disusun sekali saja tiap kali halaman dibuka, lalu dipakai ulang
+    // oleh semua method di bawah -- soalnya dropdown dan badge memanggilnya
+    // berkali-kali dalam satu halaman yang sama.
+    //
+    // Isinya tidak akan nyangkut ke pengunjung berikutnya: PHP memulai semuanya
+    // dari nol tiap ada permintaan halaman baru.
     private static ?Collection $cache = null;
 
+    // Sumber datanya sekarang config/recruitment.php, bukan lagi tabel database.
+    //
+    // Nama di sebelah kiri (key, label, color_classes, dst) sengaja dibuat sama
+    // persis dengan nama kolom tabel yang lama, supaya semua method di bawah
+    // tidak perlu ikut diubah sama sekali.
     private static function loaded(): Collection
     {
-        return static::$cache ??= static::with('pipelineEntries')->get();
+        return static::$cache ??= collect(config('recruitment.stages', []))
+            ->map(fn (array $definisi, string $key) => [
+                'key'               => $key,
+                'label'             => $definisi['label'],
+                'applicant_label'   => $definisi['applicant_label'] ?? null,
+                'color_classes'     => $definisi['color'],
+                'is_universal'      => $definisi['universal'] ?? false,
+                'is_bulk_updatable' => $definisi['bulk'] ?? false,
+            ])
+            ->values();
     }
 
     // Urutan tahap per kategori lowongan: ['Profesional' => ['administration', 'psikotes', ...], ...]
+    //
+    // Dulu ini menyusun ulang urutannya dari kolom `order` di tabel pivot. Sekarang
+    // urutannya sudah berupa posisi array di config, jadi tinggal diteruskan apa adanya.
     public static function pipelines(): array
     {
-        $pipelines = [];
-        foreach (static::loaded() as $stage) {
-            foreach ($stage->pipelineEntries as $entry) {
-                $pipelines[$entry->kategori][$entry->order] = $stage->key;
-            }
-        }
-        foreach ($pipelines as $kategori => $stagesByOrder) {
-            ksort($stagesByOrder);
-            $pipelines[$kategori] = array_values($stagesByOrder);
-        }
-
-        return $pipelines;
+        return config('recruitment.pipelines', []);
     }
 
     // Tahap yang selalu tersedia di semua kategori, di luar pipeline: pending/accepted/rejected.
