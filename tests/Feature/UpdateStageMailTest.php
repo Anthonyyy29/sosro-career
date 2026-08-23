@@ -211,3 +211,116 @@ test('tahap ngawur ditolak', function () {
 
     Mail::assertNothingSent();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Jalur Update Massal
+|--------------------------------------------------------------------------
+|
+| Sebelum disatukan, jalur massal punya salinan sendiri untuk memilih kelas
+| email -- dan salinan itu sudah menyimpang: tes kepribadian dan interview
+| lanjutan TIDAK BISA dikirim massal sama sekali.
+|
+| Tes di bawah mengunci supaya kedua jalur tidak bisa berbeda lagi.
+|
+*/
+
+function prosesMassal(string $status, array $barisPerLamaran)
+{
+    return test()->actingAs(superadmin(), 'admin')
+        ->post(route('admin.applicants.bulkProcess'), [
+            'status'     => $status,
+            'applicants' => $barisPerLamaran,
+        ]);
+}
+
+test('massal memilih kelas email yang sama dengan jalur satuan', function (string $status, array $isian, string $kelasEmail) {
+    $a = buatLamaran();
+    $b = buatLamaran();
+
+    prosesMassal($status, [$a->id => $isian, $b->id => $isian])->assertRedirect();
+
+    expect($a->fresh()->status)->toBe($status)
+        ->and($b->fresh()->status)->toBe($status);
+
+    Mail::assertSent($kelasEmail, 2);
+    Mail::assertSentCount(2);
+})->with([
+    'psikotes standar'   => ['psikotes',  ['psikotes_type' => 'psikotes',        'psikotes_date' => '2026-09-01', 'psikotes_link' => 'https://a', 'psikotes_token' => 'T1'], PsikotesEmail::class],
+    'psikotes kepribadian' => ['psikotes', ['psikotes_type' => 'tes_kepribadian', 'psikotes_date' => '2026-09-01', 'psikotes_link' => 'https://a', 'psikotes_token' => 'T2'], TesKepribadianEmail::class],
+    'interview awal'     => ['interview', ['interview_type' => 'initial',  'interview_date' => '2026-09-02', 'interview_link' => 'https://b'], InterviewEmail::class],
+    'interview lanjutan' => ['interview', ['interview_type' => 'lanjutan', 'interview_date' => '2026-09-02', 'interview_link' => 'https://b'], InterviewLanjutanEmail::class],
+    'interview offline'  => ['interview', ['interview_type' => 'offline',  'interview_date' => '2026-09-02', 'interview_link' => 'Kantor'],    InterviewOfflineEmail::class],
+]);
+
+test('massal juga meneruskan isian ke template email', function () {
+    $a = buatLamaran();
+
+    prosesMassal('psikotes', [$a->id => [
+        'psikotes_type'  => 'psikotes',
+        'psikotes_date'  => '2026-09-09',
+        'psikotes_link'  => 'https://massal.example',
+        'psikotes_token' => 'TOKEN-MASSAL',
+    ]]);
+
+    Mail::assertSent(PsikotesEmail::class, function ($mail) {
+        return $mail->data['psikotes_link'] === 'https://massal.example'
+            && $mail->data['psikotes_token'] === 'TOKEN-MASSAL';
+    });
+});
+
+// Tahap tanpa layar persiapan (mis. rejected) langsung mengubah status.
+test('massal untuk tahap tanpa isian tambahan langsung mengubah status', function () {
+    $a = buatLamaran();
+    $b = buatLamaran();
+
+    test()->actingAs(superadmin(), 'admin')
+        ->post(route('admin.applicants.bulkPrepare'), [
+            'status'       => 'administration',
+            'selected_ids' => [$a->id, $b->id],
+        ])->assertRedirect();
+
+    expect($a->fresh()->status)->toBe('administration')
+        ->and($b->fresh()->status)->toBe('administration');
+
+    Mail::assertNothingSent();
+});
+
+// Kalau tahapnya punya layar persiapan, bulkPrepare menampilkan halamannya
+// (bukan langsung mengubah status).
+test('massal untuk psikotes menampilkan layar persiapan dulu', function () {
+    $a = buatLamaran();
+
+    test()->actingAs(superadmin(), 'admin')
+        ->post(route('admin.applicants.bulkPrepare'), [
+            'status'       => 'psikotes',
+            'selected_ids' => [$a->id],
+        ])->assertOk();
+
+    expect($a->fresh()->status)->toBe('pending');
+    Mail::assertNothingSent();
+});
+
+// Penjagaan cabang: admin cabang tidak boleh menyentuh lamaran cabang lain,
+// termasuk lewat jalur massal.
+test('admin cabang tidak bisa memproses lamaran cabang lain secara massal', function () {
+    $cabangA = App\Models\Cabang::create(['nama' => 'Cabang A '.uniqid(), 'kelompok' => 'KPW']);
+    $cabangB = App\Models\Cabang::create(['nama' => 'Cabang B '.uniqid(), 'kelompok' => 'KPW']);
+
+    $adminCabangA = Admin::create([
+        'name' => 'Admin A', 'email' => 'admin.a'.uniqid().'@sosro.test',
+        'password' => bcrypt(str()->random(32)), 'role' => 'admin', 'cabang_id' => $cabangA->id,
+    ]);
+
+    $milikB = buatLamaran();
+    $milikB->lowongan->update(['cabang_id' => $cabangB->id]);
+
+    test()->actingAs($adminCabangA, 'admin')
+        ->post(route('admin.applicants.bulkProcess'), [
+            'status'     => 'psikotes',
+            'applicants' => [$milikB->id => ['psikotes_type' => 'psikotes', 'psikotes_date' => '2026-09-01', 'psikotes_link' => 'https://a']],
+        ]);
+
+    expect($milikB->fresh()->status)->toBe('pending');
+    Mail::assertNothingSent();
+});

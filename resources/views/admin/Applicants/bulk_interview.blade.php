@@ -6,7 +6,8 @@
         <p class="text-sm text-gray-500">Atur jadwal interview untuk beberapa kandidat sekaligus.</p>
     </div>
     
-    <form action="{{ route('admin.applicants.bulkProcessInterview') }}" method="POST">
+    <form action="{{ route('admin.applicants.bulkProcess') }}" method="POST">
+    <input type="hidden" name="status" value="{{ $status }}">
         @csrf
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
@@ -39,16 +40,17 @@
                             <div class="text-[11px] text-gray-400">{{ $app->lowongan->judul_lowongan }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <select name="applicants[{{ $app->id }}][type]" class="input-type border rounded-lg px-2 py-1.5 text-sm w-full">
-                                <option value="online">Online (Virtual)</option>
-                                <option value="offline">Offline (Tatap Muka)</option>
+                            <select name="applicants[{{ $app->id }}][interview_type]" class="input-type border rounded-lg px-2 py-1.5 text-sm w-full">
+                                <option value="initial">Interview Awal (Online)</option>
+                                <option value="lanjutan">Interview Lanjutan (Online)</option>
+                                <option value="offline">Interview Offline (Tatap Muka)</option>
                             </select>
                         </td>
                         <td class="px-6 py-4">
-                            <input type="datetime-local" name="applicants[{{ $app->id }}][date]" class="input-date border rounded-lg px-2 py-1.5 text-sm w-full" required>
+                            <input type="datetime-local" name="applicants[{{ $app->id }}][interview_date]" class="input-date border rounded-lg px-2 py-1.5 text-sm w-full" required>
                         </td>
                         <td class="px-6 py-4">
-                            <input type="text" name="applicants[{{ $app->id }}][link_atau_lokasi]" class="input-link border rounded-lg px-2 py-1.5 text-sm w-full" placeholder="Link Zoom atau Alamat Kantor" required>
+                            <input type="text" name="applicants[{{ $app->id }}][interview_link]" class="input-link border rounded-lg px-2 py-1.5 text-sm w-full" placeholder="Link Zoom atau Alamat Kantor" required>
                         </td>
                     </tr>
                     @endforeach

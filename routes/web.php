@@ -150,7 +150,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
     Route::post('/applicants/bulk-update', [ApplicantController::class, 'bulkUpdate'])->name('applicants.bulkUpdate');
     Route::post('/applicants/bulk-prepare', [ApplicantController::class, 'bulkPrepare'])->name('applicants.bulkPrepare');
     Route::post('/applicants/bulk-process', [ApplicantController::class, 'bulkProcess'])->name('applicants.bulkProcess');
-    Route::post('/applicants/bulk-process-interview', [ApplicantController::class, 'bulkProcessInterview'])->name('applicants.bulkProcessInterview');
 
     Route::post('/applications/update-stage', [ApplicantController::class, 'updateStage'])
         ->name('applications.update-stage');

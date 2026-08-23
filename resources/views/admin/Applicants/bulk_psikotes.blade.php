@@ -12,6 +12,8 @@
     </div>
     
     <form action="{{ route('admin.applicants.bulkProcess') }}" method="POST" id="bulkPsikotesForm">
+    {{-- Tahap tujuan ikut dikirim, supaya controller tidak perlu menebak --}}
+    <input type="hidden" name="status" value="{{ $status }}">
         @csrf
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200" id="psikotesTable">
@@ -28,6 +30,7 @@
                             <button type="button" onclick="fillAll('link')" class="ml-2 text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full hover:bg-blue-200 transition shadow-md">Apply All</button>
                         </th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Token Psikotes (Manual)</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jenis Tes</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 bg-white">
@@ -42,14 +45,14 @@
                         </td>
                         <td class="px-6 py-4">
                             <input type="date" 
-                                   name="applicants[{{ $app->id }}][date]" 
+                                   name="applicants[{{ $app->id }}][psikotes_date]" 
                                    class="input-date border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 outline-none" 
                                    required 
                                    data-row="{{ $index }}">
                         </td>
                         <td class="px-6 py-4">
                             <input type="text" 
-                                   name="applicants[{{ $app->id }}][link]" 
+                                   name="applicants[{{ $app->id }}][psikotes_link]" 
                                    class="input-link border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 outline-none" 
                                    placeholder="https://.." 
                                    required 
@@ -57,10 +60,19 @@
                         </td>
                         <td class="px-6 py-4">
                             <input type="text" 
-                                   name="applicants[{{ $app->id }}][token]" 
+                                   name="applicants[{{ $app->id }}][psikotes_token]" 
                                    class="border-2 border-blue-100 bg-blue-50/30 rounded-lg px-3 py-2 text-sm w-full focus:border-blue-500 focus:bg-white outline-none font-mono" 
                                    placeholder="Paste Token..." 
                                    required>
+                        </td>
+                        <td class="px-6 py-4">
+                            {{-- Pilihan yang sama dengan modal satuan, supaya Tes Kepribadian
+                                 juga bisa dikirim lewat jalur massal --}}
+                            <select name="applicants[{{ $app->id }}][psikotes_type]"
+                                    class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="psikotes">Psikotes (Standar)</option>
+                                <option value="tes_kepribadian">Tes Kepribadian (Level Atas)</option>
+                            </select>
                         </td>
                     </tr>
                     @endforeach

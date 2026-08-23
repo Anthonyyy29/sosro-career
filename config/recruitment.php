@@ -80,6 +80,9 @@ return [
     |   mail            kelas email yang dikirim. Kalau baris ini TIDAK ADA,
     |                   berarti tahap ini memang sengaja tidak mengirim email
     |                   apa pun ke pelamar
+    |   bulk_form       halaman persiapan yang muncul waktu tahap ini dipilih di
+    |                   Update Massal, karena butuh isian per pelamar. Tanpa
+    |                   baris ini, Update Massal langsung mengubah status
     |
     | Sebagian tahap mengirim email yang berbeda tergantung pilihan admin.
     | Untuk itu `mail` ditulis sebagai daftar:
@@ -115,6 +118,7 @@ return [
             'bulk'            => true,
             'fields'          => ['psikotes_type', 'psikotes_date', 'psikotes_link'],
             'mail_data'       => ['psikotes_date', 'psikotes_link', 'psikotes_token'],
+            'bulk_form'       => 'admin.applicants.bulk_psikotes',
             'mail'            => [
                 'switch'  => 'psikotes_type',
                 'map'     => ['tes_kepribadian' => TesKepribadianEmail::class],
@@ -130,6 +134,7 @@ return [
             'bulk'            => true,
             'fields'          => ['interview_date', 'interview_type', 'interview_link'],
             'mail_data'       => ['interview_date', 'interview_link', 'interview_location'],
+            'bulk_form'       => 'admin.applicants.bulk_interview',
             'mail'            => [
                 'switch'  => 'interview_type',
                 'map'     => [

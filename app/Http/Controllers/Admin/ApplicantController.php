@@ -168,115 +168,98 @@ class ApplicantController extends Controller
     }
 
     // FITUR UPDATE MASSAL
-    public function bulkUpdate(Request $request)
+    // Menyaring lamaran ke cabang admin yang sedang login. Superadmin lihat semua.
+    // Dipakai semua jalur massal supaya penjagaannya tidak bisa terlewat di salah satu.
+    private function lingkupCabang($query)
     {
-        $request->validate([
-            'status' => ['required', Rule::in(RecruitmentStage::bulkUpdateStages())],
-        ]);
-
-        $ids = $request->selected_ids;
-        $status = $request->status;
-
-        // KEAMANAN BULK: Hanya update data yang di cabangnya (jika bukan superadmin)
-        $query = Application::whereIn('id', $ids);
         if (Auth::user()->role !== 'superadmin') {
-            $query->whereHas('lowongan', function($q) {
+            $query->whereHas('lowongan', function ($q) {
                 $q->where('cabang_id', Auth::user()->cabang_id);
             });
         }
 
-        $updatedCount = $query->update(['status' => $status]);
-        return back()->with('success', $updatedCount . ' pelamar berhasil diperbarui.');
+        return $query;
     }
 
-    // Tambahkan di ApplicantController.php
+    // Update massal untuk tahap yang tidak butuh isian tambahan.
+    public function bulkUpdate(Request $request)
+    {
+        $request->validate([
+            'status' => ['required', Rule::in(RecruitmentStage::bulkUpdateStages())],
+            'selected_ids' => 'required|array|min:1',
+            'selected_ids.*' => 'integer',
+        ]);
+
+        $jumlah = $this->lingkupCabang(Application::whereIn('id', $request->selected_ids))
+            ->update(['status' => $request->status]);
+
+        return back()->with('success', $jumlah . ' pelamar berhasil diperbarui.');
+    }
+
+    // Tahap yang butuh isian per pelamar (psikotes, interview) menampilkan layar
+    // persiapan dulu. Halaman mana yang dipakai ditentukan kunci 'bulk_form' di
+    // config/recruitment.php -- tidak lagi ditulis sebagai if di sini.
     public function bulkPrepare(Request $request)
     {
-        $ids = $request->selected_ids;
+        $request->validate([
+            'status' => ['required', Rule::in(RecruitmentStage::bulkUpdateStages())],
+            'selected_ids' => 'required|array|min:1',
+            'selected_ids.*' => 'integer',
+        ]);
+
         $status = $request->status;
+        $halaman = config("recruitment.stages.{$status}.bulk_form");
 
-        // Jika pilih psikotes, jalankan fungsi yang sebelumnya
-        if ($status === 'psikotes') {
-            $applications = Application::with(['applicant.user', 'lowongan'])->whereIn('id', $ids)->get();
-            return view('admin.applicants.bulk_psikotes', compact('applications', 'status'));
+        if (! $halaman) {
+            return $this->bulkUpdate($request);
         }
 
-        // JIKA INTERVIEW
-        if ($status === 'interview') {
-            $applications = Application::with(['applicant.user', 'lowongan'])->whereIn('id', $ids)->get();
-            return view('admin.applicants.bulk_interview', compact('applications', 'status'));
-        }
+        $applications = $this->lingkupCabang(
+            Application::with(['applicant.user', 'lowongan'])->whereIn('id', $request->selected_ids)
+        )->get();
 
-        // Untuk status lain (Rejected/Administration) bisa langsung update
-        return $this->bulkUpdate($request);
+        return view($halaman, compact('applications', 'status'));
     }
 
+    // Memproses layar persiapan di atas. Satu method untuk semua tahap: kelas email
+    // dan isinya diambil dari config lewat resolver yang sama dengan alur satuan
+    // (updateStage), jadi kedua jalur tidak bisa lagi menyimpang satu sama lain.
     public function bulkProcess(Request $request)
     {
-        $data = $request->input('applicants'); // Ambil array dari form
+        $request->validate([
+            'status' => ['required', Rule::in(RecruitmentStage::bulkUpdateStages())],
+            'applicants' => 'required|array|min:1',
+        ]);
 
-        foreach ($data as $id => $details) {
-            $application = Application::findOrFail($id);
-            
-            // Update Database
-            $application->update([
-                'status' => 'psikotes',
-            ]);
+        $status = $request->status;
+        $isianPerPelamar = $request->input('applicants');
 
-            // Kirim Email
-            try {
-                $emailData = [
-                    'psikotes_date' => $details['date'],
-                    'psikotes_link' => $details['link'],
-                    'psikotes_token' => $details['token'],
-                ];
-                
-                Mail::to($application->applicant->user->email)
-                    ->send(new \App\Mail\PsikotesEmail($application, $emailData));
-                    
-            } catch (\Exception $e) {
-                logger()->error("Gagal kirim email ke ID $id: " . $e->getMessage());
-            }
-        }
+        $applications = $this->lingkupCabang(
+            Application::with(['applicant.user', 'lowongan'])->whereIn('id', array_keys($isianPerPelamar))
+        )->get();
 
-        return redirect()->route('admin.applicants')->with('success', count($data) . ' undangan psikotes berhasil dikirim.');
-    }
+        foreach ($applications as $application) {
+            $isian = $isianPerPelamar[$application->id] ?? [];
 
-    public function bulkProcessInterview(Request $request)
-    {
-        $data = $request->input('applicants');
-
-        foreach ($data as $id => $details) {
-            $application = Application::findOrFail($id);
-            
-            $application->update(['status' => 'interview']);
+            $application->update(['status' => $status]);
 
             try {
-                $emailData = [
-                    'interview_date' => $details['date'],
-                    'interview_type' => $details['type'],
-                    'interview_link' => $details['link_atau_lokasi'], // Bisa berisi Link atau Alamat
-                    'interview_location' => $details['link_atau_lokasi'], 
-                ];
-                
-                // Pilih Mailable berdasarkan tipe
-                if ($details['type'] === 'offline') {
-                    Mail::to($application->applicant->user->email)
-                        ->send(new \App\Mail\InterviewOfflineEmail($application, $emailData));
-                } else {
-                    Mail::to($application->applicant->user->email)
-                        ->send(new \App\Mail\InterviewEmail($application, $emailData));
+                if ($kelasEmail = RecruitmentStage::mailClass($status, $isian)) {
+                    Mail::to($application->applicant->user->email)->send(
+                        new $kelasEmail($application, RecruitmentStage::mailData($status, $isian))
+                    );
                 }
-                    
             } catch (\Exception $e) {
-                logger()->error("Gagal kirim email interview ke ID $id: " . $e->getMessage());
+                logger()->error("Gagal kirim email massal ke lamaran {$application->id}: " . $e->getMessage());
             }
         }
 
-        return redirect()->route('admin.applicants')->with('success', count($data) . ' undangan interview berhasil dikirim.');
+        $label = RecruitmentStage::labels()[$status] ?? $status;
+
+        return redirect()->route('admin.applicants')
+            ->with('success', $applications->count() . ' pelamar berhasil dipindahkan ke tahap ' . $label . '.');
     }
 
-    // lihat biodata walau belum apply
     public function downloadProfilePdf($applicantId)
     {
         // Cari applicant berdasarkan ID, muat user dan profilenya
