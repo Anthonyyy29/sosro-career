@@ -14,9 +14,14 @@ class OfferingEmail extends Mailable
 
     public $application;
 
-    public function __construct($application)
+    public $data;
+
+    // $data tidak dipakai template email ini, tapi tetap diterima supaya bentuk
+    // pemanggilan kesembilan kelas email seragam: new XEmail($application, $data).
+    public function __construct($application, $data = [])
     {
         $this->application = $application;
+        $this->data = $data;
     }
 
     public function envelope(): Envelope

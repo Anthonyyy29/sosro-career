@@ -16,11 +16,13 @@ class AcceptedEmail extends Mailable
     public $data;
     public $type;
 
-    public function __construct($application, $data, $type)
+    public function __construct($application, $data = [])
     {
         $this->application = $application;
         $this->data = $data;
-        $this->type = $type;
+        // Menentukan template mana yang dipakai (HO / KPW / KPB). Dulu dikirim
+        // sebagai argumen ketiga, sekarang ikut menumpang di dalam $data.
+        $this->type = $data['office_type'] ?? null;
     }
 
     public function envelope(): Envelope

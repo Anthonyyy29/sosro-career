@@ -103,20 +103,12 @@ class ApplicantController extends Controller
 
     public function updateStage(Request $request)
     {
-        // Validasi input
-        $request->validate([
+        // Validasi input. Daftar kolom wajib per tahap tidak ditulis di sini lagi,
+        // melainkan diambil dari kunci 'fields' di config/recruitment.php.
+        $request->validate(array_merge([
             'application_id' => 'required|exists:applications,id',
             'next_status' => ['required', Rule::in(RecruitmentStage::allKeys())],
-            'rejection_reason' => 'required_if:next_status,rejected',
-            'psikotes_type' => 'required_if:next_status,psikotes',
-            'psikotes_date' => 'required_if:next_status,psikotes',
-            'psikotes_link' => 'required_if:next_status,psikotes',
-            'interview_date' => 'required_if:next_status,interview',
-            'interview_type' => 'required_if:next_status,interview',
-            'interview_link' => 'required_if:next_status,interview',
-            'mcu_date' => 'required_if:next_status,mcu',
-            'join_date' => 'required_if:next_status,accepted',
-        ], [
+        ], RecruitmentStage::fieldRules()), [
             'required_if' => 'Kolom :attribute wajib diisi untuk tahapan ini.',
         ]);
 
@@ -136,30 +128,15 @@ class ApplicantController extends Controller
         try {
             $userEmail = $application->applicant->user->email;
 
-            if ($request->next_status === 'psikotes') {
-                $data = $request->only(['psikotes_date', 'psikotes_link', 'psikotes_token']);
-                if ($request->psikotes_type === 'tes_kepribadian') {
-                    Mail::to($userEmail)->send(new \App\Mail\TesKepribadianEmail($application, $data));
-                } else {
-                    Mail::to($userEmail)->send(new \App\Mail\PsikotesEmail($application, $data));
-                }
-            } elseif ($request->next_status === 'interview') {
-                $data = $request->only(['interview_date', 'interview_link', 'interview_location']);
-                if ($request->interview_type === 'offline') {
-                    Mail::to($userEmail)->send(new \App\Mail\InterviewOfflineEmail($application, $data));
-                } elseif ($request->interview_type === 'lanjutan') {
-                    Mail::to($userEmail)->send(new \App\Mail\InterviewLanjutanEmail($application, $data));
-                } else {
-                    Mail::to($userEmail)->send(new \App\Mail\InterviewEmail($application, $data));
-                }
-            } elseif ($request->next_status === 'offering') {
-                Mail::to($userEmail)->send(new \App\Mail\OfferingEmail($application));
-            } elseif ($request->next_status === 'mcu') {
-                Mail::to($userEmail)->send(new \App\Mail\MCUEmail($application, $request->only(['mcu_date', 'mcu_location_name', 'mcu_location_address'])));
-            } elseif ($request->next_status === 'rejected') {
-                Mail::to($userEmail)->send(new \App\Mail\RejectedEmail($application, $request->rejection_reason));
-            } elseif ($request->next_status === 'accepted') {
-                Mail::to($userEmail)->send(new \App\Mail\AcceptedEmail($application, $request->only(['join_date', 'work_location', 'office_address']), $request->office_type));
+            // Kelas email tiap tahap ditentukan di config/recruitment.php.
+            // Tahap yang tidak punya baris 'mail' di sana memang sengaja tidak
+            // mengirim apa pun ke pelamar -- jadi tidak perlu cabang khusus.
+            $tahap = $request->next_status;
+
+            if ($kelasEmail = RecruitmentStage::mailClass($tahap, $request->all())) {
+                Mail::to($userEmail)->send(
+                    new $kelasEmail($application, RecruitmentStage::mailData($tahap, $request->all()))
+                );
             }
 
         } catch (\Exception $e) {

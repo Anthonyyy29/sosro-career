@@ -13,12 +13,17 @@ class RejectedEmail extends Mailable
     use Queueable, SerializesModels;
 
     public $application;
+    public $data;
+
     public $reason;
 
-    public function __construct($application, $reason = null)
+    public function __construct($application, $data = [])
     {
         $this->application = $application;
-        $this->reason = $reason;
+        $this->data = $data;
+        // Diambil dari $data supaya bentuknya seragam dengan kelas email lain.
+        // Template emails.rejected tetap memakai $reason seperti sebelumnya.
+        $this->reason = $data['rejection_reason'] ?? null;
     }
 
     public function envelope(): Envelope

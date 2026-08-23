@@ -103,4 +103,57 @@ class RecruitmentStage extends Model
     {
         return static::loaded()->pluck('key')->all();
     }
+
+    // Aturan validasi untuk SEMUA tahap sekaligus, siap ditempel ke
+    // $request->validate(). Daftar kolom wajibnya diambil dari kunci 'fields'
+    // di config/recruitment.php, jadi tidak perlu ditulis satu per satu lagi
+    // di controller seperti dulu.
+    public static function fieldRules(): array
+    {
+        $rules = [];
+        foreach (config('recruitment.stages', []) as $key => $definisi) {
+            foreach ($definisi['fields'] ?? [] as $kolom) {
+                $rules[$kolom] = 'required_if:next_status,'.$key;
+            }
+        }
+
+        return $rules;
+    }
+
+    // Kelas email yang harus dikirim untuk tahap ini, atau null kalau tahap ini
+    // memang sengaja tidak mengirim email apa pun.
+    //
+    // Sebagian tahap punya lebih dari satu kemungkinan email (psikotes dan
+    // interview), dipilih berdasarkan isian admin -- itu yang diurus 'switch'.
+    //
+    // $input biasanya isi $request->all().
+    public static function mailClass(string $key, array $input = []): ?string
+    {
+        $mail = config("recruitment.stages.{$key}.mail");
+
+        if (empty($mail)) {
+            return null;
+        }
+
+        if (is_string($mail)) {
+            return $mail;
+        }
+
+        $penentu = $input[$mail['switch']] ?? null;
+
+        if (is_string($penentu) && isset($mail['map'][$penentu])) {
+            return $mail['map'][$penentu];
+        }
+
+        return $mail['default'];
+    }
+
+    // Isian yang diteruskan ke template email untuk tahap ini. Daftar kolomnya
+    // ada di kunci 'mail_data' pada config/recruitment.php.
+    public static function mailData(string $key, array $input = []): array
+    {
+        $kolom = config("recruitment.stages.{$key}.mail_data", []);
+
+        return array_intersect_key($input, array_flip($kolom));
+    }
 }

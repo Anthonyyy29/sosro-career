@@ -1,5 +1,15 @@
 <?php
 
+use App\Mail\AcceptedEmail;
+use App\Mail\InterviewEmail;
+use App\Mail\InterviewLanjutanEmail;
+use App\Mail\InterviewOfflineEmail;
+use App\Mail\MCUEmail;
+use App\Mail\OfferingEmail;
+use App\Mail\PsikotesEmail;
+use App\Mail\RejectedEmail;
+use App\Mail\TesKepribadianEmail;
+
 /*
 |--------------------------------------------------------------------------
 | Tahapan Seleksi Rekrutmen
@@ -60,6 +70,23 @@ return [
     |                   saja. Untuk sekarang belum dipakai kode manapun
     |   bulk            true = tahap ini boleh dipilih di fitur Update Massal
     |                   pada halaman daftar pelamar
+    |
+    |   fields          kolom yang WAJIB diisi admin waktu memindahkan pelamar
+    |                   ke tahap ini
+    |   mail_data       kolom yang dikirimkan ke template email. Sengaja
+    |                   dipisah dari `fields`, karena tidak selalu sama:
+    |                   psikotes_token dikirim ke email tapi tidak wajib diisi,
+    |                   sedangkan psikotes_type wajib diisi tapi tidak dikirim
+    |   mail            kelas email yang dikirim. Kalau baris ini TIDAK ADA,
+    |                   berarti tahap ini memang sengaja tidak mengirim email
+    |                   apa pun ke pelamar
+    |
+    | Sebagian tahap mengirim email yang berbeda tergantung pilihan admin.
+    | Untuk itu `mail` ditulis sebagai daftar:
+    |
+    |   'switch'  kolom mana yang menentukan
+    |   'map'     nilai kolom itu => kelas emailnya
+    |   'default' dipakai kalau nilainya tidak ada di map
     */
 
     'stages' => [
@@ -86,6 +113,13 @@ return [
             'color'           => 'bg-blue-50 text-blue-600 border-blue-100',
             'universal'       => false,
             'bulk'            => true,
+            'fields'          => ['psikotes_type', 'psikotes_date', 'psikotes_link'],
+            'mail_data'       => ['psikotes_date', 'psikotes_link', 'psikotes_token'],
+            'mail'            => [
+                'switch'  => 'psikotes_type',
+                'map'     => ['tes_kepribadian' => TesKepribadianEmail::class],
+                'default' => PsikotesEmail::class,
+            ],
         ],
 
         'interview' => [
@@ -94,6 +128,16 @@ return [
             'color'           => 'bg-cyan-50 text-cyan-600 border-cyan-100',
             'universal'       => false,
             'bulk'            => true,
+            'fields'          => ['interview_date', 'interview_type', 'interview_link'],
+            'mail_data'       => ['interview_date', 'interview_link', 'interview_location'],
+            'mail'            => [
+                'switch'  => 'interview_type',
+                'map'     => [
+                    'offline'  => InterviewOfflineEmail::class,
+                    'lanjutan' => InterviewLanjutanEmail::class,
+                ],
+                'default' => InterviewEmail::class,
+            ],
         ],
 
         'study case' => [
@@ -126,6 +170,7 @@ return [
             'color'           => 'bg-pink-50 text-pink-600 border-pink-100',
             'universal'       => false,
             'bulk'            => false,
+            'mail'            => OfferingEmail::class,
         ],
 
         'mcu' => [
@@ -134,6 +179,9 @@ return [
             'color'           => 'bg-teal-50 text-teal-600 border-teal-100',
             'universal'       => false,
             'bulk'            => false,
+            'fields'          => ['mcu_date'],
+            'mail_data'       => ['mcu_date', 'mcu_location_name', 'mcu_location_address'],
+            'mail'            => MCUEmail::class,
         ],
 
         'accepted' => [
@@ -142,6 +190,9 @@ return [
             'color'           => 'bg-green-50 text-green-600 border-green-100',
             'universal'       => true,
             'bulk'            => false,
+            'fields'          => ['join_date'],
+            'mail_data'       => ['join_date', 'work_location', 'office_address', 'office_type'],
+            'mail'            => AcceptedEmail::class,
         ],
 
         'rejected' => [
@@ -150,6 +201,9 @@ return [
             'color'           => 'bg-red-50 text-red-600 border-red-100',
             'universal'       => true,
             'bulk'            => true,
+            'fields'          => ['rejection_reason'],
+            'mail_data'       => ['rejection_reason'],
+            'mail'            => RejectedEmail::class,
         ],
 
     ],
