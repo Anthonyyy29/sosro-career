@@ -118,6 +118,19 @@ class ApplicantController extends Controller
         if (Auth::user()->role !== 'superadmin' && $application->lowongan->cabang_id !== Auth::user()->cabang_id) {
             abort(403, 'Akses ditolak.');
         }
+
+        // Tahap harus berlaku untuk kategori lowongan lamaran ini. Sebelumnya
+        // validasi cuma memeriksa "kunci tahap ini ada", jadi tahap milik kategori
+        // lain (mis. 'simulasi' pada lamaran Profesional) tetap lolos lewat POST
+        // langsung, meski opsinya tidak pernah muncul di dropdown.
+        $kategori = $application->lowongan->kategori;
+
+        if (! in_array($request->next_status, RecruitmentStage::selectableFor($kategori), true)) {
+            return back()->withErrors([
+                'next_status' => 'Tahap "'.$request->next_status.'" tidak berlaku untuk kategori '.$kategori.'.',
+            ]);
+        }
+
         
         $updateData = [
             'status' => $request->next_status,

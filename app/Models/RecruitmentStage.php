@@ -148,6 +148,34 @@ class RecruitmentStage extends Model
         return $mail['default'];
     }
 
+    // Tahap yang sah dituju untuk satu kategori lowongan: urutan pipeline kategori
+    // itu, ditambah tahap universal (accepted/rejected) yang berlaku di mana saja.
+    //
+    // Ini daftar yang sama dengan isi dropdown "Pindah ke Tahap" -- dipakai juga
+    // untuk validasi, supaya yang tidak ada di dropdown juga ditolak server.
+    public static function selectableFor(?string $kategori): array
+    {
+        $pipeline = config('recruitment.pipelines.'.$kategori, []);
+
+        return array_merge($pipeline, static::universalDestinations());
+    }
+
+    // Daftar berkas blade berisi isian tambahan per tahap, buat disertakan di modal
+    // "Pindah ke Tahap". Tahap yang tidak punya kunci 'form' berarti tidak butuh
+    // isian apa pun -- jadi tidak ada berkas yang perlu dibuat untuknya.
+    public static function formPartials(): array
+    {
+        $daftar = [];
+
+        foreach (config('recruitment.stages', []) as $key => $definisi) {
+            if (! empty($definisi['form'])) {
+                $daftar[$key] = $definisi['form'];
+            }
+        }
+
+        return $daftar;
+    }
+
     // Isian yang diteruskan ke template email untuk tahap ini. Daftar kolomnya
     // ada di kunci 'mail_data' pada config/recruitment.php.
     public static function mailData(string $key, array $input = []): array

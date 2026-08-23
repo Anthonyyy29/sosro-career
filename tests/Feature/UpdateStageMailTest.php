@@ -324,3 +324,60 @@ test('admin cabang tidak bisa memproses lamaran cabang lain secara massal', func
     expect($milikB->fresh()->status)->toBe('pending');
     Mail::assertNothingSent();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Kesahihan tahap terhadap kategori lowongan
+|--------------------------------------------------------------------------
+|
+| Sebelumnya validasi cuma memeriksa "kunci tahap ini ada di daftar", tanpa
+| peduli kategori. Jadi POST langsung dengan tahap milik kategori lain tetap
+| lolos, meski opsinya tidak pernah muncul di dropdown.
+|
+*/
+
+test('tahap milik kategori lain ditolak', function (string $kategori, string $tahapAsing, array $isianWajib = []) {
+    $application = buatLamaran($kategori);
+
+    // Kolom wajib tahap itu tetap diisi, supaya yang menolak benar-benar
+    // pemeriksaan kategori -- bukan sekadar validasi kolom kosong.
+    pindahTahap([
+        'application_id' => $application->id,
+        'next_status'    => $tahapAsing,
+    ] + $isianWajib)->assertSessionHasErrors('next_status');
+
+    expect($application->fresh()->status)->toBe('pending');
+    Mail::assertNothingSent();
+})->with([
+    'simulasi bukan milik Profesional'        => ['Profesional', 'simulasi'],
+    'study case bukan milik Profesional'      => ['Profesional', 'study case'],
+    'panel bod bukan milik Magang'            => ['Magang', 'panel bod'],
+    'mcu bukan milik Magang'                  => ['Magang', 'mcu', ['mcu_date' => '2026-09-03']],
+    'simulasi bukan milik Management Trainee' => ['Management Trainee', 'simulasi'],
+]);
+
+test('tahap milik kategorinya sendiri tetap diterima', function (string $kategori, string $tahap) {
+    $application = buatLamaran($kategori);
+
+    pindahTahap(['application_id' => $application->id, 'next_status' => $tahap])
+        ->assertSessionHasNoErrors();
+
+    expect($application->fresh()->status)->toBe($tahap);
+})->with([
+    ['Profesional', 'administration'],
+    ['Magang', 'simulasi'],
+    ['Management Trainee', 'panel bod'],
+]);
+
+// accepted/rejected berlaku di semua kategori, dari titik mana pun.
+test('tahap universal diterima di semua kategori', function (string $kategori) {
+    $application = buatLamaran($kategori);
+
+    pindahTahap([
+        'application_id'   => $application->id,
+        'next_status'      => 'rejected',
+        'rejection_reason' => 'Alasan uji',
+    ])->assertSessionHasNoErrors();
+
+    expect($application->fresh()->status)->toBe('rejected');
+})->with(['Profesional', 'Management Trainee', 'Magang']);

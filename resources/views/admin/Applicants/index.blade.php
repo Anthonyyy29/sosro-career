@@ -330,89 +330,17 @@
                             </select>
                         </div>
 
-                        {{-- Form input Psikotes --}}
-                        <div x-show="nextStatus === 'psikotes'" x-transition class="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
-                            <p class="text-[11px] font-bold text-blue-600 uppercase">Informasi Psikotes</p>
+                        {{-- Isian tambahan per tahap. Tiap tahap punya berkasnya sendiri di
+                             resources/views/admin/applicants/stages/, dan yang disertakan
+                             ditentukan kunci 'form' di config/recruitment.php. --}}
+                        @foreach (App\Models\RecruitmentStage::formPartials() as $partialTahap)
+                            @include($partialTahap)
+                        @endforeach
 
-                            <div>
-                                <label class="text-xs text-gray-500">Jenis Tes</label>
-                                <select name="psikotes_type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                                    <option value="psikotes">Psikotes (Standar)</option>
-                                    <option value="tes_kepribadian">Tes Kepribadian (Level Atas)</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label class="text-xs text-gray-500">Tanggal Pelaksanaan</label>
-                                <input type="date" name="psikotes_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Link Psikotes</label>
-                                <input type="url" name="psikotes_link" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="https://...">
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Token Access</label>
-                                <input type="text" name="psikotes_token" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="XYZ-123">
-                            </div>
-                            <p class="text-[10px] text-blue-500 mt-2 italic">* Sistem akan otomatis mengirim email template Psikotes ke pelamar.</p>
-                        </div>
 
-                        {{-- Form input Interview --}}
-                        <div x-show="nextStatus === 'interview'" x-transition class="p-4 bg-cyan-50 rounded-xl border border-cyan-100 space-y-3" x-data="{ invType: 'initial' }">
-                            <p class="text-[11px] font-bold text-cyan-600 uppercase">Informasi Interview</p>
-                            <div>
-                                <label class="text-xs text-gray-500">Jenis Interview</label>
-                                <select name="interview_type" x-model="invType" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                                    <option value="initial">Interview Awal (Online)</option>
-                                    <option value="lanjutan">Interview Lanjutan (Online)</option>
-                                    <option value="offline">Interview Offline (Tatap Muka)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="text-xs text-gray-500">Tanggal & Waktu Interview</label>
-                                <input type="datetime-local" name="interview_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                            </div>
-
-                            <div x-show="invType !== 'offline'">
-                                <label class="text-xs text-gray-500">Link Interview (Zoom/Gmeet)</label>
-                                <input type="url" name="interview_link" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="https://...">
-                            </div>
-
-                            <div x-show="invType === 'offline'">
-                                <label class="text-xs text-gray-500">Lokasi Interview (Alamat Lengkap)</label>
-                                <textarea name="interview_location" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Gedung Graha Rekso..."></textarea>
-                            </div>
-                        </div>
 
                         {{-- Form Info Offering --}}
-                        <div x-show="nextStatus === 'offering'" x-transition class="p-4 bg-pink-50 rounded-xl border border-pink-100 space-y-2">
-                            <div class="flex items-center gap-2 text-pink-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <p class="text-[11px] font-bold uppercase">Konfirmasi Tahap Offering</p>
-                            </div>
-                            <p class="text-xs text-gray-600">Sistem akan mengirimkan email pemberitahuan bahwa kandidat lolos seleksi dan akan segera dihubungi oleh tim HC untuk proses Offering Letter.</p>
-                        </div>
 
-                        {{-- Form input MCU --}}
-                        <div x-show="nextStatus === 'mcu'" x-transition class="p-4 bg-teal-50 rounded-xl border border-teal-100 space-y-3">
-                            <p class="text-[11px] font-bold text-teal-600 uppercase">Informasi Medical Check Up</p>
-                            
-                            <div>
-                                <label class="text-xs text-gray-500">Tanggal & Waktu MCU</label>
-                                <input type="datetime-local" name="mcu_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                            </div>
-
-                            <div>
-                                <label class="text-xs text-gray-500">Nama Rumah Sakit/Klinik</label>
-                                <input type="text" name="mcu_location_name" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Contoh: RS Gading Pluit">
-                            </div>
-
-                            <div>
-                                <label class="text-xs text-gray-500">Alamat Lengkap Lokasi</label>
-                                <textarea name="mcu_location_address" rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Masukkan alamat lengkap RS/Klinik..."></textarea>
-                            </div>
-                        </div>
 
                         {{-- Form input Tes Lapangan (disabled: dead code, gak ada opsi manapun yang set nextStatus ke 'practical_test', digantikan 'simulasi')
                         <div x-show="nextStatus === 'practical_test'" x-transition class="p-4 bg-orange-50 rounded-xl border border-orange-100 space-y-3">
@@ -424,56 +352,7 @@
                         </div>
                         --}}
 
-                        {{-- Form input Lolos / Hiring --}}
-                        <div x-show="nextStatus === 'accepted'" x-transition class="p-4 bg-green-50 rounded-xl border border-green-100 space-y-3">
-                            <p class="text-[11px] font-bold text-green-600 uppercase">Informasi Karyawan Baru</p>
-                            
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-xs text-gray-500">Tipe Kantor</label>
-                                    <select name="office_type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                                        <option value="HO">Head Office (HO)</option>
-                                        <option value="KPW">Kantor Wilayah (KPW)</option>
-                                        <option value="KPB">Kantor Pabrikan/PKM/Kebun</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-xs text-gray-500">Tanggal Mulai Kerja</label>
-                                    <input type="date" name="join_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1">
-                                </div>
-                            </div>
 
-                            <div>
-                                <label class="text-xs text-gray-500">Nama Penempatan Kerja</label>
-                                <input type="text" name="work_location" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Contoh: KPW Jawa Barat">
-                            </div>
-
-                            <div>
-                                <label class="text-xs text-gray-500">Alamat Lengkap Kantor Penempatan</label>
-                                <textarea name="office_address" rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1" placeholder="Masukkan alamat lengkap kantor..."></textarea>
-                            </div>
-                        </div>
-
-                        {{-- Form input Alasan Penolakan --}}
-                        <div x-show="nextStatus === 'rejected'" x-transition class="p-4 bg-red-50 rounded-xl border border-red-100 space-y-3">
-                            <div class="flex items-center gap-2 text-red-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <p class="text-[11px] font-bold uppercase">Konfirmasi Penolakan</p>
-                            </div>
-                            
-                            <div>
-                                <label class="text-xs text-red-600 font-bold uppercase">Alasan Penolakan</label>
-                                <select name="rejection_reason" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mt-1 focus:ring-red-500">
-                                    <option value="" disabled selected>-- Pilih Alasan --</option>
-                                    <option value="Pengalaman kerja tidak sesuai">Pengalaman kerja tidak sesuai</option>
-                                    <option value="Latar belakang industri tidak sesuai">Latar belakang industri tidak sesuai</option>
-                                    <option value="Latar belakang pendidikan tidak sesuai">Latar belakang pendidikan tidak sesuai</option>
-                                    <option value="Belum sesuai dengan kriteria lowongan yang ada saat ini">Kriteria belum sesuai</option>
-                                </select>
-                            </div>
-                            
-                            <p class="text-[10px] text-red-500 italic mt-1">* Alasan ini akan tampil di dashboard pelamar sebagai feedback standar.</p>
-                        </div>
                     </div>
 
                     <div class="mt-6 flex justify-end gap-3">

@@ -80,6 +80,8 @@ return [
     |   mail            kelas email yang dikirim. Kalau baris ini TIDAK ADA,
     |                   berarti tahap ini memang sengaja tidak mengirim email
     |                   apa pun ke pelamar
+    |   form            berkas blade berisi isian tambahan yang muncul di modal
+    |                   "Pindah ke Tahap" waktu tahap ini dipilih
     |   bulk_form       halaman persiapan yang muncul waktu tahap ini dipilih di
     |                   Update Massal, karena butuh isian per pelamar. Tanpa
     |                   baris ini, Update Massal langsung mengubah status
@@ -124,6 +126,7 @@ return [
                 'map'     => ['tes_kepribadian' => TesKepribadianEmail::class],
                 'default' => PsikotesEmail::class,
             ],
+            'form'            => 'admin.applicants.stages.psikotes',
         ],
 
         'interview' => [
@@ -143,6 +146,7 @@ return [
                 ],
                 'default' => InterviewEmail::class,
             ],
+            'form'            => 'admin.applicants.stages.interview',
         ],
 
         'study case' => [
@@ -176,6 +180,7 @@ return [
             'universal'       => false,
             'bulk'            => false,
             'mail'            => OfferingEmail::class,
+            'form'            => 'admin.applicants.stages.offering',
         ],
 
         'mcu' => [
@@ -187,6 +192,7 @@ return [
             'fields'          => ['mcu_date'],
             'mail_data'       => ['mcu_date', 'mcu_location_name', 'mcu_location_address'],
             'mail'            => MCUEmail::class,
+            'form'            => 'admin.applicants.stages.mcu',
         ],
 
         'accepted' => [
@@ -198,6 +204,7 @@ return [
             'fields'          => ['join_date'],
             'mail_data'       => ['join_date', 'work_location', 'office_address', 'office_type'],
             'mail'            => AcceptedEmail::class,
+            'form'            => 'admin.applicants.stages.accepted',
         ],
 
         'rejected' => [
@@ -209,6 +216,7 @@ return [
             'fields'          => ['rejection_reason'],
             'mail_data'       => ['rejection_reason'],
             'mail'            => RejectedEmail::class,
+            'form'            => 'admin.applicants.stages.rejected',
         ],
 
     ],
