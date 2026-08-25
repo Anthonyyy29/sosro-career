@@ -51,6 +51,47 @@ class UserConfirmation extends Model
         return $this->belongsTo(Admin::class, 'dipilih_admin_id');
     }
 
+    /*
+     * Membuat satu kelompok konfirmasi berikut isinya, lalu memindahkan status
+     * semua lamaran itu ke tahap "Konfirmasi User".
+     *
+     * SATU-SATUNYA tempat kelompok dibuat -- dipakai jalur centang (Update Massal)
+     * maupun jalur langsung (modal satu pelamar), supaya keduanya tidak mungkin
+     * menghasilkan data yang berbeda bentuk.
+     *
+     * $catatanPerLamaran: [application_id => catatan interview]
+     */
+    public static function buatUntuk(
+        \Illuminate\Support\Collection $applications,
+        string $emailUser,
+        array $catatanPerLamaran,
+        ?int $adminId,
+        int $masaBerlakuHari,
+    ): self {
+        return \Illuminate\Support\Facades\DB::transaction(
+            function () use ($applications, $emailUser, $catatanPerLamaran, $adminId, $masaBerlakuHari) {
+                $konfirmasi = static::create([
+                    'lowongan_id' => $applications->first()->lowongan_id,
+                    'email_user' => $emailUser,
+                    'status' => 'menunggu',
+                    'created_by' => $adminId,
+                    'expires_at' => now()->addDays($masaBerlakuHari),
+                ]);
+
+                foreach ($applications as $application) {
+                    $konfirmasi->items()->create([
+                        'application_id' => $application->id,
+                        'catatan_interview' => $catatanPerLamaran[$application->id],
+                    ]);
+
+                    $application->update(['status' => 'konfirmasi user']);
+                }
+
+                return $konfirmasi;
+            }
+        );
+    }
+
     public function sudahDipilih(): bool
     {
         return $this->selected_application_id !== null;

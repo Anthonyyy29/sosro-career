@@ -143,17 +143,42 @@ test('admin cabang tidak bisa menyodorkan kandidat cabang lain', function () {
     Mail::assertNothingSent();
 });
 
-// Tahap ini ber-'bulk_only', jadi tidak sah lewat modal satu pelamar.
-test('tahap konfirmasi user ditolak lewat updateStage', function () {
+// Jalur langsung: admin memindahkan SATU pelamar lewat modal, mengisi email user
+// dan catatan di situ juga. Hasilnya harus sama persis dengan jalur centang.
+test('satu pelamar bisa dikirim lewat modal', function () {
     $application = lamaranPada(lowonganUji());
 
     $this->actingAs(superadminKonfirmasi(), 'admin')
         ->post(route('admin.applications.update-stage'), [
             'application_id' => $application->id,
             'next_status' => 'konfirmasi user',
-        ])->assertSessionHasErrors('next_status');
+            'email_user' => 'user@perusahaan.test',
+            'catatan_interview' => 'Catatan dari modal',
+        ])->assertRedirect();
 
-    expect($application->fresh()->status)->toBe('interview');
+    $konfirmasi = UserConfirmation::latest('id')->first();
+
+    expect($application->fresh()->status)->toBe('konfirmasi user')
+        ->and($konfirmasi->items)->toHaveCount(1)
+        ->and($konfirmasi->items->first()->catatan_interview)->toBe('Catatan dari modal')
+        ->and($konfirmasi->email_user)->toBe('user@perusahaan.test');
+
+    Mail::assertSent(KonfirmasiUserEmail::class, 1);
+    Mail::assertSentCount(1);
+});
+
+test('email user dan catatan wajib diisi di jalur modal', function () {
+    $application = lamaranPada(lowonganUji());
+
+    $this->actingAs(superadminKonfirmasi(), 'admin')
+        ->post(route('admin.applications.update-stage'), [
+            'application_id' => $application->id,
+            'next_status' => 'konfirmasi user',
+        ])->assertSessionHasErrors(['email_user', 'catatan_interview']);
+
+    expect($application->fresh()->status)->toBe('interview')
+        ->and(UserConfirmation::count())->toBe(0);
+    Mail::assertNothingSent();
 });
 
 // ---------------------------------------------------------------- halaman user
@@ -313,10 +338,9 @@ test('keadaan konfirmasi terbaca dari sisi lamaran', function () {
         ->and($tidak->fresh()->keadaanKonfirmasi())->toBe('tidak');
 });
 
-// Bug yang pernah terjadi: dropdown modal dibangun dari pipelines() mentah, sedangkan
-// validasi memakai selectableFor() yang sudah menyaring bulk_only. Akibatnya modal
-// menawarkan "Konfirmasi User", admin memilihnya, lalu ditolak server dengan pesan
-// membingungkan. Dua daftar ini harus sepakat.
+// Bug yang pernah terjadi: dropdown modal dibangun dari pipelines() mentah sedangkan
+// validasi memakai selectableFor() yang tersaring, sehingga modal menawarkan opsi yang
+// lalu ditolak server. Dua daftar itu harus sepakat, apa pun isinya.
 test('daftar tahap modal dan daftar yang diterima validasi sepakat', function (string $kategori) {
     $modal = App\Models\RecruitmentStage::selectablePipelines()[$kategori];
     $sah = App\Models\RecruitmentStage::selectableFor($kategori);
@@ -324,12 +348,10 @@ test('daftar tahap modal dan daftar yang diterima validasi sepakat', function (s
     foreach ($modal as $tahap) {
         expect($sah)->toContain($tahap);
     }
-
-    expect($modal)->not->toContain('konfirmasi user');
 })->with(['Profesional', 'Management Trainee', 'Magang']);
 
-// Dropdown filter justru HARUS memuatnya -- admin perlu bisa menyaring siapa saja
-// yang sedang menunggu keputusan user.
-test('daftar filter tetap memuat tahap bulk_only', function () {
-    expect(App\Models\RecruitmentStage::pipelines()['Profesional'])->toContain('konfirmasi user');
+test('konfirmasi user tersedia di modal maupun di update massal', function () {
+    expect(App\Models\RecruitmentStage::selectablePipelines()['Profesional'])->toContain('konfirmasi user')
+        ->and(App\Models\RecruitmentStage::selectableFor('Profesional'))->toContain('konfirmasi user')
+        ->and(App\Models\RecruitmentStage::bulkUpdateStages())->toContain('konfirmasi user');
 });

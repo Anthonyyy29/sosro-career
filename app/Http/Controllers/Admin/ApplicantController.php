@@ -143,6 +143,30 @@ class ApplicantController extends Controller
         ];
         $application->update($updateData);
 
+        // Tahap tertentu tidak sekadar mengubah status: ia membuat kelompok konfirmasi
+        // dan mengirim tautan ke user. Ditandai lewat config, bukan menyebut nama tahap
+        // di sini, supaya polanya sama dengan bidang-bidang lain.
+        if (config("recruitment.stages.{$request->next_status}.creates_confirmation")) {
+            $konfirmasi = \App\Models\UserConfirmation::buatUntuk(
+                collect([$application]),
+                $request->email_user,
+                [$application->id => $request->catatan_interview],
+                Auth::id(),
+                \App\Http\Controllers\Admin\UserConfirmationController::MASA_BERLAKU_HARI,
+            );
+
+            try {
+                Mail::to($konfirmasi->email_user)->send(new \App\Mail\KonfirmasiUserEmail($konfirmasi));
+            } catch (\Exception $e) {
+                logger()->error('Email Error: '.$e->getMessage());
+
+                return redirect()->back()->with('success', 'Kandidat dikirim ke user, namun email GAGAL dikirim.');
+            }
+
+            return redirect()->back()->with('success',
+                'Kandidat dikirim ke '.$konfirmasi->email_user.' untuk dipilih.');
+        }
+
         try {
             $userEmail = $application->applicant->user->email;
 

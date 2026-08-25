@@ -62,26 +62,13 @@ class UserConfirmationController extends Controller
             ])->withInput();
         }
 
-        $konfirmasi = DB::transaction(function () use ($applications, $lowonganIds, $catatanPerLamaran, $request) {
-            $konfirmasi = UserConfirmation::create([
-                'lowongan_id' => $lowonganIds->first(),
-                'email_user' => $request->email_user,
-                'status' => 'menunggu',
-                'created_by' => Auth::id(),
-                'expires_at' => now()->addDays(self::MASA_BERLAKU_HARI),
-            ]);
-
-            foreach ($applications as $application) {
-                $konfirmasi->items()->create([
-                    'application_id' => $application->id,
-                    'catatan_interview' => $catatanPerLamaran[$application->id],
-                ]);
-
-                $application->update(['status' => 'konfirmasi user']);
-            }
-
-            return $konfirmasi;
-        });
+        $konfirmasi = UserConfirmation::buatUntuk(
+            $applications,
+            $request->email_user,
+            $catatanPerLamaran,
+            Auth::id(),
+            self::MASA_BERLAKU_HARI,
+        );
 
         try {
             Mail::to($konfirmasi->email_user)->send(new KonfirmasiUserEmail($konfirmasi));
