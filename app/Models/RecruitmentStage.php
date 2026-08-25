@@ -145,6 +145,29 @@ class RecruitmentStage
         return $mail['default'];
     }
 
+    /*
+     * Urutan tahap per kategori KHUSUS untuk dropdown "Pindah ke Tahap" di modal
+     * satu pelamar: sama dengan pipelines(), tapi tahap ber-'bulk_only' dibuang.
+     *
+     * Dibedakan dari pipelines() karena keduanya memang beda keperluan:
+     * dropdown FILTER tetap harus bisa menyaring berdasarkan tahap bulk_only
+     * (admin perlu melihat siapa saja yang sedang di tahap itu), sedangkan
+     * dropdown PINDAH tidak boleh menawarkannya.
+     */
+    public static function selectablePipelines(): array
+    {
+        $hasil = [];
+
+        foreach (static::pipelines() as $kategori => $tahap) {
+            $hasil[$kategori] = array_values(array_filter(
+                $tahap,
+                fn ($key) => ! config("recruitment.stages.{$key}.bulk_only", false)
+            ));
+        }
+
+        return $hasil;
+    }
+
     // Tahap yang sah dituju untuk satu kategori lowongan: urutan pipeline kategori
     // itu, ditambah tahap universal (accepted/rejected) yang berlaku di mana saja.
     //

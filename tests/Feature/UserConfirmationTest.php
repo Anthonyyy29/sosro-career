@@ -312,3 +312,24 @@ test('keadaan konfirmasi terbaca dari sisi lamaran', function () {
     expect($terpilih->fresh()->keadaanKonfirmasi())->toBe('terpilih')
         ->and($tidak->fresh()->keadaanKonfirmasi())->toBe('tidak');
 });
+
+// Bug yang pernah terjadi: dropdown modal dibangun dari pipelines() mentah, sedangkan
+// validasi memakai selectableFor() yang sudah menyaring bulk_only. Akibatnya modal
+// menawarkan "Konfirmasi User", admin memilihnya, lalu ditolak server dengan pesan
+// membingungkan. Dua daftar ini harus sepakat.
+test('daftar tahap modal dan daftar yang diterima validasi sepakat', function (string $kategori) {
+    $modal = App\Models\RecruitmentStage::selectablePipelines()[$kategori];
+    $sah = App\Models\RecruitmentStage::selectableFor($kategori);
+
+    foreach ($modal as $tahap) {
+        expect($sah)->toContain($tahap);
+    }
+
+    expect($modal)->not->toContain('konfirmasi user');
+})->with(['Profesional', 'Management Trainee', 'Magang']);
+
+// Dropdown filter justru HARUS memuatnya -- admin perlu bisa menyaring siapa saja
+// yang sedang menunggu keputusan user.
+test('daftar filter tetap memuat tahap bulk_only', function () {
+    expect(App\Models\RecruitmentStage::pipelines()['Profesional'])->toContain('konfirmasi user');
+});

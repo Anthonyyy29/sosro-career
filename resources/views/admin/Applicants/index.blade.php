@@ -7,7 +7,10 @@
         selectedAppId: null,
         nextStatus: '',
         category: '',
-        pipelines: {{ Js::from(App\Models\RecruitmentStage::pipelines()) }},
+        {{-- Dipakai dropdown "Pindah ke Tahap". Tahap bulk_only sengaja tidak ikut:
+             tahap seperti itu butuh isian sekelompok pelamar, jadi hanya lewat
+             Update Massal. Dropdown FILTER di atas tetap memakai daftar lengkap. --}}
+        pipelines: {{ Js::from(App\Models\RecruitmentStage::selectablePipelines()) }},
         stageLabels: {{ Js::from(App\Models\RecruitmentStage::labels()) }},
         stageColors: {{ Js::from(App\Models\RecruitmentStage::colors()) }},
         universalDestinations: {{ Js::from(App\Models\RecruitmentStage::universalDestinations()) }},
