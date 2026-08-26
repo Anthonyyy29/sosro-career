@@ -1,3 +1,80 @@
+# Sosro Career
+
+Portal rekrutmen: daftar lowongan publik, portal pelamar (biodata & lacak lamaran),
+dan panel admin (pipeline seleksi, lowongan, laporan). Laravel 12 + Blade + Alpine.js
++ Tailwind, dijalankan lewat Laravel Sail (Docker).
+
+## Menyiapkan di komputer baru
+
+**Yang perlu ada dulu:** Docker Desktop (jalan), PHP + Composer, dan Node.js.
+
+```bash
+git clone <url-repo>
+cd sosro.career
+
+composer install
+npm install
+```
+
+### Berkas .env
+
+Berkas ini **tidak ikut di repo** karena berisi kredensial. Mintalah salinannya ke
+pemilik repo, taruh di akar proyek dengan nama `.env`.
+
+Tiga hal yang biasanya perlu disesuaikan di komputermu sendiri:
+
+| Isian | Keterangan |
+|---|---|
+| `APP_KEY` | kosongkan, lalu hasilkan sendiri (langkah di bawah) |
+| `MAIL_*` | kalau tidak punya akun pengirim, set `MAIL_MAILER=log` — email tidak benar-benar terkirim, cuma dicatat ke `storage/logs/laravel.log` |
+| `TURNSTILE_*` | captcha. Untuk lokal pakai dummy key resmi Cloudflare yang selalu lolos: site `1x00000000000000000000AA`, secret `1x0000000000000000000000000000000AA` |
+
+### Menjalankan
+
+```bash
+./vendor/bin/sail up -d                      # nyalakan container
+./vendor/bin/sail artisan key:generate       # isi APP_KEY
+./vendor/bin/sail artisan migrate --seed     # buat tabel + data awal
+npm run dev                                  # aset Vite
+```
+
+Buka `http://localhost`. phpMyAdmin ada di `http://localhost:8080`.
+
+Akun awal dibuat oleh seeder — lihat `database/seeders/AdminUserSeeder.php`.
+
+### Yang sering bikin tersandung
+
+**`php artisan` langsung gagal terhubung ke database.** `DB_HOST=mysql` itu nama
+container, hanya dikenali dari dalam jaringan Sail. Selalu pakai
+`./vendor/bin/sail artisan ...`, bukan `php artisan ...`.
+
+**Dua tes selalu gagal.** `AuthenticationTest` dan `RegistrationTest` — tes bawaan
+Breeze yang tidak mengirim token Turnstile, padahal field itu wajib. Ini kondisi
+lama, bukan kerusakan. Kalau `sail artisan test` menunjukkan tepat dua kegagalan
+itu, berarti tidak ada yang rusak.
+
+**Tahapan seleksi tidak ada di database.** Dulu memang di tabel, sekarang di
+`config/recruitment.php`. Mau menambah atau mengubah tahap, sunting berkas itu.
+
+## Perintah sehari-hari
+
+```bash
+./vendor/bin/sail artisan test                  # seluruh tes
+./vendor/bin/sail artisan test --filter=NamaTes # satu tes
+./vendor/bin/pint                               # rapikan gaya kode
+npm run build                                   # bangun aset produksi
+```
+
+## Dokumentasi lain
+
+- `CLAUDE.md` — penjelasan arsitektur: dua guard autentikasi, penyaringan per
+  cabang, pipeline seleksi, model data pelamar
+- `plans/` — catatan rencana & temuan, dikelompokkan per status. Lihat
+  `plans/README.md` untuk konvensinya
+- `plans/db_sosro_normalized_table_list.md` — daftar tabel, disinkronkan dari DB
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
