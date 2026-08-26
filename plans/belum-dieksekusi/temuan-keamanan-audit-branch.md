@@ -6,7 +6,11 @@ Hasil `/code-review high` pada 21 Agustus 2026 atas `git diff main...HEAD` (40 c
 
 **Hampir semua temuan berasal dari kerjaan normalisasi DB 10 Agustus**, bukan dari perubahan alur dokumen 20-21 Agustus. Tidak ada satu pun yang sudah diperbaiki — dokumen ini murni catatan supaya tidak hilang.
 
-**Status: belum dieksekusi, sengaja ditunda.** User memutuskan dibereskan "kapan-kapan", bukan sekarang.
+**Status: sebagian besar belum dieksekusi, sengaja ditunda.** User memutuskan dibereskan "kapan-kapan", bukan sekarang.
+
+**Diperbarui 26 Agustus 2026:** temuan **#5 sudah diperbaiki** (commit `1488aa6`) — kebetulan, karena jalur yang sama disentuh saat menyatukan Update Massal. Sepuluh temuan lain masih berdiri.
+
+Perlu diperiksa ulang kalau nanti dikerjakan: temuan **#3** menyebut 8 lokasi perbandingan `!==`, tapi sejak itu `bulkProcessInterview` dihapus dan beberapa method ditulis ulang. Hitungannya kemungkinan sudah berubah — cek lagi sebelum percaya angkanya.
 
 ## Prioritas kalau nanti dikerjakan
 
@@ -87,7 +91,7 @@ Perlu dicek dulu kebenarannya sebelum dikerjakan — agen review bisa keliru.
 
 | # | Lokasi | Dugaan masalah |
 |---|---|---|
-| 5 | `Admin/ApplicantController.php:237` (`bulkProcess`, `bulkProcessInterview`) | Tidak ada scope cabang sama sekali, padahal `bulkUpdate` punya. Admin cabang bisa POST id lamaran cabang lain lalu memindahkannya ke psikotes/interview — sekaligus mengirim email undangan. Juga `$ids = $request->selected_ids` tidak divalidasi; kalau field hilang, `whereIn('id', null)` melempar error. |
+| 5 | ~~`Admin/ApplicantController.php:237`~~ | ~~Tidak ada scope cabang sama sekali pada `bulkProcess`/`bulkProcessInterview`; `selected_ids` juga tidak divalidasi.~~ **SUDAH DIPERBAIKI** 23 Agustus 2026, commit `1488aa6`, sekalian waktu jalur Update Massal disatukan. Ketiga jalur massal sekarang memakai trait `ScopesToCabang`, `selected_ids` divalidasi, dan `bulkProcessInterview` sudah dihapus. Ada tesnya di `tests/Feature/UpdateStageMailTest.php`. |
 | 6 | `Applicant/ProfileController.php:46` | `nik` dapat UNIQUE index dari migrasi `000018` tapi rule validasinya masih `required\|digits:16` saja. NIK kembar → `QueryException`/500 saat submit, transaksi rollback tanpa pesan ke user. Butuh `Rule::unique(...)->ignore(...)` karena `update()` memanggil ulang `store()`. |
 | 7 | `Applicant/ProfileController.php:87` | `store()` menandai keempat tab lengkap + `biodata_progress = 100`, padahal rule validasinya cuma mencakup field tab 1 — tidak ada rule untuk `k_inti`, `pendidikan_formal`, `pengalaman_kerja`. POST langsung dengan field tab 1 saja menghasilkan `profile_completed = true` tanpa data keluarga/pendidikan/pengalaman, lalu lolos middleware `applicant.complete`. |
 | 8 | `Applicant/ProfileController.php:182` (`saveDraft`) | Rule `digits:16` pada `nik`, `min:10` pada `phone`, `date` pada `tanggal_lahir` diterapkan di endpoint autosave — padahal endpoint itu justru dipanggil saat field masih setengah terisi. Hasilnya 422, transaksi batal, **kerjaan keempat tab hilang**, dan satu-satunya tanda cuma teks kecil "Gagal menyimpan draft". |
