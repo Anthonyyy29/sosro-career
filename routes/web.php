@@ -29,12 +29,23 @@ use App\Http\Controllers\Admin\UserController;
 | 1. HALAMAN PUBLIK
 |--------------------------------------------------------------------------
 */
-Route::get('/', [PageController::class, 'lowongan'])->name('lowongan');
+
+Route::get('/me', fn() => view('welcome'));
+Route::get('/', [PageController::class, 'lowongan'])->name('guest.home');
+Route::get('/lowongan', [PageController::class, 'lowongan'])->name('guest.job');
+Route::get('/program', [PageController::class, 'program'])->name('guest.program');
+Route::get('/tentang', [PageController::class, 'tentang'])->name('guest.about');
+Route::get('/kontak', [PageController::class, 'kontak'])->name('guest.contact');
+
+
+
+
+// Route::get('/', [PageController::class, 'lowongan'])->name('lowongan');
 // Route::get('/', [PageController::class, 'lowongan'])->name('landing');
 // Route::get('/lowongan', [PageController::class, 'lowongan'])->name('lowongan');
-// Route::get('/program-kami', [PageController::class, 'program'])->name('program');
-// Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
-// Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
+Route::get('/program-kami', [PageController::class, 'program'])->name('program');
+Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
+Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
 
 // // // // // // // // // // // // // // // // // // // // // //
 // DISABLE PUBLIC ROUTES UNTUK SEMENTARA UNTUK SOFT LAUNCHING  //
@@ -107,14 +118,14 @@ Route::middleware(['auth'])
         Route::get('/documents', [DocumentController::class, 'edit'])->name('documents.edit');
         Route::post('/documents', [DocumentController::class, 'update'])->name('documents.update');
 
-            /*
+        /*
             |--------------------------------------------------------------------------
             | RIWAYAT LAMARAN
             |--------------------------------------------------------------------------
             */
         Route::get('/lamaran-saya', [ApplicationController::class, 'index'])
-        ->name('applications.index');
-});
+            ->name('applications.index');
+    });
 
 
 /*
@@ -179,7 +190,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
 
     Route::get('laporan/export', [LaporanController::class, 'export'])
         ->name('laporan.export');
-        
+
     Route::get('/users', [UserController::class, 'index'])
         ->name('users.index');
 
@@ -200,14 +211,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
 
     Route::post('/messages/{contact}/assign', [ContactController::class, 'assign'])
         ->name('kontak.assign');
-        
+
     Route::delete('/kontak/{contact}', [ContactController::class, 'destroy'])
         ->name('kontak.destroy');
 
     Route::post('/kontak/{contact}/mark-replied', [ContactController::class, 'markAsReplied'])
-    ->name('kontak.mark-replied');
+        ->name('kontak.mark-replied');
 
-    require __DIR__.'/admin.php';   
+    require __DIR__ . '/admin.php';
 });
 
 
@@ -216,4 +227,4 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
 | Breeze Auth Routes
 |--------------------------------------------------------------------------
 */
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

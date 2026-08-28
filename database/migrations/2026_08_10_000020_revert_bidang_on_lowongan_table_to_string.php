@@ -14,9 +14,12 @@ return new class extends Migration
         });
 
         // backfill dari job_fields sebelum kolom bidang_id dihapus
-        DB::table('lowongan')
-            ->join('job_fields', 'lowongan.bidang_id', '=', 'job_fields.id')
-            ->update(['lowongan.bidang' => DB::raw('job_fields.nama')]);
+        foreach (DB::table('lowongan')->whereNotNull('bidang_id')->get() as $lowongan) {
+            $jobField = DB::table('job_fields')->where('id', $lowongan->bidang_id)->first();
+            if ($jobField) {
+                DB::table('lowongan')->where('id', $lowongan->id)->update(['bidang' => $jobField->nama]);
+            }
+        }
 
         Schema::table('lowongan', function (Blueprint $table) {
             $table->dropConstrainedForeignId('bidang_id');
@@ -30,9 +33,12 @@ return new class extends Migration
                 ->constrained('job_fields')->nullOnDelete();
         });
 
-        DB::table('lowongan')
-            ->join('job_fields', 'lowongan.bidang', '=', 'job_fields.nama')
-            ->update(['lowongan.bidang_id' => DB::raw('job_fields.id')]);
+        foreach (DB::table('lowongan')->whereNotNull('bidang')->get() as $lowongan) {
+            $jobField = DB::table('job_fields')->where('nama', $lowongan->bidang)->first();
+            if ($jobField) {
+                DB::table('lowongan')->where('id', $lowongan->id)->update(['bidang_id' => $jobField->id]);
+            }
+        }
 
         Schema::table('lowongan', function (Blueprint $table) {
             $table->dropColumn('bidang');
