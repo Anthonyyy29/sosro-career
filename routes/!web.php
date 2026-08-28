@@ -23,8 +23,6 @@ use App\Http\Controllers\Admin\Auth\AdminNewPasswordController;
 use App\Http\Controllers\Admin\ApplicantController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,22 +30,12 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 |--------------------------------------------------------------------------
 */
 
-// Refactor
 Route::get('/me', fn() => view('welcome'));
 Route::get('/', [PageController::class, 'lowongan'])->name('guest.home');
 Route::get('/lowongan', [PageController::class, 'lowongan'])->name('guest.job');
 Route::get('/program', [PageController::class, 'program'])->name('guest.program');
 Route::get('/tentang', [PageController::class, 'tentang'])->name('guest.about');
 Route::get('/kontak', [PageController::class, 'kontak'])->name('guest.contact');
-Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('guest.login');
-Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('guest.login');
-Route::get('register', [RegisteredUserController::class, 'create'])->name('guest.register');
-Route::post('register', [RegisteredUserController::class, 'store'])->name('guest.register');
-
-
-
-
-
 
 
 
@@ -239,4 +227,4 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
 | Breeze Auth Routes
 |--------------------------------------------------------------------------
 */
-// require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';

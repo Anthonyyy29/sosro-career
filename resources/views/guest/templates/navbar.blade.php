@@ -1,8 +1,13 @@
 {{-- NAVBAR UTAMA (Managed by Alpine.js) --}}
-<nav id="main-navbar" x-data="{ mobileMenuOpen: false }"
-    class="max-w-[1800px] w-full px-4 md:px-[200px] py-3 fixed text-white z-50 transition-all duration-500 ease-in-out">
+@php
+    $isLoginRoute = request()->routeIs('guest.login');
+    $isRegisterRoute = request()->routeIs('guest.register');
+@endphp
 
-    <div class="flex justify-between items-center">
+<nav id="main-navbar" x-data="{ mobileMenuOpen: false }"
+    class="max-w-[1800px] w-full px-4 {{ $isLoginRoute || $isRegisterRoute ? 'md:px-8 bg-[#B11116] relative' : 'md:px-[200px] py-3 fixed z-10 transition-all duration-500 ease-in-out' }} text-white">
+
+    <div class="flex justify-between items-center py-3">
         <div class="flex items-center space-x-3">
             <img src="{{ asset('assets/images/SGS Logo-Putih.webp') }}" alt="Logo Sinar Sosro Gunung Slamat"
                 class="h-11 w-auto">
@@ -101,10 +106,17 @@
                     </div>
                 </div>
             @else
-                <a href="{{ route('login') }}"
-                    class="px-6 py-2 bg-white text-red-700 font-bold rounded-full hover:bg-gray-100 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95">
-                    Masuk
-                </a>
+                @if (request()->routeIs('guest.login'))
+                    <a href="{{ route('guest.register') }}"
+                        class="px-6 py-2 bg-white text-red-700 font-bold rounded-full hover:bg-gray-100 transition shadow-md hover:shadow-lg transform active:scale-95">
+                        Daftar
+                    </a>
+                @else
+                    <a href="{{ route('guest.login') }}"
+                        class="px-6 py-2 bg-white text-red-700 font-bold rounded-full hover:bg-gray-100 transition shadow-md hover:shadow-lg transform active:scale-95">
+                        Masuk
+                    </a>
+                @endif
             @endauth
 
             <div class="relative inline-block text-left" x-data="{ open: false, lang: 'ID', flag: 'id' }">
@@ -211,7 +223,7 @@
                 </form>
             @else
                 <div class="px-4 py-2">
-                    <a href="{{ route('login') }}"
+                    <a href="{{ route('guest.login') }}"
                         class="block w-full text-center px-4 py-3 bg-white text-red-700 font-bold rounded-xl shadow-md transition active:scale-95">
                         Masuk ke Akun
                     </a>

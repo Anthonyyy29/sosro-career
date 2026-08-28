@@ -28,7 +28,7 @@
                     <p class="text-[15px] leading-tight">
                         <span class="font-bold">Jam Operasional:</span><br>
                         Senin - Jumat: 08:00 17:00<br>
-                        Sabtu- Minggu: Tutup
+                        Sabtu - Minggu: Tutup
                     </p>
                 </div>
             </div>
@@ -75,7 +75,7 @@
     {{-- Copyright Section --}}
     <div class="pt-8 mt-4">
         <div class="bg-white h-0.5"></div>
-        <div class=" px-3 text-center text-[16px] py-4 -mx-6 md:-mx-16 -mb-8">
+        <div class=" px-3 text-center text-[16px] py-4 -mx-6 md:-mx-16 -mb-8 text-sm">
             <p>© Copyright {{ date('Y') }}. <span class="font-semibold">PT Sinar Sosro Gunung Slamat.</span> All
                 Rights Reserved</p>
         </div>
