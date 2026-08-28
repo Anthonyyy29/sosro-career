@@ -8,6 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('applicants', function (Blueprint $table) {
+            $table->dropUnique(['email']);
             $table->dropColumn(['email']);
         });
     }

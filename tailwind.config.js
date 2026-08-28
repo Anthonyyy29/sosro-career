@@ -9,14 +9,5 @@ export default {
         './resources/views/**/*.blade.php',
     ],
 
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans], // default
-                figtree: ['Figtree', 'sans-serif'], // font tambahan
-            },
-        },
-    },
-
     plugins: [forms],
 };

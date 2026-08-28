@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class PageController extends Controller
 {
     public function beranda() {
-        return view('pages.beranda');
+        return view('guest.home');
     }
 
     public function lowongan()
@@ -36,7 +36,7 @@ class PageController extends Controller
             $applicant = $user->applicant; 
         }
 
-        return view('pages.lowongan', compact('lowongan', 'applicant'));
+        return view('guest.job', compact('lowongan', 'applicant'));
     }
 
     public function program() {

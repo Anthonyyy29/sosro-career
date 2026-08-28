@@ -22,10 +22,7 @@ class AdminAuthController extends Controller
         $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-            'cf-turnstile-response' => ['required', new Turnstile()],
         ], [
-            'cf-turnstile-response.required' => 'Verifikasi keamanan wajib dicentang.',
-            'cf-turnstile-response.turnstile' => 'Sesi verifikasi kadaluwarsa, silakan ulangi.',
     ]);
 
         // 2. AMBIL HANYA email dan password saja untuk login
