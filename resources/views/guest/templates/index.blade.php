@@ -131,7 +131,7 @@
         @include('guest.templates.components.toggle_menu_mobile')
 
         {{-- Content --}}
-        <main class="min-h-screen">
+        <main>
             @yield('content')
         </main>
 

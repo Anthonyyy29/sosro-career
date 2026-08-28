@@ -1,36 +1,38 @@
 @extends('guest.templates.index')
 
 @section('content')
-    <div class="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center px-4 py-8">
+    <div class="flex flex-col items-center justify-center px-4 py-8">
 
         <div
             class="w-full sm:max-w-md bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-2xl p-8 md:p-10 border border-gray-100">
 
-            <div class="flex justify-center mb-6">
-                <img src="{{ asset('assets/images/SGS Logo-Color.webp') }}" alt="Logo Sinar Sosro Gunung Slamat"
-                    class="w-80 h-auto object-contain">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800 tracking-tight">
+                    Masuk ke <span class="text-red-600">Akun Anda</span>
+                </h2>
+                <p class="text-gray-500 mt-2 font-medium">Selamat datang kembali! Silakan masuk untuk melanjutkan.</p>
             </div>
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
             {{-- <form method="POST" action="{{ route('login') }}" class="space-y-5"> --}}
-            <form method="POST" action="{{ route('login') }}" class="space-y-5" onsubmit="return disableButton(this)">
+            <form method="POST" action="{{ route('guest.login') }}" class="space-y-5" onsubmit="return disableButton(this)">
                 @csrf
 
                 <div>
-                    <x-input-label for="email" value="Email" class="font-semibold text-gray-700 ml-1" />
+                    <x-input-label for="email" value="Email" class="font-semibold text-gray-700" />
                     <input id="email" type="email" name="email"
-                        class="block mt-1 w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-red-50 focus:border-red-500 transition-all outline-none"
+                        class="block mt-1 w-full bg-gray-50 border-gray-100 rounded-md px-4 py-3 text-sm focus:ring-4 focus:ring-red-50 focus:border-red-500 transition-all outline-none"
                         :value="old('email')" required autofocus placeholder="Masukkan email Anda" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
                 <div>
-                    <x-input-label for="password" value="Password" class="font-semibold text-gray-700 ml-1" />
+                    <x-input-label for="password" value="Password" class="font-semibold text-gray-700" />
 
                     <div class="relative">
                         <input id="password" type="password" name="password"
-                            class="block mt-1 w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-red-50 focus:border-red-500 transition-all outline-none pr-12"
+                            class="block mt-1 w-full bg-gray-50 border-gray-100 rounded-md px-4 py-3 text-sm focus:ring-4 focus:ring-red-50 focus:border-red-500 transition-all outline-none pr-12"
                             required placeholder="••••••••" />
 
                         <button type="button" onclick="togglePassword('password', 'eyeOpen', 'eyeClose')"
@@ -76,23 +78,19 @@
                     <x-input-error :messages="$errors->get('cf-turnstile-response')" class="text-xs" />
                 </div>
 
-                <div class="pt-2">
+                <div>
                     <button type="submit" id="submit-btn"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-red-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100">
+                        class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-md font-bold transition-all shadow-lg shadow-gray-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100">
                         <span id="btn-text">Masuk</span>
                     </button>
-                    {{-- <button type="submit"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-red-200 active:scale-95">
-                        Masuk
-                    </button> --}}
                 </div>
             </form>
 
-            <div class="flex flex-col items-center space-y-3 pt-4">
-                @if (Route::has('register'))
+            <div class="flex flex-col items-center space-y-3 pt-1">
+                @if (Route::has('guest.register'))
                     <p class="text-sm text-gray-500">
                         Belum punya akun?
-                        <a href="{{ route('register') }}" class="text-red-600 hover:underline font-bold ml-1">
+                        <a href="{{ route('guest.register') }}" class="text-red-600 hover:underline font-bold ml-1">
                             Daftar di sini
                         </a>
                     </p>

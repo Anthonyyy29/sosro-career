@@ -106,7 +106,7 @@
 
     <script>
         // SCRIPT UNTUK MENONAKTIFKAN TOMBOL SUBMIT SETELAH DIKLIK UNTUK MENCEGAH DOUBLE SUBMISSION
-        function disableButton(form) {
+        function disableButton(form) {                                                   
             const btn = document.getElementById('submit-btn');
             const btnText = document.getElementById('btn-text');
 
