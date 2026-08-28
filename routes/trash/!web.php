@@ -1,13 +1,20 @@
 <?php
 
-// User Routes
-require __DIR__ . '/user/auth.php';
-require __DIR__ . '/user/applicant.php';
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ApplyController;
+use App\Http\Controllers\Admin\UserConfirmationController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\UserConfirmationPublicController;
 
-// Admin Routes
-require __DIR__ . '/admin/auth.php';
-require __DIR__ . '/admin/admin.php';
+// Breeze (User)
+use App\Http\Controllers\ProfileController as UserProfileController;
 
+// Applicant
+use App\Http\Controllers\Applicant\DashboardController;
+use App\Http\Controllers\Applicant\ApplicationController;
+use App\Http\Controllers\Applicant\ProfileController;
+use App\Http\Controllers\Applicant\DocumentController;
 
 // Admin
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
@@ -16,26 +23,20 @@ use App\Http\Controllers\Admin\Auth\AdminNewPasswordController;
 use App\Http\Controllers\Admin\ApplicantController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
 
+/*
+|--------------------------------------------------------------------------
+| 1. HALAMAN PUBLIK
+|--------------------------------------------------------------------------
+*/
 
-// Refactor
 Route::get('/me', fn() => view('welcome'));
+Route::get('/verif', fn() => view('guest.auth.verifyEmail'));
 Route::get('/', [PageController::class, 'lowongan'])->name('guest.home');
 Route::get('/lowongan', [PageController::class, 'lowongan'])->name('guest.job');
 Route::get('/program', [PageController::class, 'program'])->name('guest.program');
 Route::get('/tentang', [PageController::class, 'tentang'])->name('guest.about');
 Route::get('/kontak', [PageController::class, 'kontak'])->name('guest.contact');
-Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('guest.login');
-Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('guest.login');
-Route::get('register', [RegisteredUserController::class, 'create'])->name('guest.register');
-Route::post('register', [RegisteredUserController::class, 'store'])->name('guest.register');
-
-
-
-
-
 
 
 
@@ -227,4 +228,4 @@ Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function
 | Breeze Auth Routes
 |--------------------------------------------------------------------------
 */
-// require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
