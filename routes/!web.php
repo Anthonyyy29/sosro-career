@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\UserController;
 */
 
 Route::get('/me', fn() => view('welcome'));
+Route::get('/verif', fn() => view('guest.auth.verifyEmail'));
 Route::get('/', [PageController::class, 'lowongan'])->name('guest.home');
 Route::get('/lowongan', [PageController::class, 'lowongan'])->name('guest.job');
 Route::get('/program', [PageController::class, 'program'])->name('guest.program');

@@ -217,6 +217,7 @@
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
+                    
                     <button class="block w-full text-left px-4 py-3 text-white hover:bg-red-900 font-medium transition">
                         <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Keluar Aplikasi
                     </button>

@@ -50,4 +50,7 @@ class PageController extends Controller
     public function kontak() {
         return view('pages.kontak');
     }
+    public function dashboard() {
+        return view('dashboard');
+    }
 }

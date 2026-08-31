@@ -1,12 +1,113 @@
 <?php
 
-// User Routes
-require __DIR__ . '/user/auth.php';
-require __DIR__ . '/user/applicant.php';
 
-// Admin Routes
-require __DIR__ . '/admin/auth.php';
-require __DIR__ . '/admin/admin.php';
+use illuminate\support\Facades\Route;
+
+use App\Http\Controllers\PageController;
+
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\VerifyEmailController;
+
+
+// // Refactor
+// Guest
+Route::get('/', [PageController::class, 'lowongan'])->name('guest.home');
+Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
+Route::get('/lowongan', [PageController::class, 'lowongan'])->name('guest.job');
+
+//Belum untuk di kerjakan sekarang. sambil jalan yg ini.
+
+// Route::get('/program', [PageController::class, 'program'])->name('guest.program'); 
+// Route::get('/tentang', [PageController::class, 'tentang'])->name('guest.about');
+// Route::get('/kontak', [PageController::class, 'kontak'])->name('guest.contact');
+
+
+// // Auth Guest
+
+Route::middleware('guest')->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])
+        ->name('guest.register');
+
+    Route::post('register', [RegisteredUserController::class, 'store']);
+
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+        ->name('guest.login');
+
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
+
+    Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.store');
+});
+
+
+// Auth Applicant
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('verify-email', EmailVerificationPromptController::class)
+        ->name('verification.notice');
+
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
+    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+
+    Route::patch('verify-email/change', [EmailVerificationPromptController::class, 'updateEmail'])
+        ->middleware('throttle:3,10')
+        ->name('verification.change-email');
+
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('logout');
+
+    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Admin
@@ -16,40 +117,17 @@ use App\Http\Controllers\Admin\Auth\AdminNewPasswordController;
 use App\Http\Controllers\Admin\ApplicantController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-
-
-// Refactor
-Route::get('/me', fn() => view('welcome'));
-Route::get('/', [PageController::class, 'lowongan'])->name('guest.home');
-Route::get('/lowongan', [PageController::class, 'lowongan'])->name('guest.job');
-Route::get('/program', [PageController::class, 'program'])->name('guest.program');
-Route::get('/tentang', [PageController::class, 'tentang'])->name('guest.about');
-Route::get('/kontak', [PageController::class, 'kontak'])->name('guest.contact');
-Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('guest.login');
-Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('guest.login');
-Route::get('register', [RegisteredUserController::class, 'create'])->name('guest.register');
-Route::post('register', [RegisteredUserController::class, 'store'])->name('guest.register');
-
-
-
-
-
-
 
 
 
 // Route::get('/', [PageController::class, 'lowongan'])->name('lowongan');
 // Route::get('/', [PageController::class, 'lowongan'])->name('landing');
 // Route::get('/lowongan', [PageController::class, 'lowongan'])->name('lowongan');
-Route::get('/program-kami', [PageController::class, 'program'])->name('program');
-Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
-Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
+// Route::get('/program-kami', [PageController::class, 'program'])->name('program');
+// Route::get('/tentang-kami', [PageController::class, 'tentang'])->name('tentang');
+// Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
+// HAPUS1
 
-// // // // // // // // // // // // // // // // // // // // // //
-// DISABLE PUBLIC ROUTES UNTUK SEMENTARA UNTUK SOFT LAUNCHING  //
-// // // // // // // // // // // // // // // // // // // // // //
 
 // BARU: Route untuk publik :: Limit 3 kali kirim per 1 menit
 /*
@@ -74,18 +152,18 @@ Route::post('/contact-us', [ContactController::class, 'store'])
 | 2. AUTH USER (Breeze)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])->group(function () {
+// Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return redirect()->route('applicant.dashboard');
-    })->name('dashboard');
+//     Route::get('/dashboard', function () {
+//         return redirect()->route('applicant.dashboard');
+//     })->name('dashboard');
 
-    Route::controller(UserProfileController::class)->group(function () {
-        Route::get('/profile', 'edit')->name('profile.edit');
-        Route::patch('/profile', 'update')->name('profile.update');
-        Route::delete('/profile', 'destroy')->name('profile.destroy');
-    });
-});
+//     Route::controller(UserProfileController::class)->group(function () {
+//         Route::get('/profile', 'edit')->name('profile.edit');
+//         Route::patch('/profile', 'update')->name('profile.update');
+//         Route::delete('/profile', 'destroy')->name('profile.destroy');
+//     });
+// });
 
 
 /*
@@ -93,39 +171,39 @@ Route::middleware(['auth', 'verified'])->group(function () {
 | 3. AREA APPLICANT
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])
-    ->prefix('applicant')
-    ->name('applicant.')
-    ->group(function () {
+// Route::middleware(['auth'])
+//     ->prefix('applicant')
+//     ->name('applicant.')
+//     ->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+//         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Profile Applicant (SEMUA DATA + DOKUMEN ADA DI SINI)
-        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-        Route::get('/profile/create', [ProfileController::class, 'create'])->name('profile.create');
-        Route::post('/profile', [ProfileController::class, 'store'])->name('profile.store');
-        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::patch('/profile/draft', [ProfileController::class, 'saveDraft'])->name('profile.draft');
+//         // Profile Applicant (SEMUA DATA + DOKUMEN ADA DI SINI)
+//         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+//         Route::get('/profile/create', [ProfileController::class, 'create'])->name('profile.create');
+//         Route::post('/profile', [ProfileController::class, 'store'])->name('profile.store');
+//         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+//         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//         Route::patch('/profile/draft', [ProfileController::class, 'saveDraft'])->name('profile.draft');
 
-        Route::get('/profile/download', [ProfileController::class, 'downloadPdf'])->name('profile.download');
+//         Route::get('/profile/download', [ProfileController::class, 'downloadPdf'])->name('profile.download');
 
-        /*
-        |--------------------------------------------------------------------------
-        | DOKUMEN (terpisah dari form biodata, wajib setelah lamaran accepted)
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/documents', [DocumentController::class, 'edit'])->name('documents.edit');
-        Route::post('/documents', [DocumentController::class, 'update'])->name('documents.update');
+//         /*
+//         |--------------------------------------------------------------------------
+//         | DOKUMEN (terpisah dari form biodata, wajib setelah lamaran accepted)
+//         |--------------------------------------------------------------------------
+//         */
+//         Route::get('/documents', [DocumentController::class, 'edit'])->name('documents.edit');
+//         Route::post('/documents', [DocumentController::class, 'update'])->name('documents.update');
 
-        /*
-            |--------------------------------------------------------------------------
-            | RIWAYAT LAMARAN
-            |--------------------------------------------------------------------------
-            */
-        Route::get('/lamaran-saya', [ApplicationController::class, 'index'])
-            ->name('applications.index');
-    });
+//         /*
+//             |--------------------------------------------------------------------------
+//             | RIWAYAT LAMARAN
+//             |--------------------------------------------------------------------------
+//             */
+//         Route::get('/lamaran-saya', [ApplicationController::class, 'index'])
+//             ->name('applications.index');
+//     });
 
 
 /*
